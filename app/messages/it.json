@@ -1,0 +1,267 @@
+{
+  "app": {
+    "name": "ContentFlix",
+    "tagline": "Consuma YouTube più velocemente con l'AI",
+    "description": "ContentFlix analizza automaticamente i tuoi canali YouTube preferiti così rimani informato in pochi minuti, non ore."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "channels": "Canali",
+    "analysis": "Analisi",
+    "integrations": "Integrazioni",
+    "watchlist": "Lista da vedere",
+    "admin": "Console Admin",
+    "help": "Centro assistenza",
+    "logout": "Esci",
+    "login": "Accedi"
+  },
+  "auth": {
+    "loginWithGoogle": "Accedi con Google",
+    "loginTitle": "Accedi a ContentFlix",
+    "loginSubtitle": "Usa il tuo account Google per accedere alla piattaforma.",
+    "accessDenied": "Accesso negato",
+    "accessDeniedDetail": "Il tuo account non è autorizzato ad accedere a ContentFlix. Contatta l'amministratore.",
+    "loggingIn": "Accesso in corso...",
+    "logoutConfirm": "Vuoi davvero uscire?"
+  },
+  "landing": {
+    "hero": {
+      "badge": "Il futuro dei contenuti",
+      "title": "Consuma YouTube",
+      "titleHighlight": "più velocemente con l'AI",
+      "subtitle": "Smetti di sprecare ore su video lunghi. ContentFlix riassume automaticamente i tuoi canali preferiti così rimani informato in pochi minuti, non ore.",
+      "ctaLogin": "Accedi con Google",
+      "ctaDemo": "Guarda la demo"
+    },
+    "howItWorks": {
+      "title": "Come funziona",
+      "subtitle": "Il nostro motore AI lavora in background così non perdi mai un aggiornamento dai creator che segui.",
+      "step1Title": "Segui i canali",
+      "step1Description": "Aggiungi i canali YouTube che vuoi monitorare tramite URL. Supportiamo tutti i creator.",
+      "step2Title": "Analisi automatica",
+      "step2Description": "Non appena viene pubblicato un nuovo video, la nostra AI analizza il contenuto e identifica i punti chiave.",
+      "step3Title": "Rimani informato",
+      "step3Description": "Sfoglia i riepiloghi nel tuo dashboard. Comprendi video da 30 minuti in soli 60 secondi."
+    },
+    "faq": {
+      "title": "Domande frequenti",
+      "q1": "Quanto sono accurati i riepiloghi AI?",
+      "a1": "I nostri modelli sono ottimizzati per contenuti video lunghi e catturano le sfumature tecniche, il contesto e l'intento principale del parlante.",
+      "q2": "Posso ottenere riepiloghi in altre lingue?",
+      "a2": "Sì, ContentFlix supporta più lingue. I riepiloghi vengono generati nella tua lingua preferita indipendentemente dalla lingua audio del video.",
+      "q3": "Quanti canali posso seguire?",
+      "a3": "In V1 non ci sono limiti al numero di canali che puoi seguire.",
+      "q4": "Come sono protetti i miei dati?",
+      "a4": "Usiamo crittografia enterprise. Non vendiamo mai i tuoi dati di visione o informazioni personali a terzi."
+    },
+    "cta": {
+      "title": "Pronto a curare la tua intelligenza?",
+      "subtitle": "Accedi con Google e inizia subito a seguire i tuoi canali preferiti.",
+      "button": "Inizia ora"
+    },
+    "footer": {
+      "copyright": "© 2025 ContentFlix. Tutti i diritti riservati.",
+      "privacy": "Privacy Policy",
+      "terms": "Termini di Servizio",
+      "contact": "Contatto"
+    }
+  },
+  "dashboard": {
+    "title": "Intelligenza curata",
+    "subtitle": "Bentornato. {count} nuove analisi sono pronte per la tua revisione.",
+    "subtitleNone": "Nessuna nuova analisi. Controlla di nuovo più tardi.",
+    "myChannels": "I miei canali",
+    "syncActive": "Sincronizzazione attiva",
+    "viewSummary": "Vedi riepilogo",
+    "quickPreview": "Anteprima rapida",
+    "readDigest": "Leggi digest",
+    "watchLater": "Guarda dopo",
+    "markSeen": "Segna come visto",
+    "addToWatchlist": "Aggiungi alla lista",
+    "removeFromWatchlist": "Rimuovi dalla lista",
+    "unseen": "NON VISTO",
+    "analysisComplete": "ANALISI COMPLETATA",
+    "analysisInProgress": "ANALISI IN CORSO",
+    "notAnalyzed": "NON ANALIZZATO",
+    "noChannels": "Non stai ancora seguendo nessun canale.",
+    "addFirstChannel": "Aggiungi il tuo primo canale"
+  },
+  "channels": {
+    "title": "Canali",
+    "addChannel": "Aggiungi canale",
+    "addChannelPlaceholder": "youtube.com/@handle o channel/UC...",
+    "addChannelButton": "Sincronizza canale",
+    "addChannelTitle": "Segui un nuovo canale",
+    "addChannelSubtitle": "Aggiungi un canale YouTube tramite URL pubblico o handle.",
+    "followedChannels": "Canali seguiti",
+    "scanNow": "Scansiona ora",
+    "removeChannel": "Rimuovi canale",
+    "removeChannelConfirm": "Sei sicuro di voler rimuovere questo canale? La tua cronologia personale (visto/non visto, lista) verrà eliminata.",
+    "lastScan": "Ultima scansione",
+    "nextScan": "Prossima scansione",
+    "status": {
+      "active": "Attivo",
+      "blocked": "Bloccato",
+      "noApi": "API non configurata",
+      "importing": "Importazione in corso"
+    },
+    "existingChannel": {
+      "title": "Canale già nell'archivio",
+      "description": "Questo canale è già presente nell'archivio ContentFlix. Vuoi importare i contenuti esistenti nel tuo account?",
+      "import": "Importa contenuti esistenti",
+      "cancel": "Annulla"
+    },
+    "noApiWarning": "Configura le tue API key nelle Integrazioni per abilitare l'analisi AI.",
+    "urlError": "URL non valido. Usa il formato youtube.com/@handle o youtube.com/channel/UC...",
+    "videos": "video",
+    "syncFrequency": "Frequenza sincronizzazione",
+    "daily": "Ogni giorno",
+    "weekly": "Ogni settimana"
+  },
+  "video": {
+    "publishedBy": "Pubblicato da",
+    "daysAgo": "{days} giorni fa",
+    "hoursAgo": "{hours} ore fa",
+    "minutesAgo": "{minutes} minuti fa",
+    "today": "oggi",
+    "yesterday": "ieri",
+    "duration": "Durata",
+    "bottomLine": "In sintesi",
+    "deepDive": "Analisi approfondita",
+    "context": "Contesto",
+    "keyMoments": "Momenti chiave",
+    "relatedIntelligence": "Contenuti correlati",
+    "analyzeNow": "Analizza ora",
+    "analysisNotAvailable": "Analisi non disponibile",
+    "analysisNotAvailableDetail": "Configura le tue API key per analizzare questo video.",
+    "category": "Categoria",
+    "subcategory": "Sottocategoria"
+  },
+  "integrations": {
+    "title": "Integrazioni",
+    "subtitle": "Configura le tue chiavi API per abilitare la sincronizzazione e l'analisi AI.",
+    "activeConnectors": "{count} connettori attivi",
+    "youtubeKey": "YouTube Data API v3",
+    "youtubeKeyDesc": "Sincronizzazione metadati canali e video",
+    "geminiKey": "Gemini API",
+    "geminiKeyDesc": "Analisi AI e generazione riepiloghi",
+    "status": {
+      "configured": "Configurata",
+      "notConfigured": "Non configurata",
+      "valid": "Valida",
+      "invalid": "Non valida",
+      "aiActive": "AI Attiva"
+    },
+    "lastCheck": "Ultimo controllo",
+    "lastUsage": "Ultimo utilizzo",
+    "rotateKey": "Ruota chiave",
+    "updateKey": "Aggiorna chiave",
+    "addKey": "Aggiungi chiave",
+    "removeKey": "Rimuovi chiave",
+    "keyPlaceholder": "Incolla la tua chiave API qui",
+    "keyMasked": "••••••••••••{last4}",
+    "saveKey": "Salva chiave",
+    "cancel": "Annulla",
+    "keyError": "Chiave non valida o quota esaurita",
+    "keyRequired": "Chiave API richiesta per nuove analisi"
+  },
+  "watchlist": {
+    "title": "Lista da vedere",
+    "subtitle": "I video che hai salvato per dopo.",
+    "empty": "La tua lista è vuota.",
+    "emptyDetail": "Aggiungi video dalla dashboard o dalla pagina di analisi.",
+    "removeFromList": "Rimuovi dalla lista"
+  },
+  "admin": {
+    "title": "Console Admin",
+    "superAdmin": "Super-Admin",
+    "systemHealth": "Stato del sistema",
+    "systemHealthSubtitle": "Monitoraggio infrastruttura e throughput elaborazione in tempo reale.",
+    "users": {
+      "title": "Gestione utenti",
+      "allowlistUser": "Aggiungi all'allowlist",
+      "email": "Email",
+      "accessLevel": "Livello accesso",
+      "status": "Stato",
+      "lastActivity": "Ultima attività",
+      "actions": "Azioni",
+      "manage": "Gestisci",
+      "activate": "Attiva",
+      "suspend": "Sospendi",
+      "delete": "Elimina",
+      "statusActive": "Attivo",
+      "statusSuspended": "Sospeso",
+      "statusDeleted": "Eliminato"
+    },
+    "content": {
+      "title": "Contenuto canonico",
+      "subtitle": "Rivedi e modifica i riepiloghi AI globali.",
+      "editSummary": "Modifica riepilogo",
+      "viewHistory": "Vedi cronologia",
+      "aiCurated": "CURATO AI",
+      "verifiedContent": "CONTENUTO VERIFICATO",
+      "adminEdited": "MODIFICATO ADMIN"
+    },
+    "aiProfile": {
+      "title": "Profilo analisi AI",
+      "subtitle": "Gestisci il template di prompt globale per l'analisi dei video."
+    },
+    "jobs": {
+      "title": "Job e operazioni",
+      "retry": "Riprova",
+      "status": {
+        "pending": "In attesa",
+        "running": "In esecuzione",
+        "completed": "Completato",
+        "failed": "Fallito"
+      }
+    },
+    "logs": {
+      "title": "Log e audit",
+      "appLogs": "Log applicazione",
+      "auditTrail": "Audit trail",
+      "viewExplorer": "Apri explorer"
+    },
+    "metrics": {
+      "successRate": "Tasso di successo",
+      "pendingJobs": "Job in attesa",
+      "failedJobs": "Job falliti (24h)",
+      "apiUsage": "Utilizzo API piattaforma",
+      "requestsPerHour": "Richieste / Ora"
+    },
+    "export": {
+      "title": "Esporta dati",
+      "exportCsv": "Esporta CSV",
+      "exportJson": "Esporta JSON"
+    }
+  },
+  "common": {
+    "loading": "Caricamento...",
+    "error": "Si è verificato un errore",
+    "tryAgain": "Riprova",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "confirm": "Conferma",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "next": "Avanti",
+    "previous": "Precedente",
+    "search": "Cerca",
+    "filter": "Filtra",
+    "sort": "Ordina",
+    "refresh": "Aggiorna",
+    "more": "Altro",
+    "less": "Meno",
+    "yes": "Sì",
+    "no": "No",
+    "unknown": "Sconosciuto",
+    "never": "Mai",
+    "now": "Ora",
+    "ago": "fa",
+    "settings": "Impostazioni",
+    "notifications": "Notifiche",
+    "profile": "Profilo"
+  }
+}

@@ -1,0 +1,84 @@
+import type { Metadata } from 'next'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+export const metadata: Metadata = { title: 'Admin — Canali' }
+
+export default async function AdminChannelsPage() {
+  const supabase = createAdminClient()
+
+  const { data: channels } = await supabase
+    .from('channels')
+    .select('*, canonical_sync_state(*)')
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  return (
+    <div className="p-8 max-w-6xl">
+      <header className="mb-10">
+        <h1 className="font-headline text-3xl font-extrabold tracking-tight text-on-surface mb-1">
+          Canali canonici
+        </h1>
+        <p className="text-on-surface-variant text-sm">
+          Tutti i canali nell&apos;archivio ContentFlix ({channels?.length ?? 0} canali).
+        </p>
+      </header>
+
+      <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient">
+        <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-surface-container-low">
+          <div className="col-span-5 text-label-caps text-on-surface-variant">Canale</div>
+          <div className="col-span-2 text-label-caps text-on-surface-variant">Iscritti</div>
+          <div className="col-span-2 text-label-caps text-on-surface-variant">Ultima sync</div>
+          <div className="col-span-2 text-label-caps text-on-surface-variant">Stato</div>
+          <div className="col-span-1 text-label-caps text-on-surface-variant">Video</div>
+        </div>
+        {!channels || channels.length === 0 ? (
+          <div className="p-12 text-center text-on-surface-variant">Nessun canale nell&apos;archivio.</div>
+        ) : (
+          channels.map((ch, i) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const sync = (ch as any).canonical_sync_state
+
+            return (
+              <div
+                key={ch.id}
+                className={`grid grid-cols-12 gap-4 px-6 py-4 items-center
+                             ${i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low'}
+                             hover:bg-surface-container transition-colors`}
+              >
+                <div className="col-span-5 flex items-center gap-3">
+                  {ch.thumbnail_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={ch.thumbnail_url} alt="" className="w-8 h-8 rounded-full" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
+                      {ch.title[0]}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-semibold text-on-surface">{ch.title}</p>
+                    <p className="text-xs text-on-surface-variant">{ch.handle ? `@${ch.handle}` : ch.youtube_channel_id}</p>
+                  </div>
+                </div>
+                <div className="col-span-2 text-sm text-on-surface-variant">
+                  {ch.subscriber_count ? `${(ch.subscriber_count / 1000).toFixed(0)}K` : '—'}
+                </div>
+                <div className="col-span-2 text-sm text-on-surface-variant">
+                  {sync?.last_sync_at ? new Date(sync.last_sync_at).toLocaleDateString('it-IT') : '—'}
+                </div>
+                <div className="col-span-2">
+                  <span className={`text-xs font-semibold px-2 py-1 rounded-full
+                    ${ch.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-error-container text-error'}`}>
+                    {ch.status === 'active' ? 'Attivo' : 'Errore'}
+                  </span>
+                </div>
+                <div className="col-span-1 text-sm text-on-surface-variant">
+                  {ch.video_count ?? sync?.videos_found_count ?? '—'}
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+    </div>
+  )
+}
