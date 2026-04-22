@@ -1,0 +1,287 @@
+{
+  "app": {
+    "name": "ContentFlix",
+    "tagline": "Consume YouTube faster with AI",
+    "description": "ContentFlix automatically analyzes your favorite YouTube channels so you stay informed in minutes, not hours."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "channels": "Channels",
+    "analysis": "Analysis",
+    "integrations": "Integrations",
+    "watchlist": "Watchlist",
+    "admin": "Admin Console",
+    "help": "Help Center",
+    "logout": "Sign out",
+    "login": "Sign in"
+  },
+  "auth": {
+    "loginWithGoogle": "Sign in with Google",
+    "loginTitle": "Sign in to ContentFlix",
+    "loginSubtitle": "Use your Google account to access the platform.",
+    "accessDenied": "Access denied",
+    "accessDeniedDetail": "Your account is not authorized to access ContentFlix. Contact the administrator.",
+    "loggingIn": "Signing in...",
+    "logoutConfirm": "Do you really want to sign out?",
+    "exchangeFailed": "Sign-in failed. Please try again shortly.",
+    "noUser": "Unable to retrieve user information. Please try again.",
+    "noCode": "Invalid request. Please try again.",
+    "inviteOnly": "Invite-only access.",
+    "inviteOnlyDetail": "Only users authorized by the administrator can access ContentFlix.",
+    "backToHome": "Back to home"
+  },
+  "landing": {
+    "hero": {
+      "badge": "The future of content",
+      "title": "Consume YouTube",
+      "titleHighlight": "faster with AI",
+      "subtitle": "Stop wasting hours on long videos. ContentFlix automatically summarizes your favorite channels so you stay informed in minutes, not hours.",
+      "ctaLogin": "Sign in with Google",
+      "ctaDemo": "Watch demo"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Our AI engine works in the background so you never miss updates from the creators you follow.",
+      "step1Title": "Follow channels",
+      "step1Description": "Add the YouTube channels you want to monitor by URL. We support all creators.",
+      "step2Title": "Automatic analysis",
+      "step2Description": "As soon as a new video is published, our AI analyzes the content and extracts key points.",
+      "step3Title": "Stay informed",
+      "step3Description": "Browse summaries in your dashboard. Understand 30-minute videos in just 60 seconds."
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "q1": "How accurate are AI summaries?",
+      "a1": "Our models are optimized for long-form video content and capture technical nuances, context, and speaker intent.",
+      "q2": "Can I get summaries in other languages?",
+      "a2": "Yes, ContentFlix supports multiple languages. Summaries are generated in your preferred language regardless of the video's audio language.",
+      "q3": "How many channels can I follow?",
+      "a3": "In V1 there are no limits to the number of channels you can follow.",
+      "q4": "How is my data protected?",
+      "a4": "We use enterprise-grade encryption. We never sell your viewing data or personal information to third parties."
+    },
+    "cta": {
+      "title": "Ready to curate your intelligence?",
+      "subtitle": "Sign in with Google and start following your favorite channels right away.",
+      "button": "Get started"
+    },
+    "footer": {
+      "copyright": "All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact"
+    }
+  },
+  "dashboard": {
+    "title": "Curated intelligence",
+    "subtitle": "Welcome back. {count} new analyses are ready for your review.",
+    "subtitleNone": "No new analyses. Check back later.",
+    "myChannels": "My channels",
+    "syncActive": "Sync active",
+    "viewSummary": "View summary",
+    "quickPreview": "Quick preview",
+    "readDigest": "Read digest",
+    "watchLater": "Watch later",
+    "markSeen": "Mark as seen",
+    "addToWatchlist": "Add to watchlist",
+    "removeFromWatchlist": "Remove from watchlist",
+    "unseen": "UNSEEN",
+    "analysisComplete": "ANALYSIS COMPLETE",
+    "analysisInProgress": "ANALYSIS IN PROGRESS",
+    "notAnalyzed": "NOT ANALYZED",
+    "noChannels": "You are not following any channels yet.",
+    "addFirstChannel": "Add your first channel",
+    "emptyFeed": "Add YouTube channels via URL and ContentFlix will automatically analyze new videos.",
+    "unknownChannel": "Unknown channel",
+    "noVideosYet": "Videos from your channels will appear here as soon as they are imported."
+  },
+  "video": {
+    "bottomLine": "Bottom line",
+    "category": "Technology",
+    "watchOnYoutube": "Watch on YouTube",
+    "aiAnalysisTitle": "ContentFlix AI Analysis",
+    "analysisPendingDetail": "The result will be available shortly.",
+    "analysisNotAvailableDetail": "Analysis is not yet available for this video. Configure your API keys in",
+    "context": "Context",
+    "deepDive": "Deep dive",
+    "keyMoments": "Key moments",
+    "publishedBy": "Published by",
+    "relatedIntelligence": "Related content"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "tryAgain": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "refresh": "Refresh",
+    "more": "More",
+    "less": "Less",
+    "yes": "Yes",
+    "no": "No",
+    "unknown": "Unknown",
+    "never": "Never",
+    "now": "Now",
+    "ago": "ago",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "profile": "Profile"
+  },
+  "channels": {
+    "refreshError": "Unable to refresh channel list",
+    "urlRequired": "Enter a valid YouTube channel URL",
+    "addError": "Error while adding channel",
+    "added": "Channel added",
+    "removeError": "Error while removing channel",
+    "removed": "Channel removed",
+    "scanError": "Error during scan",
+    "scanQueued": "Scan queued",
+    "adding": "Adding...",
+    "supportedFormats": "Supported formats",
+    "statusLabel": "Status",
+    "everyNHoursPrefix": "Every",
+    "addChannel": "Add channel",
+    "addChannelPlaceholder": "youtube.com/@handle or youtube.com/channel/UC...",
+    "addChannelSubtitle": "Add a YouTube channel by public URL or handle.",
+    "addChannelTitle": "Follow a new channel",
+    "daily": "Daily",
+    "followedChannels": "Followed channels",
+    "lastScan": "Last scan",
+    "removeChannel": "Remove channel",
+    "removeChannelConfirm": "Are you sure you want to remove this channel? Your personal history will be deleted.",
+    "scanNow": "Scan now",
+    "status": {
+      "active": "Active"
+    },
+    "syncFrequency": "Sync frequency",
+    "title": "Channels",
+    "videos": "videos",
+    "weekly": "Weekly"
+  },
+  "integrations": {
+    "refreshError": "Unable to refresh integration status",
+    "saveError": "Error while saving key",
+    "savedButInvalid": "Key saved but invalid",
+    "saved": "API key saved successfully",
+    "validateError": "Error while validating key",
+    "validationSuccess": "Validation completed: key is valid",
+    "removeConfirm": "Remove API key for this provider?",
+    "removeError": "Error while removing key",
+    "removed": "API key removed",
+    "check": "Validate",
+    "serverEncrypted": "API keys are encrypted server-side and never exposed to the browser.",
+    "activeConnectors": "{count} active connectors",
+    "keyError": "Invalid key or exhausted quota",
+    "keyPlaceholder": "Paste your API key here",
+    "keyRequired": "API key required for new analysis",
+    "lastCheck": "Last check",
+    "removeKey": "Remove key",
+    "saveKey": "Save key",
+    "status": {
+      "configured": "Configured",
+      "invalid": "Invalid",
+      "notConfigured": "Not configured"
+    },
+    "subtitle": "Configure your API keys to enable synchronization and AI analysis.",
+    "title": "Integrations"
+  },
+  "watchlist": {
+    "count": "{count} videos saved for your review.",
+    "backToDashboard": "Back to dashboard",
+    "empty": "Your watchlist is empty.",
+    "emptyDetail": "Add videos from the dashboard or the analysis page.",
+    "removeFromList": "Remove from watchlist",
+    "subtitle": "Videos you saved for later.",
+    "title": "Watchlist"
+  },
+  "admin": {
+    "system": "System",
+    "backToApp": "Back to app",
+    "users": {
+      "subtitle": "Manage access to ContentFlix through the allowlist.",
+      "allowlistDescription": "Enter the email address to authorize access to ContentFlix.",
+      "emailPlaceholder": "email@example.com",
+      "authorizeAccess": "Authorize access",
+      "user": "User",
+      "role": "Role",
+      "registeredAt": "Registered on",
+      "empty": "No registered users.",
+      "standardUser": "User",
+      "actions": "Actions",
+      "allowlistUser": "Add to allowlist",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusDeleted": "Deleted",
+      "statusSuspended": "Suspended",
+      "suspend": "Suspend",
+      "title": "User management"
+    },
+    "channels": {
+      "subtitle": "All channels in the ContentFlix archive ({count} channels).",
+      "subscribers": "Subscribers",
+      "lastSync": "Last sync",
+      "videos": "Videos",
+      "empty": "No channels in archive."
+    },
+    "jobs": {
+      "subtitle": "Monitor and manage background processing jobs.",
+      "type": "Type",
+      "priority": "Priority",
+      "createdAt": "Created on",
+      "error": "Error",
+      "empty": "No queued jobs.",
+      "retry": "Retry",
+      "status": {
+        "pending": "Pending",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
+      "title": "Jobs and operations"
+    },
+    "logs": {
+      "retention": "Retention: 7 days. Logs are deleted automatically.",
+      "empty": "No logs available.",
+      "emptyAudit": "No audit logs.",
+      "system": "system",
+      "viewAll": "View all",
+      "appLogs": "Application logs",
+      "auditTrail": "Audit trail",
+      "title": "Logs and audit"
+    },
+    "metrics": {
+      "activeUsers": "Active users",
+      "activeChannels": "Active channels",
+      "totalVideos": "Total videos",
+      "failedJobs": "Failed jobs (24h)",
+      "pendingJobs": "Pending jobs"
+    },
+    "incidents": {
+      "openIncidents": "Open incidents",
+      "none": "No open incidents",
+      "systemOperational": "The system is operational."
+    },
+    "aiProfile": {
+      "promptNote": "The prompt is applied to all new analyses. Existing summaries are not regenerated.",
+      "title": "AI Analysis Profile",
+      "subtitle": "Manage the global prompt template for video analysis."
+    },
+    "content": {
+      "title": "Canonical content"
+    },
+    "superAdmin": "Super Admin",
+    "systemHealth": "System health",
+    "systemHealthSubtitle": "Real-time infrastructure and processing throughput monitoring.",
+    "title": "Admin Console"
+  }
+}

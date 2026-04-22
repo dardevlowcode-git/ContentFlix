@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type FormEvent } from 'react'
 import type { UserChannelListItem } from '@/lib/services/channels'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface ChannelsClientProps {
   initialChannels: UserChannelListItem[]
@@ -13,13 +14,18 @@ type BusyAction = {
 } | null
 
 export default function ChannelsClient({ initialChannels }: ChannelsClientProps) {
+  const t = useTranslations()
+  const locale = useLocale()
   const [channelUrl, setChannelUrl] = useState('')
   const [channels, setChannels] = useState<UserChannelListItem[]>(initialChannels)
   const [busy, setBusy] = useState<BusyAction>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const channelsCountLabel = useMemo(() => `${channels.length} canali`, [channels.length])
+  const channelsCountLabel = useMemo(
+    () => `${channels.length} ${t('channels.videos')}`,
+    [channels.length, t]
+  )
 
   const clearFeedback = () => {
     setMessage(null)
@@ -40,7 +46,7 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
       | null
 
     if (!response.ok || !payload?.data) {
-      throw new Error(payload?.error ?? 'Impossibile aggiornare la lista canali')
+      throw new Error(payload?.error ?? t('channels.refreshError'))
     }
 
     setChannels(payload.data)
@@ -52,7 +58,7 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
 
     const value = channelUrl.trim()
     if (!value) {
-      setError('Inserisci un URL canale YouTube valido')
+      setError(t('channels.urlRequired'))
       return
     }
 
@@ -70,14 +76,14 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
         | null
 
       if (!response.ok) {
-        throw new Error(payload?.error ?? 'Errore in aggiunta canale')
+        throw new Error(payload?.error ?? t('channels.addError'))
       }
 
       setChannelUrl('')
-      setMessage(payload?.data?.message ?? 'Canale aggiunto')
+      setMessage(payload?.data?.message ?? t('channels.added'))
       await refreshChannels()
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Errore inatteso'
+      const message = err instanceof Error ? err.message : t('common.error')
       setError(message)
     } finally {
       setBusy(null)
@@ -87,7 +93,7 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
   async function handleRemoveChannel(channelId: string) {
     clearFeedback()
 
-    const confirmed = window.confirm('Rimuovere questo canale dai seguiti?')
+    const confirmed = window.confirm(t('channels.removeChannelConfirm'))
     if (!confirmed) return
 
     setBusy({ type: 'remove', channelId })
@@ -104,13 +110,13 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
         | null
 
       if (!response.ok) {
-        throw new Error(payload?.error ?? 'Errore in rimozione canale')
+        throw new Error(payload?.error ?? t('channels.removeError'))
       }
 
-      setMessage(payload?.data?.message ?? 'Canale rimosso')
+      setMessage(payload?.data?.message ?? t('channels.removed'))
       await refreshChannels()
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Errore inatteso'
+      const message = err instanceof Error ? err.message : t('common.error')
       setError(message)
     } finally {
       setBusy(null)
@@ -133,12 +139,12 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
         | null
 
       if (!response.ok) {
-        throw new Error(payload?.error ?? 'Errore durante la scansione')
+        throw new Error(payload?.error ?? t('channels.scanError'))
       }
 
-      setMessage(payload?.data?.message ?? 'Scansione accodata')
+      setMessage(payload?.data?.message ?? t('channels.scanQueued'))
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Errore inatteso'
+      const message = err instanceof Error ? err.message : t('common.error')
       setError(message)
     } finally {
       setBusy(null)
@@ -150,18 +156,18 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
       <header className="mb-10 flex items-start justify-between gap-4">
         <div>
           <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
-            Canali
+            {t('channels.title')}
           </h1>
           <p className="text-on-surface-variant">
-            Segui nuovi canali YouTube e gestisci le tue preferenze di sincronizzazione.
+            {t('channels.addChannelSubtitle')}
           </p>
         </div>
       </header>
 
       <div className="bg-surface-container-lowest rounded-2xl p-6 mb-8 shadow-ambient">
-        <h2 className="font-headline text-lg font-bold text-primary mb-1">Segui un nuovo canale</h2>
+        <h2 className="font-headline text-lg font-bold text-primary mb-1">{t('channels.addChannelTitle')}</h2>
         <p className="text-sm text-on-surface-variant mb-4">
-          Sincronizza qualsiasi canale YouTube tramite handle pubblico o URL.
+          {t('channels.addChannelSubtitle')}
         </p>
 
         <form className="flex flex-col gap-3" onSubmit={handleAddChannel}>
@@ -179,9 +185,9 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
                 type="text"
                 value={channelUrl}
                 onChange={(event) => setChannelUrl(event.target.value)}
-                placeholder="youtube.com/@handle o youtube.com/channel/UC..."
+                placeholder={t('channels.addChannelPlaceholder')}
                 className="w-full bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none"
-                aria-label="URL canale YouTube"
+                aria-label={t('channels.addChannel')}
                 disabled={busy?.type === 'add'}
               />
             </label>
@@ -196,13 +202,13 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              {busy?.type === 'add' ? 'Aggiunta...' : 'Aggiungi canale'}
+              {busy?.type === 'add' ? t('channels.adding') : t('channels.addChannel')}
             </button>
           </div>
         </form>
 
         <p className="text-xs text-on-surface-variant mt-3">
-          Formati supportati:{' '}
+          {t('channels.supportedFormats')}:{' '}
           <code className="bg-surface-container px-1.5 py-0.5 rounded text-xs">youtube.com/@handle</code>
           {' '}e{' '}
           <code className="bg-surface-container px-1.5 py-0.5 rounded text-xs">youtube.com/channel/UC...</code>
@@ -214,22 +220,22 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
 
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-headline text-xl font-bold text-on-surface">Canali seguiti</h2>
+          <h2 className="font-headline text-xl font-bold text-on-surface">{t('channels.followedChannels')}</h2>
           <span className="text-sm text-on-surface-variant">{channelsCountLabel}</span>
         </div>
 
         {channels.length === 0 ? (
           <div className="bg-surface-container-low rounded-2xl p-12 text-center">
-            <p className="text-on-surface-variant">Non stai ancora seguendo nessun canale.</p>
+            <p className="text-on-surface-variant">{t('dashboard.noChannels')}</p>
           </div>
         ) : (
           <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient">
             <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-surface-container-low">
-              <div className="col-span-5 text-label-caps text-on-surface-variant">Canale</div>
-              <div className="col-span-2 text-label-caps text-on-surface-variant">Ultima scansione</div>
-              <div className="col-span-2 text-label-caps text-on-surface-variant">Frequenza</div>
-              <div className="col-span-2 text-label-caps text-on-surface-variant">Stato</div>
-              <div className="col-span-1 text-label-caps text-on-surface-variant">Azioni</div>
+              <div className="col-span-5 text-label-caps text-on-surface-variant">{t('channels.title')}</div>
+              <div className="col-span-2 text-label-caps text-on-surface-variant">{t('channels.lastScan')}</div>
+              <div className="col-span-2 text-label-caps text-on-surface-variant">{t('channels.syncFrequency')}</div>
+              <div className="col-span-2 text-label-caps text-on-surface-variant">{t('channels.statusLabel')}</div>
+              <div className="col-span-1 text-label-caps text-on-surface-variant">{t('admin.users.actions')}</div>
             </div>
 
             {channels.map((item, index) => {
@@ -270,16 +276,16 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
 
                   <div className="col-span-2 text-sm text-on-surface-variant">
                     {syncState?.last_sync_at
-                      ? new Date(syncState.last_sync_at).toLocaleDateString('it-IT')
-                      : 'Mai'}
+                      ? new Date(syncState.last_sync_at).toLocaleDateString(locale)
+                      : t('common.never')}
                   </div>
 
                   <div className="col-span-2 text-sm text-on-surface-variant">
                     {preferences?.sync_frequency_hours === 24
-                      ? 'Ogni giorno'
+                      ? t('channels.daily')
                       : preferences?.sync_frequency_hours === 168
-                        ? 'Ogni settimana'
-                        : `Ogni ${preferences?.sync_frequency_hours ?? 24}h`}
+                        ? t('channels.weekly')
+                        : `${t('channels.everyNHoursPrefix')} ${preferences?.sync_frequency_hours ?? 24}h`}
                   </div>
 
                   <div className="col-span-2">
@@ -293,13 +299,13 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
                         className={`w-1.5 h-1.5 rounded-full
                                   ${channel.status === 'active' ? 'status-active' : 'status-error'}`}
                       />
-                      {channel.status === 'active' ? 'Attivo' : 'Errore'}
+                      {channel.status === 'active' ? t('channels.status.active') : t('common.error')}
                     </span>
                   </div>
 
                   <div className="col-span-1 flex items-center gap-2">
                     <button
-                      title="Scansiona ora"
+                      title={t('channels.scanNow')}
                       disabled={scanBusy}
                       onClick={() => handleScanNow(channel.id)}
                       className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-all disabled:opacity-50"
@@ -315,7 +321,7 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
                     </button>
 
                     <button
-                      title="Rimuovi canale"
+                      title={t('channels.removeChannel')}
                       disabled={removeBusy}
                       onClick={() => handleRemoveChannel(channel.id)}
                       className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container/30 rounded-lg transition-all disabled:opacity-50"

@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getLocale, getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = { title: 'Admin — Canali' }
 
 export default async function AdminChannelsPage() {
   const supabase = createAdminClient()
+  const t = await getTranslations()
+  const locale = await getLocale()
 
   const { data: channels } = await supabase
     .from('channels')
@@ -16,23 +19,23 @@ export default async function AdminChannelsPage() {
     <div className="p-8 max-w-6xl">
       <header className="mb-10">
         <h1 className="font-headline text-3xl font-extrabold tracking-tight text-on-surface mb-1">
-          Canali canonici
+          {t('admin.content.title')}
         </h1>
         <p className="text-on-surface-variant text-sm">
-          Tutti i canali nell&apos;archivio ContentFlix ({channels?.length ?? 0} canali).
+          {t('admin.channels.subtitle', { count: channels?.length ?? 0 })}
         </p>
       </header>
 
       <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient">
         <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-surface-container-low">
-          <div className="col-span-5 text-label-caps text-on-surface-variant">Canale</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">Iscritti</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">Ultima sync</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">Stato</div>
-          <div className="col-span-1 text-label-caps text-on-surface-variant">Video</div>
+          <div className="col-span-5 text-label-caps text-on-surface-variant">{t('nav.channels')}</div>
+          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.channels.subscribers')}</div>
+          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.channels.lastSync')}</div>
+          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.users.status')}</div>
+          <div className="col-span-1 text-label-caps text-on-surface-variant">{t('admin.channels.videos')}</div>
         </div>
         {!channels || channels.length === 0 ? (
-          <div className="p-12 text-center text-on-surface-variant">Nessun canale nell&apos;archivio.</div>
+          <div className="p-12 text-center text-on-surface-variant">{t('admin.channels.empty')}</div>
         ) : (
           channels.map((ch, i) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,12 +66,12 @@ export default async function AdminChannelsPage() {
                   {ch.subscriber_count ? `${(ch.subscriber_count / 1000).toFixed(0)}K` : '—'}
                 </div>
                 <div className="col-span-2 text-sm text-on-surface-variant">
-                  {sync?.last_sync_at ? new Date(sync.last_sync_at).toLocaleDateString('it-IT') : '—'}
+                  {sync?.last_sync_at ? new Date(sync.last_sync_at).toLocaleDateString(locale) : '—'}
                 </div>
                 <div className="col-span-2">
                   <span className={`text-xs font-semibold px-2 py-1 rounded-full
                     ${ch.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-error-container text-error'}`}>
-                    {ch.status === 'active' ? 'Attivo' : 'Errore'}
+                    {ch.status === 'active' ? t('admin.users.statusActive') : t('common.error')}
                   </span>
                 </div>
                 <div className="col-span-1 text-sm text-on-surface-variant">

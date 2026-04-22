@@ -1,14 +1,16 @@
 import type { Metadata } from 'next'
 import { getCurrentSession } from '@/lib/auth/provider'
 import { createClient } from '@/lib/supabase/server'
+import { getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = {
-  title: 'Lista da vedere',
+  title: 'Watchlist',
 }
 
 export default async function WatchlistPage() {
   const session = await getCurrentSession()
   const supabase = await createClient()
+  const t = await getTranslations()
 
   const { data: watchlist } = await supabase
     .from('watchlists')
@@ -35,12 +37,12 @@ export default async function WatchlistPage() {
     <div className="p-8 max-w-5xl">
       <header className="mb-10">
         <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
-          Lista da vedere
+          {t('watchlist.title')}
         </h1>
         <p className="text-on-surface-variant">
           {items?.length
-            ? `${items.length} video salvati per la tua revisione.`
-            : 'I video che hai salvato per dopo.'}
+            ? t('watchlist.count', { count: items.length })
+            : t('watchlist.subtitle')}
         </p>
       </header>
 
@@ -52,15 +54,15 @@ export default async function WatchlistPage() {
                 d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
             </svg>
           </div>
-          <h2 className="font-headline text-xl font-bold text-on-surface mb-2">La tua lista è vuota</h2>
+          <h2 className="font-headline text-xl font-bold text-on-surface mb-2">{t('watchlist.empty')}</h2>
           <p className="text-on-surface-variant max-w-sm mb-6 text-sm leading-relaxed">
-            Aggiungi video dalla dashboard o dalla pagina di analisi cliccando &ldquo;Aggiungi alla lista&rdquo;.
+            {t('watchlist.emptyDetail')}
           </p>
           <a
             href="/dashboard"
             className="text-sm text-primary font-semibold hover:underline"
           >
-            ← Torna alla dashboard
+            ← {t('watchlist.backToDashboard')}
           </a>
         </div>
       ) : (
@@ -102,7 +104,7 @@ export default async function WatchlistPage() {
                   <button
                     className="text-xs text-on-surface-variant hover:text-error transition-colors font-medium"
                   >
-                    Rimuovi dalla lista
+                    {t('watchlist.removeFromList')}
                   </button>
                 </div>
               </article>

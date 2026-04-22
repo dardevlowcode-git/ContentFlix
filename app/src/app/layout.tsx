@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
+import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -27,10 +27,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const locale = await getLocale()
   const messages = await getMessages()
 
   return (
-    <html lang="it" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

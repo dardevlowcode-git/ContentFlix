@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getCurrentSession } from '@/lib/auth/provider'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import { getLocale, getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = {
   title: 'Analisi Video',
@@ -15,6 +16,8 @@ export default async function VideoDetailPage({ params }: Props) {
   const { videoId } = await params
   const session = await getCurrentSession()
   const supabase = await createClient()
+  const t = await getTranslations()
+  const locale = await getLocale()
 
   // Fetch video with full context
   const { data: video } = await supabase
@@ -89,12 +92,12 @@ export default async function VideoDetailPage({ params }: Props) {
               {video.title}
             </h1>
             <p className="text-sm text-on-surface-variant mb-4">
-              Pubblicato da{' '}
+              {t('video.publishedBy')}{' '}
               <a href={`/channels/${channel?.id}`} className="text-secondary font-medium hover:underline">
                 {channel?.title}
               </a>
               {video.published_at && (
-                <> · {new Date(video.published_at).toLocaleDateString('it-IT', {
+                <> · {new Date(video.published_at).toLocaleDateString(locale, {
                   day: 'numeric', month: 'long', year: 'numeric'
                 })}</>
               )}
@@ -110,7 +113,7 @@ export default async function VideoDetailPage({ params }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Segna come visto
+                {t('dashboard.markSeen')}
               </button>
               <button
                 className="flex items-center gap-2 bg-surface-container-low hover:bg-surface-container
@@ -120,7 +123,7 @@ export default async function VideoDetailPage({ params }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
                 </svg>
-                Aggiungi alla lista
+                {t('dashboard.addToWatchlist')}
               </button>
               <a
                 href={video.video_url}
@@ -132,7 +135,7 @@ export default async function VideoDetailPage({ params }: Props) {
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.28 6.28 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.05a8.19 8.19 0 004.78 1.52V7.12a4.85 4.85 0 01-1.01-.43z"/>
                 </svg>
-                Guarda su YouTube
+                {t('video.watchOnYoutube')}
               </a>
             </div>
           </div>
@@ -149,11 +152,11 @@ export default async function VideoDetailPage({ params }: Props) {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-on-surface">Analisi AI ContentFlix</p>
+                  <p className="text-sm font-bold text-on-surface">{t('video.aiAnalysisTitle')}</p>
                   <p className="text-xs text-on-surface-variant">
                     {analysis.model_used ?? 'Gemini'} · {' '}
                     {analysis.analyzed_at
-                      ? new Date(analysis.analyzed_at).toLocaleDateString('it-IT')
+                      ? new Date(analysis.analyzed_at).toLocaleDateString(locale)
                       : ''}
                   </p>
                 </div>
@@ -162,7 +165,7 @@ export default async function VideoDetailPage({ params }: Props) {
               {/* Short summary */}
               {content.short_summary && (
                 <div>
-                  <p className="text-label-caps text-on-surface-variant mb-2">In sintesi</p>
+                  <p className="text-label-caps text-on-surface-variant mb-2">{t('video.bottomLine')}</p>
                   <p className="text-lg font-semibold text-tertiary leading-relaxed ai-content">
                     &ldquo;{content.short_summary}&rdquo;
                   </p>
@@ -172,7 +175,7 @@ export default async function VideoDetailPage({ params }: Props) {
               {/* Full summary */}
               {content.full_summary && (
                 <div>
-                  <p className="text-label-caps text-on-surface-variant mb-2">Analisi approfondita</p>
+                  <p className="text-label-caps text-on-surface-variant mb-2">{t('video.deepDive')}</p>
                   <p className="text-on-surface leading-relaxed">
                     {content.full_summary}
                   </p>
@@ -183,7 +186,7 @@ export default async function VideoDetailPage({ params }: Props) {
               <div className="grid grid-cols-2 gap-6">
                 {(content.general_category || content.subcategory) && (
                   <div>
-                    <p className="text-label-caps text-on-surface-variant mb-3">Contesto</p>
+                    <p className="text-label-caps text-on-surface-variant mb-3">{t('video.context')}</p>
                     <div className="flex flex-wrap gap-2">
                       {content.general_category && (
                         <span className="px-3 py-1 bg-surface-container rounded-full text-sm text-on-surface-variant">
@@ -201,7 +204,7 @@ export default async function VideoDetailPage({ params }: Props) {
 
                 {content.highlights_text && (
                   <div>
-                    <p className="text-label-caps text-on-surface-variant mb-3">Momenti chiave</p>
+                    <p className="text-label-caps text-on-surface-variant mb-3">{t('video.keyMoments')}</p>
                     <div className="space-y-2">
                       {content.highlights_text.split('\n').slice(0, 5).map((line, i) => (
                         <p key={i} className="text-sm text-on-surface-variant">{line}</p>
@@ -221,18 +224,16 @@ export default async function VideoDetailPage({ params }: Props) {
                   </svg>
                 </div>
                 <div>
-                  <p className="font-semibold text-on-surface">Analisi in corso...</p>
-                  <p className="text-sm text-on-surface-variant">Il risultato sarà disponibile tra qualche momento.</p>
+                  <p className="font-semibold text-on-surface">{t('dashboard.analysisInProgress')}</p>
+                  <p className="text-sm text-on-surface-variant">{t('video.analysisPendingDetail')}</p>
                 </div>
               </div>
             </div>
           ) : (
             <div className="bg-surface-container-low rounded-2xl p-6">
               <p className="text-on-surface-variant text-sm">
-                Analisi non ancora disponibile per questo video.
-                Configura le tue API key nelle{' '}
-                <a href="/integrations" className="text-primary hover:underline">Integrazioni</a>{' '}
-                per avviare l&apos;analisi.
+                {t('video.analysisNotAvailableDetail')}{' '}
+                <a href="/integrations" className="text-primary hover:underline">{t('nav.integrations')}</a>.
               </p>
             </div>
           )}
@@ -243,7 +244,7 @@ export default async function VideoDetailPage({ params }: Props) {
           {/* Related videos placeholder */}
           <div className="bg-surface-container-lowest rounded-2xl p-5 shadow-ambient">
             <h3 className="font-headline text-base font-bold text-on-surface mb-4">
-              Contenuti correlati
+              {t('video.relatedIntelligence')}
             </h3>
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (

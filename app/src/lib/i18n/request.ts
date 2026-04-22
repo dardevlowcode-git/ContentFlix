@@ -1,13 +1,48 @@
 import { getRequestConfig } from 'next-intl/server'
 import { cookies } from 'next/headers'
+import { defaultLocale, isLocale, localeCookieName } from './config'
+
+type MessageValue = string | number | boolean | null | MessageObject | MessageValue[]
+type MessageObject = { [key: string]: MessageValue }
+
+function mergeMessages(base: MessageObject, override: MessageObject): MessageObject {
+  const result: MessageObject = { ...base }
+
+  for (const [key, value] of Object.entries(override)) {
+    const baseValue = result[key]
+    const bothObjects =
+      typeof baseValue === 'object' &&
+      baseValue !== null &&
+      !Array.isArray(baseValue) &&
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value)
+
+    result[key] = bothObjects
+      ? mergeMessages(baseValue as MessageObject, value as MessageObject)
+      : value
+  }
+
+  return result
+}
 
 export default getRequestConfig(async () => {
-  // In V1, only Italian is supported.
-  // Future: read locale from user preferences / URL segment.
-  const locale = 'it'
+  const cookieStore = await cookies()
+  const localeFromCookie = cookieStore.get(localeCookieName)?.value
+  const locale = localeFromCookie && isLocale(localeFromCookie)
+    ? localeFromCookie
+    : defaultLocale
+  const defaultMessages = (
+    await import(`../../../messages/${defaultLocale}.json`)
+  ).default as MessageObject
+  const localeMessages = (
+    await import(`../../../messages/${locale}.json`)
+  ).default as MessageObject
 
   return {
     locale,
-    messages: (await import(`../../../messages/${locale}.json`)).default,
+    messages: locale === defaultLocale
+      ? defaultMessages
+      : mergeMessages(defaultMessages, localeMessages),
   }
 })

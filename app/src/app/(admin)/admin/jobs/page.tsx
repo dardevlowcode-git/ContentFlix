@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getLocale, getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = { title: 'Admin — Job' }
 
 export default async function AdminJobsPage() {
   const supabase = createAdminClient()
+  const t = await getTranslations()
+  const locale = await getLocale()
 
   const { data: jobs } = await supabase
     .from('jobs')
@@ -20,36 +23,36 @@ export default async function AdminJobsPage() {
   }
 
   const statusLabel: Record<string, string> = {
-    pending: 'In attesa',
-    running: 'In esecuzione',
-    completed: 'Completato',
-    failed: 'Fallito',
+    pending: t('admin.jobs.status.pending'),
+    running: t('admin.jobs.status.running'),
+    completed: t('admin.jobs.status.completed'),
+    failed: t('admin.jobs.status.failed'),
   }
 
   return (
     <div className="p-8 max-w-6xl">
       <header className="mb-10">
         <h1 className="font-headline text-3xl font-extrabold tracking-tight text-on-surface mb-1">
-          Job e operazioni
+          {t('admin.jobs.title')}
         </h1>
         <p className="text-on-surface-variant text-sm">
-          Monitora e gestisci i job di elaborazione in background.
+          {t('admin.jobs.subtitle')}
         </p>
       </header>
 
       <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient">
         <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-surface-container-low">
-          <div className="col-span-3 text-label-caps text-on-surface-variant">Tipo</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">Stato</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">Priorità</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">Creato il</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">Errore</div>
-          <div className="col-span-1 text-label-caps text-on-surface-variant">Azioni</div>
+          <div className="col-span-3 text-label-caps text-on-surface-variant">{t('admin.jobs.type')}</div>
+          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.users.status')}</div>
+          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.jobs.priority')}</div>
+          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.jobs.createdAt')}</div>
+          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.jobs.error')}</div>
+          <div className="col-span-1 text-label-caps text-on-surface-variant">{t('admin.users.actions')}</div>
         </div>
 
         {!jobs || jobs.length === 0 ? (
           <div className="p-12 text-center text-on-surface-variant">
-            Nessun job in coda.
+            {t('admin.jobs.empty')}
           </div>
         ) : (
           jobs.map((job, i) => (
@@ -69,7 +72,7 @@ export default async function AdminJobsPage() {
               </div>
               <div className="col-span-2 text-sm text-on-surface-variant">{job.priority}</div>
               <div className="col-span-2 text-sm text-on-surface-variant">
-                {new Date(job.created_at).toLocaleDateString('it-IT')}
+                {new Date(job.created_at).toLocaleDateString(locale)}
               </div>
               <div className="col-span-2 text-xs text-error truncate">
                 {job.error_message ?? '—'}
@@ -77,7 +80,7 @@ export default async function AdminJobsPage() {
               <div className="col-span-1">
                 {job.status === 'failed' && (
                   <button
-                    title="Riprova"
+                        title={t('admin.jobs.retry')}
                     className="p-1.5 text-primary hover:bg-primary-fixed rounded-lg transition-all"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils/cn'
 const adminNavItems = [
   {
     href: '/admin',
-    label: 'Sistema',
+    labelKey: 'admin.system',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -19,7 +19,7 @@ const adminNavItems = [
   },
   {
     href: '/admin/users',
-    label: 'Utenti',
+    labelKey: 'admin.users.title',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -29,7 +29,7 @@ const adminNavItems = [
   },
   {
     href: '/admin/channels',
-    label: 'Canali',
+    labelKey: 'nav.channels',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -39,7 +39,7 @@ const adminNavItems = [
   },
   {
     href: '/admin/videos',
-    label: 'Contenuto canonico',
+    labelKey: 'admin.content.title',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -49,7 +49,7 @@ const adminNavItems = [
   },
   {
     href: '/admin/ai-profile',
-    label: 'Profilo AI',
+    labelKey: 'admin.aiProfile.title',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -59,7 +59,7 @@ const adminNavItems = [
   },
   {
     href: '/admin/jobs',
-    label: 'Job',
+    labelKey: 'admin.jobs.title',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -69,7 +69,7 @@ const adminNavItems = [
   },
   {
     href: '/admin/logs',
-    label: 'Log e audit',
+    labelKey: 'admin.logs.title',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -85,7 +85,6 @@ export default function AdminSideNav() {
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-surface-container-low flex flex-col z-40">
-      {/* Header */}
       <div className="px-4 pt-6 pb-4">
         <div className="flex items-center gap-2 px-3">
           <div className="w-7 h-7 gradient-ai rounded-lg flex items-center justify-center">
@@ -96,12 +95,11 @@ export default function AdminSideNav() {
           </div>
           <div>
             <p className="text-sm font-bold text-on-surface">ContentFlix</p>
-            <p className="text-xs text-on-surface-variant">Console Admin</p>
+            <p className="text-xs text-on-surface-variant">{t('admin.title')}</p>
           </div>
         </div>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
         {adminNavItems.map((item) => {
           const isActive = item.exact
@@ -122,13 +120,12 @@ export default function AdminSideNav() {
               <span className={cn(isActive ? 'text-on-tertiary' : 'text-on-surface-variant')}>
                 {item.icon}
               </span>
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           )
         })}
       </nav>
 
-      {/* Back to user area */}
       <div className="px-3 py-4 border-t border-surface-container-high">
         <Link
           href="/dashboard"
@@ -139,7 +136,7 @@ export default function AdminSideNav() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
               d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
-          Torna all&apos;app
+          {t('admin.backToApp')}
         </Link>
       </div>
     </aside>

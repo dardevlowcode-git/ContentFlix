@@ -1,14 +1,16 @@
 import type { Metadata } from 'next'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getLocale, getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = {
-  title: 'Admin — Sistema',
+  title: 'Admin',
 }
 
 export default async function AdminHomePage() {
   const supabase = createAdminClient()
+  const t = await getTranslations()
+  const locale = await getLocale()
 
-  // Fetch system stats
   const [
     { count: totalUsers },
     { count: totalChannels },
@@ -28,16 +30,15 @@ export default async function AdminHomePage() {
   ])
 
   const statCards = [
-    { label: 'Utenti attivi', value: totalUsers ?? 0, icon: '👤', color: 'bg-primary-fixed' },
-    { label: 'Canali attivi', value: totalChannels ?? 0, icon: '📺', color: 'bg-secondary-fixed' },
-    { label: 'Video totali', value: totalVideos ?? 0, icon: '🎬', color: 'bg-surface-container-high' },
-    { label: 'Job in coda', value: pendingJobs ?? 0, icon: '⏳', color: 'bg-amber-100' },
-    { label: 'Job falliti (24h)', value: failedJobs ?? 0, icon: '❌', color: 'bg-error-container' },
+    { label: t('admin.metrics.activeUsers'), value: totalUsers ?? 0, icon: '👤', color: 'bg-primary-fixed' },
+    { label: t('admin.metrics.activeChannels'), value: totalChannels ?? 0, icon: '📺', color: 'bg-secondary-fixed' },
+    { label: t('admin.metrics.totalVideos'), value: totalVideos ?? 0, icon: '🎬', color: 'bg-surface-container-high' },
+    { label: t('admin.metrics.pendingJobs'), value: pendingJobs ?? 0, icon: '⏳', color: 'bg-amber-100' },
+    { label: t('admin.metrics.failedJobs'), value: failedJobs ?? 0, icon: '❌', color: 'bg-error-container' },
   ]
 
   return (
     <div className="p-8 max-w-6xl">
-      {/* Header */}
       <header className="mb-10">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 gradient-ai rounded-xl flex items-center justify-center">
@@ -48,16 +49,15 @@ export default async function AdminHomePage() {
           </div>
           <div>
             <h1 className="font-headline text-3xl font-extrabold tracking-tight text-on-surface">
-              Stato del sistema
+              {t('admin.systemHealth')}
             </h1>
             <p className="text-on-surface-variant text-sm">
-              Monitoraggio infrastruttura e throughput elaborazione in tempo reale.
+              {t('admin.systemHealthSubtitle')}
             </p>
           </div>
         </div>
       </header>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
         {statCards.map((card) => (
           <div key={card.label} className={`${card.color} rounded-2xl p-5`}>
@@ -69,10 +69,9 @@ export default async function AdminHomePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent incidents */}
         <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-ambient">
           <h2 className="font-headline text-lg font-bold text-on-surface mb-4">
-            Incidenti aperti
+            {t('admin.incidents.openIncidents')}
           </h2>
           {!recentIncidents || recentIncidents.length === 0 ? (
             <div className="flex items-center gap-3 py-4">
@@ -83,8 +82,8 @@ export default async function AdminHomePage() {
                 </svg>
               </div>
               <div>
-                <p className="font-semibold text-on-surface text-sm">Nessun incidente aperto</p>
-                <p className="text-xs text-on-surface-variant">Il sistema è operativo.</p>
+                <p className="font-semibold text-on-surface text-sm">{t('admin.incidents.none')}</p>
+                <p className="text-xs text-on-surface-variant">{t('admin.incidents.systemOperational')}</p>
               </div>
             </div>
           ) : (
@@ -103,15 +102,14 @@ export default async function AdminHomePage() {
           )}
         </div>
 
-        {/* Recent logs */}
         <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-ambient">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-headline text-lg font-bold text-on-surface">Log recenti</h2>
-            <a href="/admin/logs" className="text-xs text-primary hover:underline">Vedi tutti</a>
+            <h2 className="font-headline text-lg font-bold text-on-surface">{t('admin.logs.title')}</h2>
+            <a href="/admin/logs" className="text-xs text-primary hover:underline">{t('admin.logs.viewAll')}</a>
           </div>
           <div className="space-y-1 font-mono text-xs">
             {!recentLogs || recentLogs.length === 0 ? (
-              <p className="text-on-surface-variant py-4 text-center">Nessun log disponibile.</p>
+              <p className="text-on-surface-variant py-4 text-center">{t('admin.logs.empty')}</p>
             ) : (
               recentLogs.map((log) => (
                 <div key={log.id} className="flex items-start gap-2 py-1.5 border-b border-surface-container-high last:border-0">
@@ -125,7 +123,7 @@ export default async function AdminHomePage() {
                     {log.message}
                   </span>
                   <span className="text-outline text-xs shrink-0">
-                    {new Date(log.created_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(log.created_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
               ))

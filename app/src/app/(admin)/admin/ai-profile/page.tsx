@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = { title: 'Admin — Profilo AI' }
+export const metadata: Metadata = { title: 'Admin' }
 
-export default function AdminAiProfilePage() {
+export default async function AdminAiProfilePage() {
+  const t = await getTranslations()
   // In V1 this is a static prompt editor — no dynamic profile yet
   const defaultPrompt = `Sei un assistente AI specializzato nell'analisi di video YouTube.
 
@@ -33,10 +35,10 @@ Rispondi SOLO con un oggetto JSON valido contenente questi campi. Non aggiungere
           </div>
           <div>
             <h1 className="font-headline text-3xl font-extrabold tracking-tight text-on-surface">
-              Profilo analisi AI
+              {t('admin.aiProfile.title')}
             </h1>
             <p className="text-on-surface-variant text-sm">
-              Modifica il template di prompt globale per l&apos;analisi dei video.
+              {t('admin.aiProfile.subtitle')}
             </p>
           </div>
         </div>
@@ -60,13 +62,13 @@ Rispondi SOLO con un oggetto JSON valido contenente questi campi. Non aggiungere
 
         <div className="flex items-center justify-between pt-2">
           <p className="text-xs text-on-surface-variant">
-            Il prompt viene applicato a tutte le nuove analisi. I riepiloghi esistenti non vengono rigenerati.
+            {t('admin.aiProfile.promptNote')}
           </p>
           <button
             className="gradient-ai text-on-tertiary px-6 py-2.5 rounded-xl font-bold text-sm
                        hover:shadow-tertiary-glow transition-all active:scale-95"
           >
-            Salva prompt
+            {t('common.save')}
           </button>
         </div>
       </div>

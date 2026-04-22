@@ -22,7 +22,13 @@
     "accessDenied": "Accesso negato",
     "accessDeniedDetail": "Il tuo account non è autorizzato ad accedere a ContentFlix. Contatta l'amministratore.",
     "loggingIn": "Accesso in corso...",
-    "logoutConfirm": "Vuoi davvero uscire?"
+    "logoutConfirm": "Vuoi davvero uscire?",
+    "exchangeFailed": "Accesso fallito. Riprova tra qualche momento.",
+    "noUser": "Impossibile recuperare le informazioni utente. Riprova.",
+    "noCode": "Richiesta non valida. Riprova.",
+    "inviteOnly": "Accesso su invito.",
+    "inviteOnlyDetail": "Solo gli utenti autorizzati dall'amministratore possono accedere a ContentFlix.",
+    "backToHome": "Torna alla home"
   },
   "landing": {
     "hero": {
@@ -60,7 +66,7 @@
       "button": "Inizia ora"
     },
     "footer": {
-      "copyright": "© 2025 ContentFlix. Tutti i diritti riservati.",
+      "copyright": "Tutti i diritti riservati.",
       "privacy": "Privacy Policy",
       "terms": "Termini di Servizio",
       "contact": "Contatto"
@@ -84,7 +90,10 @@
     "analysisInProgress": "ANALISI IN CORSO",
     "notAnalyzed": "NON ANALIZZATO",
     "noChannels": "Non stai ancora seguendo nessun canale.",
-    "addFirstChannel": "Aggiungi il tuo primo canale"
+    "addFirstChannel": "Aggiungi il tuo primo canale",
+    "emptyFeed": "Aggiungi canali YouTube tramite URL e ContentFlix analizzerà automaticamente i nuovi video.",
+    "unknownChannel": "Canale sconosciuto",
+    "noVideosYet": "I video dei tuoi canali appariranno qui non appena saranno importati."
   },
   "channels": {
     "title": "Canali",
@@ -116,7 +125,19 @@
     "videos": "video",
     "syncFrequency": "Frequenza sincronizzazione",
     "daily": "Ogni giorno",
-    "weekly": "Ogni settimana"
+    "weekly": "Ogni settimana",
+    "refreshError": "Impossibile aggiornare la lista canali",
+    "urlRequired": "Inserisci un URL canale YouTube valido",
+    "addError": "Errore in aggiunta canale",
+    "added": "Canale aggiunto",
+    "removeError": "Errore in rimozione canale",
+    "removed": "Canale rimosso",
+    "scanError": "Errore durante la scansione",
+    "scanQueued": "Scansione accodata",
+    "adding": "Aggiunta...",
+    "supportedFormats": "Formati supportati",
+    "statusLabel": "Stato",
+    "everyNHoursPrefix": "Ogni"
   },
   "video": {
     "publishedBy": "Pubblicato da",
@@ -135,7 +156,10 @@
     "analysisNotAvailable": "Analisi non disponibile",
     "analysisNotAvailableDetail": "Configura le tue API key per analizzare questo video.",
     "category": "Categoria",
-    "subcategory": "Sottocategoria"
+    "subcategory": "Sottocategoria",
+    "watchOnYoutube": "Guarda su YouTube",
+    "aiAnalysisTitle": "Analisi AI ContentFlix",
+    "analysisPendingDetail": "Il risultato sarà disponibile tra qualche momento."
   },
   "integrations": {
     "title": "Integrazioni",
@@ -163,14 +187,27 @@
     "saveKey": "Salva chiave",
     "cancel": "Annulla",
     "keyError": "Chiave non valida o quota esaurita",
-    "keyRequired": "Chiave API richiesta per nuove analisi"
+    "keyRequired": "Chiave API richiesta per nuove analisi",
+    "refreshError": "Impossibile aggiornare lo stato integrazioni",
+    "saveError": "Errore durante salvataggio chiave",
+    "savedButInvalid": "Chiave salvata ma non valida",
+    "saved": "Chiave API salvata correttamente",
+    "validateError": "Errore durante validazione chiave",
+    "validationSuccess": "Validazione completata: chiave valida",
+    "removeConfirm": "Rimuovere la chiave API di questo provider?",
+    "removeError": "Errore durante rimozione chiave",
+    "removed": "Chiave API rimossa",
+    "check": "Verifica",
+    "serverEncrypted": "Le chiavi API sono cifrate lato server e non vengono mai esposte al browser."
   },
   "watchlist": {
     "title": "Lista da vedere",
     "subtitle": "I video che hai salvato per dopo.",
     "empty": "La tua lista è vuota.",
     "emptyDetail": "Aggiungi video dalla dashboard o dalla pagina di analisi.",
-    "removeFromList": "Rimuovi dalla lista"
+    "removeFromList": "Rimuovi dalla lista",
+    "count": "{count} video salvati per la tua revisione.",
+    "backToDashboard": "Torna alla dashboard"
   },
   "admin": {
     "title": "Console Admin",
@@ -191,7 +228,16 @@
       "delete": "Elimina",
       "statusActive": "Attivo",
       "statusSuspended": "Sospeso",
-      "statusDeleted": "Eliminato"
+      "statusDeleted": "Eliminato",
+      "subtitle": "Gestisci l'accesso a ContentFlix tramite allowlist.",
+      "allowlistDescription": "Inserisci l'indirizzo email da autorizzare ad accedere a ContentFlix.",
+      "emailPlaceholder": "email@esempio.it",
+      "authorizeAccess": "Autorizza accesso",
+      "user": "Utente",
+      "role": "Ruolo",
+      "registeredAt": "Registrato il",
+      "empty": "Nessun utente registrato.",
+      "standardUser": "Utente"
     },
     "content": {
       "title": "Contenuto canonico",
@@ -204,7 +250,8 @@
     },
     "aiProfile": {
       "title": "Profilo analisi AI",
-      "subtitle": "Gestisci il template di prompt globale per l'analisi dei video."
+      "subtitle": "Gestisci il template di prompt globale per l'analisi dei video.",
+      "promptNote": "Il prompt viene applicato a tutte le nuove analisi. I riepiloghi esistenti non vengono rigenerati."
     },
     "jobs": {
       "title": "Job e operazioni",
@@ -214,25 +261,53 @@
         "running": "In esecuzione",
         "completed": "Completato",
         "failed": "Fallito"
-      }
+      },
+      "subtitle": "Monitora e gestisci i job di elaborazione in background.",
+      "type": "Tipo",
+      "priority": "Priorità",
+      "createdAt": "Creato il",
+      "error": "Errore",
+      "empty": "Nessun job in coda."
     },
     "logs": {
       "title": "Log e audit",
       "appLogs": "Log applicazione",
       "auditTrail": "Audit trail",
-      "viewExplorer": "Apri explorer"
+      "viewExplorer": "Apri explorer",
+      "retention": "Retention: 7 giorni. Log eliminati automaticamente.",
+      "empty": "Nessun log disponibile.",
+      "emptyAudit": "Nessun audit log.",
+      "system": "sistema",
+      "viewAll": "Vedi tutti"
     },
     "metrics": {
       "successRate": "Tasso di successo",
       "pendingJobs": "Job in attesa",
       "failedJobs": "Job falliti (24h)",
       "apiUsage": "Utilizzo API piattaforma",
-      "requestsPerHour": "Richieste / Ora"
+      "requestsPerHour": "Richieste / Ora",
+      "activeUsers": "Utenti attivi",
+      "activeChannels": "Canali attivi",
+      "totalVideos": "Video totali"
     },
     "export": {
       "title": "Esporta dati",
       "exportCsv": "Esporta CSV",
       "exportJson": "Esporta JSON"
+    },
+    "system": "Sistema",
+    "backToApp": "Torna all'app",
+    "channels": {
+      "subtitle": "Tutti i canali nell'archivio ContentFlix ({count} canali).",
+      "subscribers": "Iscritti",
+      "lastSync": "Ultima sync",
+      "videos": "Video",
+      "empty": "Nessun canale nell'archivio."
+    },
+    "incidents": {
+      "openIncidents": "Incidenti aperti",
+      "none": "Nessun incidente aperto",
+      "systemOperational": "Il sistema è operativo."
     }
   },
   "common": {

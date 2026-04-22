@@ -145,6 +145,7 @@ export type Database = {
           id: string
           user_id: string
           provider: 'youtube' | 'gemini'
+          encrypted_key: string | null
           is_configured: boolean
           is_valid: boolean | null
           last_validated_at: string | null
@@ -157,6 +158,7 @@ export type Database = {
           id?: string
           user_id: string
           provider: 'youtube' | 'gemini'
+          encrypted_key?: string | null
           is_configured?: boolean
           is_valid?: boolean | null
           last_validated_at?: string | null
@@ -166,6 +168,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          encrypted_key?: string | null
           is_configured?: boolean
           is_valid?: boolean | null
           last_validated_at?: string | null

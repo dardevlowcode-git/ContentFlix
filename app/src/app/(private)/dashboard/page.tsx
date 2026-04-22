@@ -1,17 +1,18 @@
 import type { Metadata } from 'next'
 import { getCurrentSession } from '@/lib/auth/provider'
 import { createClient } from '@/lib/supabase/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = {
   title: 'Dashboard',
-  description: 'I tuoi contenuti YouTube curati dall\'AI.',
 }
 
 export default async function DashboardPage() {
   const session = await getCurrentSession()
   const supabase = await createClient()
+  const t = await getTranslations()
+  const locale = await getLocale()
 
-  // Fetch user's followed channels
   const { data: userChannels } = await supabase
     .from('user_channels')
     .select('*, channels(*)')
@@ -20,7 +21,6 @@ export default async function DashboardPage() {
     .order('added_at', { ascending: false })
     .limit(10)
 
-  // Fetch recent unanalyzed + analyzed videos from user's channels
   const channelIds = userChannels?.map((uc) => uc.channel_id) ?? []
 
   const { data: recentVideos } = channelIds.length > 0
@@ -46,32 +46,44 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-8 max-w-6xl">
-      {/* Header */}
       <header className="mb-12">
         <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
-          Intelligenza curata
+          {t('dashboard.title')}
         </h1>
         <p className="text-on-surface-variant text-lg">
           {newAnalysesCount > 0
-            ? `Bentornato. ${newAnalysesCount} nuove analisi sono pronte per la tua revisione.`
+            ? t('dashboard.subtitle', { count: newAnalysesCount })
             : hasChannels
-              ? 'Nessuna nuova analisi. Controlla di nuovo più tardi.'
-              : 'Aggiungi il tuo primo canale per iniziare.'}
+              ? t('dashboard.subtitleNone')
+              : t('dashboard.addFirstChannel')}
         </p>
       </header>
 
       {!hasChannels ? (
-        /* Empty state */
-        <EmptyState />
+        <EmptyState
+          title={t('dashboard.noChannels')}
+          subtitle={t('dashboard.emptyFeed')}
+          cta={t('dashboard.addFirstChannel')}
+        />
       ) : (
-        /* Video feed — bento grid */
-        <VideoBentoGrid videos={recentVideos ?? []} />
+        <VideoBentoGrid
+          videos={recentVideos ?? []}
+          locale={locale}
+          labels={{
+            unseen: t('dashboard.unseen'),
+            analysisComplete: t('dashboard.analysisComplete'),
+            processing: t('dashboard.analysisInProgress'),
+            unknownChannel: t('dashboard.unknownChannel'),
+            viewSummary: t('dashboard.viewSummary'),
+            noVideosYet: t('dashboard.noVideosYet'),
+          }}
+        />
       )}
     </div>
   )
 }
 
-function EmptyState() {
+function EmptyState({ title, subtitle, cta }: { title: string; subtitle: string; cta: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
       <div className="w-20 h-20 gradient-ai rounded-3xl flex items-center justify-center mb-6 shadow-tertiary-glow">
@@ -81,10 +93,10 @@ function EmptyState() {
         </svg>
       </div>
       <h2 className="font-headline text-2xl font-bold text-on-surface mb-3">
-        Non stai ancora seguendo nessun canale
+        {title}
       </h2>
       <p className="text-on-surface-variant max-w-sm mb-8 leading-relaxed">
-        Aggiungi canali YouTube tramite URL e ContentFlix analizzerà automaticamente i nuovi video.
+        {subtitle}
       </p>
       <a
         href="/channels"
@@ -94,19 +106,34 @@ function EmptyState() {
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
         </svg>
-        Aggiungi il tuo primo canale
+        {cta}
       </a>
     </div>
   )
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function VideoBentoGrid({ videos }: { videos: any[] }) {
+function VideoBentoGrid({
+  videos,
+  locale,
+  labels,
+}: {
+  videos: any[]
+  locale: string
+  labels: {
+    unseen: string
+    analysisComplete: string
+    processing: string
+    unknownChannel: string
+    viewSummary: string
+    noVideosYet: string
+  }
+}) {
   if (videos.length === 0) {
     return (
       <div className="bg-surface-container-low rounded-2xl p-12 text-center">
         <p className="text-on-surface-variant">
-          I video dei tuoi canali appariranno qui non appena saranno importati.
+          {labels.noVideosYet}
         </p>
       </div>
     )
@@ -128,7 +155,6 @@ function VideoBentoGrid({ videos }: { videos: any[] }) {
                         ${isLarge ? 'lg:col-span-2' : ''}`}
           >
             <a href={`/video/${video.id}`} className="block">
-              {/* Thumbnail */}
               <div className={`relative mb-5 rounded-xl overflow-hidden bg-surface-container
                                ${isLarge ? 'aspect-video' : 'aspect-video'}`}>
                 {video.thumbnail_url ? (
@@ -147,21 +173,19 @@ function VideoBentoGrid({ videos }: { videos: any[] }) {
                   </div>
                 )}
 
-                {/* Status badge */}
                 <div className="absolute top-3 left-3">
                   {!analysis || analysis.analysis_status === 'pending' ? (
-                    <span className="badge-unseen">NON VISTO</span>
+                    <span className="badge-unseen">{labels.unseen}</span>
                   ) : analysis.analysis_status === 'completed' ? (
-                    <span className="badge-ai">ANALISI COMPLETATA</span>
+                    <span className="badge-ai">{labels.analysisComplete}</span>
                   ) : analysis.analysis_status === 'processing' ? (
                     <span className="px-3 py-1 bg-amber-400 text-white text-xs font-bold rounded-full">
-                      IN ANALISI...
+                      {labels.processing}
                     </span>
                   ) : null}
                 </div>
               </div>
 
-              {/* Info */}
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <h3 className={`font-headline font-bold text-on-surface leading-tight mb-1 line-clamp-2
@@ -169,9 +193,9 @@ function VideoBentoGrid({ videos }: { videos: any[] }) {
                     {video.title}
                   </h3>
                   <p className="text-sm text-secondary font-medium">
-                    {channel?.title ?? 'Canale sconosciuto'}
+                    {channel?.title ?? labels.unknownChannel}
                     {video.published_at && (
-                      <> · <RelativeTime date={video.published_at} /></>
+                      <> · <RelativeTime date={video.published_at} locale={locale} /></>
                     )}
                   </p>
                   {content?.short_summary && (
@@ -186,7 +210,7 @@ function VideoBentoGrid({ videos }: { videos: any[] }) {
                     className="shrink-0 gradient-ai text-white px-4 py-2 rounded-full text-sm
                                font-semibold hover:shadow-tertiary-glow transition-all active:scale-95"
                   >
-                    Vedi riepilogo
+                    {labels.viewSummary}
                   </button>
                 )}
               </div>
@@ -198,16 +222,16 @@ function VideoBentoGrid({ videos }: { videos: any[] }) {
   )
 }
 
-function RelativeTime({ date }: { date: string }) {
+function RelativeTime({ date, locale }: { date: string; locale: string }) {
   const now = new Date()
   const then = new Date(date)
   const diffMs = now.getTime() - then.getTime()
   const diffH = Math.floor(diffMs / (1000 * 60 * 60))
   const diffD = Math.floor(diffH / 24)
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
 
-  if (diffH < 1) return <span>ora</span>
-  if (diffH < 24) return <span>{diffH} ore fa</span>
-  if (diffD === 1) return <span>ieri</span>
-  if (diffD < 7) return <span>{diffD} giorni fa</span>
-  return <span>{then.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}</span>
+  if (diffH < 1) return <span>{rtf.format(0, 'hour')}</span>
+  if (diffH < 24) return <span>{rtf.format(-diffH, 'hour')}</span>
+  if (diffD < 7) return <span>{rtf.format(-diffD, 'day')}</span>
+  return <span>{then.toLocaleDateString(locale, { day: 'numeric', month: 'short' })}</span>
 }
