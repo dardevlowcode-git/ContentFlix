@@ -69,6 +69,14 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
+  // --- Admin API routes (session required, except auth endpoints handled above) ---
+  if (pathname.startsWith('/api/admin/')) {
+    if (!hasAdminSessionCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    return supabaseResponse
+  }
+
   // --- Super-admin routes (independent from Google OAuth) ---
   if (pathname.startsWith('/admin')) {
     if (!hasAdminSessionCookie) {
