@@ -16,6 +16,14 @@ function isValidEmail(value: string): boolean {
   return emailPattern.test(value)
 }
 
+function mapSupabaseError(errorMessage: string): string {
+  const lower = errorMessage.toLowerCase()
+  if (lower.includes('schema cache')) {
+    return 'Schema database non inizializzato: applicare migrazioni Supabase prima di usare la gestione utenti.'
+  }
+  return errorMessage
+}
+
 export async function POST(request: Request) {
   const adminSession = await getAdminSession()
   if (!adminSession) {
@@ -39,7 +47,10 @@ export async function POST(request: Request) {
     .upsert({ email, is_active: true }, { onConflict: 'email' })
 
   if (error) {
-    return NextResponse.json({ data: null, error: error.message, errorType: 'unknown' }, { status: 500 })
+    return NextResponse.json(
+      { data: null, error: mapSupabaseError(error.message), errorType: 'unknown' },
+      { status: 500 }
+    )
   }
 
   return NextResponse.json({
@@ -69,7 +80,10 @@ export async function DELETE(request: Request) {
     .eq('email', email)
 
   if (error) {
-    return NextResponse.json({ data: null, error: error.message, errorType: 'unknown' }, { status: 500 })
+    return NextResponse.json(
+      { data: null, error: mapSupabaseError(error.message), errorType: 'unknown' },
+      { status: 500 }
+    )
   }
 
   return NextResponse.json({

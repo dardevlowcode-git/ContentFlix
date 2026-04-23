@@ -24,6 +24,7 @@ interface AllowlistRow {
 interface AdminUsersClientProps {
   initialUsers: UserRow[]
   initialAllowlist: AllowlistRow[]
+  schemaError?: string | null
 }
 
 type BusyState =
@@ -34,6 +35,7 @@ type BusyState =
 export default function AdminUsersClient({
   initialUsers,
   initialAllowlist,
+  schemaError = null,
 }: AdminUsersClientProps) {
   const t = useTranslations()
   const locale = useLocale()
@@ -149,11 +151,11 @@ export default function AdminUsersClient({
             className="input-field flex-1"
             value={emailInput}
             onChange={(event) => setEmailInput(event.target.value)}
-            disabled={busy?.type === 'authorize'}
+            disabled={busy?.type === 'authorize' || Boolean(schemaError)}
           />
           <button
             type="submit"
-            disabled={busy?.type === 'authorize'}
+            disabled={busy?.type === 'authorize' || Boolean(schemaError)}
             className="gradient-primary text-on-primary px-6 py-3 rounded-xl font-bold text-sm
                        hover:shadow-primary-glow transition-all active:scale-95 shrink-0
                        disabled:opacity-60 disabled:cursor-not-allowed"
@@ -162,6 +164,7 @@ export default function AdminUsersClient({
           </button>
         </form>
 
+        {schemaError && <p className="mt-3 text-sm text-error">{schemaError}</p>}
         {message && <p className="mt-3 text-sm text-green-700">{message}</p>}
         {error && <p className="mt-3 text-sm text-error">{error}</p>}
       </div>

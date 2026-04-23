@@ -54,11 +54,13 @@ CREATE TABLE IF NOT EXISTS watchlists (
   user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name       TEXT NOT NULL,
   is_default BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id, is_default) WHERE is_default = TRUE  -- only one default per user
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_watchlists_user ON watchlists(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_watchlists_one_default_per_user
+  ON watchlists(user_id)
+  WHERE is_default = TRUE; -- only one default per user
 
 -- ============================================================
 -- WATCHLIST ITEMS

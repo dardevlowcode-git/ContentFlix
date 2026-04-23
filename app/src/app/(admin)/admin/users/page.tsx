@@ -6,8 +6,9 @@ export const metadata: Metadata = { title: 'Admin — Utenti' }
 
 export default async function AdminUsersPage() {
   const supabase = createAdminClient()
+  let schemaError: string | null = null
 
-  const { data: users } = await supabase
+  const { data: users, error: usersError } = await supabase
     .from('users')
     .select(`
       *,
@@ -16,10 +17,23 @@ export default async function AdminUsersPage() {
     `)
     .order('created_at', { ascending: false })
 
-  const { data: allowlist } = await supabase
+  const { data: allowlist, error: allowlistError } = await supabase
     .from('allowlist_entries')
     .select('*')
     .order('added_at', { ascending: false })
 
-  return <AdminUsersClient initialUsers={users ?? []} initialAllowlist={allowlist ?? []} />
+  if (usersError || allowlistError) {
+    const message = usersError?.message ?? allowlistError?.message ?? ''
+    schemaError = message.includes('schema cache')
+      ? 'Schema DB non inizializzato su Supabase: applica prima le migrazioni in app/supabase/migrations.'
+      : message
+  }
+
+  return (
+    <AdminUsersClient
+      initialUsers={users ?? []}
+      initialAllowlist={allowlist ?? []}
+      schemaError={schemaError}
+    />
+  )
 }
