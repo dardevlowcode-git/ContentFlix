@@ -16,6 +16,13 @@ export default function TopNav({ variant, session }: TopNavProps) {
   const router = useRouter()
 
   async function handleSignOut() {
+    if (variant === 'admin') {
+      await fetch('/api/admin/auth/logout', { method: 'POST' })
+      router.push('/admin/login')
+      router.refresh()
+      return
+    }
+
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/')

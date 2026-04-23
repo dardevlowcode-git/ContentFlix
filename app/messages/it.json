@@ -17,6 +17,7 @@
   },
   "auth": {
     "loginWithGoogle": "Accedi con Google",
+    "adminLogin": "Accesso Super Admin",
     "loginTitle": "Accedi a ContentFlix",
     "loginSubtitle": "Usa il tuo account Google per accedere alla piattaforma.",
     "accessDenied": "Accesso negato",
@@ -28,7 +29,17 @@
     "noCode": "Richiesta non valida. Riprova.",
     "inviteOnly": "Accesso su invito.",
     "inviteOnlyDetail": "Solo gli utenti autorizzati dall'amministratore possono accedere a ContentFlix.",
-    "backToHome": "Torna alla home"
+    "backToHome": "Torna alla home",
+    "admin": {
+      "subtitle": "Accesso riservato al super admin con credenziali dedicate.",
+      "username": "Utente",
+      "usernamePlaceholder": "Inserisci utente admin",
+      "password": "Password",
+      "passwordPlaceholder": "Inserisci password",
+      "loginButton": "Accedi come super admin",
+      "invalidCredentials": "Credenziali non valide",
+      "loginLink": "Accesso Super Admin (utente/password)"
+    }
   },
   "landing": {
     "hero": {

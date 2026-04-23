@@ -1,7 +1,7 @@
 import TopNav from '@/components/layout/TopNav'
 import AdminSideNav from '@/components/layout/AdminSideNav'
 import Footer from '@/components/layout/Footer'
-import { getCurrentSession } from '@/lib/auth/provider'
+import { getAdminSession } from '@/lib/auth/admin'
 import { redirect } from 'next/navigation'
 
 export default async function AdminLayout({
@@ -9,10 +9,18 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await getCurrentSession()
+  const adminSession = await getAdminSession()
+  if (!adminSession) {
+    redirect('/admin/login')
+  }
 
-  if (!session || session.role !== 'super_admin') {
-    redirect('/dashboard?error=forbidden')
+  const session = {
+    userId: `admin:${adminSession.username}`,
+    email: adminSession.username,
+    displayName: adminSession.username,
+    avatarUrl: null,
+    role: 'super_admin' as const,
+    preferredLanguage: 'it',
   }
 
   return (

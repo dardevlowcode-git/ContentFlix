@@ -2,6 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isEmailAllowlisted } from '@/lib/auth/allowlist'
 
+const adminSessionCookieName = 'cf_admin_session'
+
 /**
  * Middleware for ContentFlix.
  *
@@ -9,7 +11,7 @@ import { isEmailAllowlisted } from '@/lib/auth/allowlist'
  * 1. Refresh Supabase session on every request
  * 2. Protect private routes — redirect to login if not authenticated
  * 3. Enforce allowlist — redirect with error if not authorized
- * 4. Protect admin routes — check super_admin role
+ * 4. Protect admin routes — dedicated super-admin username/password session
  * 5. Redirect authenticated users away from /login
  */
 export async function middleware(request: NextRequest) {
@@ -40,12 +42,15 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
+  const hasAdminSessionCookie = Boolean(request.cookies.get(adminSessionCookieName)?.value)
 
   // --- Public routes (no auth required) ---
   if (
     pathname === '/' ||
     pathname === '/login' ||
+    pathname === '/admin/login' ||
     pathname.startsWith('/api/auth/') ||
+    pathname.startsWith('/api/admin/auth/') ||
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon')
   ) {
@@ -55,6 +60,21 @@ export async function middleware(request: NextRequest) {
       if (allowlisted) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
+    }
+
+    if (pathname === '/admin/login' && hasAdminSessionCookie) {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
+
+    return supabaseResponse
+  }
+
+  // --- Super-admin routes (independent from Google OAuth) ---
+  if (pathname.startsWith('/admin')) {
+    if (!hasAdminSessionCookie) {
+      const adminLoginUrl = new URL('/admin/login', request.url)
+      adminLoginUrl.searchParams.set('redirectTo', pathname)
+      return NextResponse.redirect(adminLoginUrl)
     }
     return supabaseResponse
   }
@@ -73,24 +93,6 @@ export async function middleware(request: NextRequest) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('error', 'access_denied')
     return NextResponse.redirect(loginUrl)
-  }
-
-  // --- Admin route protection ---
-  if (pathname.startsWith('/admin')) {
-    // Check super_admin role via DB
-    const { data: roleCheck } = await supabase
-      .from('user_roles')
-      .select('roles(name)')
-      .eq('user_id', user.id)
-      .single()
-
-    // @ts-expect-error — nested join
-    const isSuperAdmin = roleCheck?.roles?.name === 'super_admin'
-
-    if (!isSuperAdmin) {
-      // Not an admin — redirect to dashboard (forbidden)
-      return NextResponse.redirect(new URL('/dashboard?error=forbidden', request.url))
-    }
   }
 
   return supabaseResponse

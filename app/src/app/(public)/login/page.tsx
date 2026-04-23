@@ -64,6 +64,15 @@ function LoginForm() {
             {t('auth.loginWithGoogle')}
           </button>
 
+          <a
+            href="/admin/login"
+            className="mt-3 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full
+                       font-semibold text-sm border border-outline-variant/40 text-on-surface-variant
+                       hover:bg-surface-container-low transition-all"
+          >
+            {t('auth.admin.loginLink')}
+          </a>
+
           <div className="mt-6 p-4 bg-surface-container-low rounded-xl">
             <p className="text-xs text-on-surface-variant text-center leading-relaxed">
               <strong className="text-on-surface">{t('auth.inviteOnly')}</strong>
