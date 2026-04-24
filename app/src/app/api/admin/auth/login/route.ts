@@ -17,6 +17,9 @@ interface LoginBody {
   password?: string
 }
 
+/**
+ * Esegue login super-admin e imposta cookie sessione HttpOnly firmato.
+ */
 export async function POST(request: Request) {
   // Parsing difensivo: evita eccezioni runtime se il client invia JSON non valido.
   let body: LoginBody

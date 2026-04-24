@@ -16,6 +16,9 @@ interface RouteContext {
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
+/**
+ * Retry di un job fallito: crea una nuova riga job `pending` con payload ereditato.
+ */
 export async function POST(_request: Request, context: RouteContext) {
   const adminSession = await getAdminSession()
   if (!adminSession) {
@@ -97,6 +100,9 @@ export async function POST(_request: Request, context: RouteContext) {
   })
 }
 
+/**
+ * Elimina un job solo se ancora `pending`.
+ */
 export async function DELETE(_request: Request, context: RouteContext) {
   const adminSession = await getAdminSession()
   if (!adminSession) {

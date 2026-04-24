@@ -23,6 +23,9 @@ interface IntegrationDeleteBody {
   provider?: 'youtube' | 'gemini'
 }
 
+/**
+ * Estrae userId dalla sessione o lancia errore 401 coerente per tutte le azioni.
+ */
 function requireUserId(userId: string | null | undefined): string {
   // Verifica minima richiesta da tutte le azioni integrazioni.
   if (!userId) {
@@ -31,6 +34,9 @@ function requireUserId(userId: string | null | undefined): string {
   return userId
 }
 
+/**
+ * Restituisce stato integrazioni (configured/valid/masked) dell'utente.
+ */
 export async function GET() {
   try {
     const session = await getCurrentSession()
@@ -52,6 +58,9 @@ export async function GET() {
   }
 }
 
+/**
+ * Gestisce salvataggio o validazione di una chiave provider.
+ */
 export async function POST(request: Request) {
   try {
     const session = await getCurrentSession()
@@ -92,6 +101,9 @@ export async function POST(request: Request) {
   }
 }
 
+/**
+ * Rimuove logicamente la chiave provider dell'utente.
+ */
 export async function DELETE(request: Request) {
   try {
     const session = await getCurrentSession()

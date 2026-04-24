@@ -19,6 +19,9 @@ export const localeNames: Record<Locale, string> = {
   en: 'English',
 }
 
+/**
+ * Type guard runtime per verificare che la stringa sia una locale supportata.
+ */
 export function isLocale(value: string): value is Locale {
   return locales.includes(value as Locale)
 }

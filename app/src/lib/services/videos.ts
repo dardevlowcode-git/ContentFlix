@@ -32,12 +32,18 @@ export interface VideoListResponse {
   total: number
 }
 
+/**
+ * Applica limiti di sicurezza per paginazione (anti valori eccessivi o negativi).
+ */
 function normalizePagination(limit?: number, page?: number) {
   const safeLimit = Math.min(Math.max(limit ?? 20, 1), 50)
   const safePage = Math.max(page ?? 1, 1)
   return { safeLimit, safePage }
 }
 
+/**
+ * Mappa una riga query `videos + join` in `VideoWithContext` usato dalla UI.
+ */
 function mapVideoWithContext(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   row: any,
@@ -96,6 +102,10 @@ function mapVideoWithContext(
   }
 }
 
+/**
+ * Restituisce i video visibili all'utente con filtri, paginazione e stato utente.
+ * La funzione applica il perimetro canali seguito dall'utente prima di ogni query.
+ */
 export async function getVideosForUser(params: GetVideosForUserParams): Promise<VideoListResponse> {
   const supabase = await createClient()
 
@@ -216,6 +226,9 @@ interface YouTubePlaylistItem {
   }
 }
 
+/**
+ * Seleziona la thumbnail migliore disponibile seguendo priorita` decrescente.
+ */
 function getBestThumbnail(item: YouTubePlaylistItem): string | null {
   return item.snippet?.thumbnails?.maxres?.url
     ?? item.snippet?.thumbnails?.high?.url
@@ -224,6 +237,9 @@ function getBestThumbnail(item: YouTubePlaylistItem): string | null {
     ?? null
 }
 
+/**
+ * Helper fetch JSON con errore strutturato per risposte non-2xx.
+ */
 async function fetchJson<T>(url: URL): Promise<T> {
   const response = await fetch(url.toString(), {
     method: 'GET',
@@ -239,6 +255,9 @@ async function fetchJson<T>(url: URL): Promise<T> {
   return response.json() as Promise<T>
 }
 
+/**
+ * Recupera l'uploads playlist di un canale YouTube.
+ */
 async function getUploadsPlaylistId(youtubeApiKey: string, youtubeChannelId: string): Promise<string> {
   const url = new URL('https://www.googleapis.com/youtube/v3/channels')
   url.searchParams.set('part', 'contentDetails')
@@ -259,6 +278,9 @@ async function getUploadsPlaylistId(youtubeApiKey: string, youtubeChannelId: str
   return uploads
 }
 
+/**
+ * Elenca gli ultimi elementi della playlist uploads del canale.
+ */
 async function listRecentPlaylistItems(youtubeApiKey: string, playlistId: string, maxResults: number): Promise<YouTubePlaylistItem[]> {
   const url = new URL('https://www.googleapis.com/youtube/v3/playlistItems')
   url.searchParams.set('part', 'snippet,contentDetails')
@@ -272,6 +294,9 @@ async function listRecentPlaylistItems(youtubeApiKey: string, playlistId: string
   return json.items ?? []
 }
 
+/**
+ * Risolve un handle `@name` nel relativo channel ID canonico `UC...`.
+ */
 async function resolveChannelIdFromHandle(youtubeApiKey: string, handle: string): Promise<{ channelId: string; title: string | null }> {
   const normalizedHandle = handle.replace(/^@/, '').trim().toLowerCase()
   if (!normalizedHandle) {
@@ -304,6 +329,10 @@ async function resolveChannelIdFromHandle(youtubeApiKey: string, handle: string)
   }
 }
 
+/**
+ * Importa i video recenti del canale nell'archivio canonico.
+ * Se il canale e` in forma `handle:*`, prova prima la risoluzione verso ID `UC...`.
+ */
 export async function importChannelVideos(params: {
   userId: string
   channelId: string

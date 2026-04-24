@@ -69,6 +69,9 @@ function isYouTubeDomain(hostname: string): boolean {
   return hostname === 'youtube.com' || hostname === 'www.youtube.com'
 }
 
+/**
+ * Valida sintatticamente un handle YouTube secondo il formato supportato in V1.
+ */
 function isValidHandle(handle: string): boolean {
   // YouTube handles: 3-30 chars, alphanumeric + dots, underscores, hyphens
   return /^[a-zA-Z0-9._-]{3,30}$/.test(handle)

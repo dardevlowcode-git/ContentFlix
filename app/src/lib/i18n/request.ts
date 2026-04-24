@@ -11,6 +11,10 @@ import { defaultLocale, isLocale, localeCookieName } from './config'
 type MessageValue = string | number | boolean | null | MessageObject | MessageValue[]
 type MessageObject = { [key: string]: MessageValue }
 
+/**
+ * Merge profondo dei messaggi locale sopra i messaggi di default.
+ * Mantiene fallback automatico per chiavi non ancora tradotte.
+ */
 function mergeMessages(base: MessageObject, override: MessageObject): MessageObject {
   const result: MessageObject = { ...base }
 

@@ -23,12 +23,20 @@ export interface UserChannelListItem {
   syncState: CanonicalSyncStateRow | null
 }
 
+/**
+ * Normalizza valori opzionali provenienti da relazioni Supabase.
+ * Alcune select annidate restituiscono array, altre oggetti singoli.
+ */
 function firstOrNull<T>(value: T | T[] | null | undefined): T | null {
   // Uniforma il formato Supabase: alcune relazioni possono arrivare come array o singolo oggetto.
   if (!value) return null
   return Array.isArray(value) ? (value[0] ?? null) : value
 }
 
+/**
+ * Genera i dati minimi necessari per creare o aggiornare un canale canonico.
+ * Se l'input e` un handle, usa un id tecnico `handle:*` finche` non viene risolto in `UC...`.
+ */
 function buildFallbackChannel(parsedType: 'handle' | 'channel_id', parsedValue: string) {
   if (parsedType === 'channel_id') {
     return {
@@ -51,6 +59,10 @@ function buildFallbackChannel(parsedType: 'handle' | 'channel_id', parsedValue: 
   }
 }
 
+/**
+ * Restituisce l'elenco canali attivi di un utente con preferenze e stato sync.
+ * Esegue la composizione in DTO per evitare logica di mapping nelle API.
+ */
 export async function getChannelsForUser(userId: string): Promise<UserChannelListItem[]> {
   const supabase = await createClient()
 
@@ -106,6 +118,10 @@ export async function getChannelsForUser(userId: string): Promise<UserChannelLis
     .filter((item): item is UserChannelListItem => item !== null)
 }
 
+/**
+ * Aggiunge un canale al profilo utente.
+ * Flusso: parse URL -> upsert canale canonico -> upsert relazione utente -> init preferenze -> scan iniziale.
+ */
 export async function addChannelForUser(params: { userId: string; channelUrl: string }) {
   const parsed = parseYouTubeChannelUrl(params.channelUrl)
 
@@ -205,6 +221,10 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
   }
 }
 
+/**
+ * Disattiva il collegamento utente-canale senza eliminare il contenuto canonico.
+ * Mantiene il comportamento idempotente: se gia` disattivo ritorna `alreadyRemoved: true`.
+ */
 export async function removeChannelForUser(params: { userId: string; channelId: string }) {
   const supabase = await createClient()
 
@@ -242,6 +262,10 @@ export async function removeChannelForUser(params: { userId: string; channelId: 
   return { alreadyRemoved: false }
 }
 
+/**
+ * Accoda (ed esegue subito in V1) una scansione manuale del canale.
+ * Registra sempre il job in tabella per audit/diagnosi in console admin.
+ */
 export async function requestScanNowForUser(params: { userId: string; channelId: string }) {
   const supabase = await createClient()
 

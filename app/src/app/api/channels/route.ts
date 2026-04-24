@@ -23,6 +23,9 @@ interface ChannelDeleteBody {
   channelId?: string
 }
 
+/**
+ * Estrae userId dalla sessione o lancia errore 401 coerente per tutta la route.
+ */
 function requireSessionUserId(userId: string | null | undefined): string {
   // Helper condiviso: centralizza l'errore 401 per tutte le azioni del file.
   if (!userId) {
@@ -31,6 +34,9 @@ function requireSessionUserId(userId: string | null | undefined): string {
   return userId
 }
 
+/**
+ * Ritorna l'elenco canali dell'utente autenticato.
+ */
 export async function GET() {
   try {
     const session = await getCurrentSession()
@@ -47,6 +53,9 @@ export async function GET() {
   }
 }
 
+/**
+ * Gestisce azioni canale: `add` (default) e `scan_now`.
+ */
 export async function POST(request: Request) {
   try {
     const session = await getCurrentSession()
@@ -93,6 +102,9 @@ export async function POST(request: Request) {
   }
 }
 
+/**
+ * Rimuove (soft) il collegamento utente-canale.
+ */
 export async function DELETE(request: Request) {
   try {
     const session = await getCurrentSession()

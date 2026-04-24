@@ -16,6 +16,10 @@ type CredentialRow = Database['public']['Tables']['user_provider_credentials']['
 
 const PROVIDERS: Provider[] = ['youtube', 'gemini']
 
+/**
+ * Legge la chiave applicativa usata per cifrare le API key utente.
+ * Solleva errore strutturale se non configurata.
+ */
 function getEncryptionSecret(): string {
   // La chiave resta solo server-side: il client non deve mai conoscerla.
   const secret = process.env.CREDENTIAL_ENCRYPTION_KEY
@@ -29,11 +33,17 @@ function getEncryptionSecret(): string {
   return secret
 }
 
+/**
+ * Deriva una chiave AES-256 deterministica a partire dal segreto applicativo.
+ */
 function deriveKey(secret: string): Buffer {
   // Derivazione deterministica della chiave AES-256 dal segreto applicativo.
   return createHash('sha256').update(secret).digest()
 }
 
+/**
+ * Cifra una API key in formato versionato `v1:iv:tag:ciphertext`.
+ */
 function encryptSecret(plainText: string): string {
   const key = deriveKey(getEncryptionSecret())
   const iv = randomBytes(12)
@@ -49,6 +59,9 @@ function encryptSecret(plainText: string): string {
   return `v1:${iv.toString('base64')}:${authTag.toString('base64')}:${encrypted.toString('base64')}`
 }
 
+/**
+ * Decifra il formato versionato salvato in database.
+ */
 function decryptSecret(cipherText: string): string {
   const parts = cipherText.split(':')
   if (parts.length !== 4 || parts[0] !== 'v1') {
@@ -67,6 +80,9 @@ function decryptSecret(cipherText: string): string {
   return decrypted.toString('utf8')
 }
 
+/**
+ * Maschera una chiave per l'esposizione UI senza rivelare il valore completo.
+ */
 function maskApiKey(value: string | null): string | null {
   // Mostra solo parte finale per UX, senza esporre segreto completo.
   if (!value) return null
@@ -75,12 +91,18 @@ function maskApiKey(value: string | null): string | null {
   return `${'*'.repeat(Math.max(compact.length - 4, 6))}${compact.slice(-4)}`
 }
 
+/**
+ * Valida che il provider richiesto sia tra quelli supportati in V1.
+ */
 function assertProvider(provider: string): asserts provider is Provider {
   if (!PROVIDERS.includes(provider as Provider)) {
     throw new AppError('Provider non supportato', 'validation', 400)
   }
 }
 
+/**
+ * Carica la riga credenziali di un provider per l'utente.
+ */
 async function getCredentialRow(userId: string, provider: Provider): Promise<CredentialRow | null> {
   const supabase = await createClient()
 
@@ -98,6 +120,9 @@ async function getCredentialRow(userId: string, provider: Provider): Promise<Cre
   return data
 }
 
+/**
+ * Restituisce la chiave in chiaro solo lato server quando necessaria ai service.
+ */
 export async function getProviderApiKeyForUser(userId: string, provider: Provider): Promise<string | null> {
   const row = await getCredentialRow(userId, provider)
   if (!row?.encrypted_key || !row.is_configured) return null
@@ -112,6 +137,10 @@ export async function getProviderApiKeyForUser(userId: string, provider: Provide
   }
 }
 
+/**
+ * Restituisce lo stato integrazioni per tutti i provider supportati.
+ * La risposta e` uniforme anche quando un provider non e` ancora configurato.
+ */
 export async function getCredentialStatusesForUser(userId: string): Promise<CredentialStatus[]> {
   const supabase = await createClient()
 
@@ -159,6 +188,10 @@ export async function getCredentialStatusesForUser(userId: string): Promise<Cred
   return statuses
 }
 
+/**
+ * Salva o aggiorna la chiave API di un provider.
+ * Opzionalmente valida subito la chiave per dare feedback immediato alla UI.
+ */
 export async function saveApiKey(params: {
   userId: string
   provider: Provider
@@ -217,6 +250,9 @@ export async function saveApiKey(params: {
   }
 }
 
+/**
+ * Verifica una chiave YouTube con una chiamata minima read-only.
+ */
 async function validateYouTubeApiKey(apiKey: string): Promise<void> {
   // Chiamata minima a endpoint YouTube per confermare validita credenziale.
   const url = new URL('https://www.googleapis.com/youtube/v3/search')
@@ -238,6 +274,9 @@ async function validateYouTubeApiKey(apiKey: string): Promise<void> {
   }
 }
 
+/**
+ * Verifica una chiave Gemini con una chiamata minima read-only.
+ */
 async function validateGeminiApiKey(apiKey: string): Promise<void> {
   // Chiamata minima a endpoint Gemini: se risponde 2xx la chiave e valida.
   const url = new URL('https://generativelanguage.googleapis.com/v1beta/models')
@@ -255,6 +294,10 @@ async function validateGeminiApiKey(apiKey: string): Promise<void> {
   }
 }
 
+/**
+ * Esegue validazione provider-specific e persiste esito in `user_provider_credentials`.
+ * Registra inoltre uno storico in `credential_checks`.
+ */
 export async function validateApiKey(params: {
   userId: string
   provider: Provider
@@ -319,6 +362,9 @@ export async function validateApiKey(params: {
   }
 }
 
+/**
+ * Rimuove logicamente la chiave API: resetta cifrato e flag mantenendo il record.
+ */
 export async function removeApiKey(params: {
   userId: string
   provider: Provider

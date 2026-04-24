@@ -14,11 +14,17 @@ interface VideosPostBody {
   maxResults?: number
 }
 
+/**
+ * Converte query string booleana in valore boolean.
+ */
 function parseBoolean(value: string | null): boolean {
   // Supporta sia true/false sia 1/0 per compatibilita con client diversi.
   return value === 'true' || value === '1'
 }
 
+/**
+ * Estrae userId dalla sessione o lancia errore 401.
+ */
 function requireUserId(userId: string | null | undefined): string {
   if (!userId) {
     throw new AppError('Sessione non valida', 'unauthorized', 401)
@@ -26,6 +32,9 @@ function requireUserId(userId: string | null | undefined): string {
   return userId
 }
 
+/**
+ * Restituisce lista video con filtri, stato utente e paginazione.
+ */
 export async function GET(request: Request) {
   try {
     const session = await getCurrentSession()
@@ -75,6 +84,9 @@ export async function GET(request: Request) {
   }
 }
 
+/**
+ * Avvia import video da canale per l'utente autenticato.
+ */
 export async function POST(request: Request) {
   try {
     const session = await getCurrentSession()

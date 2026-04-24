@@ -7,6 +7,9 @@
 import { NextResponse } from 'next/server'
 import { adminSessionCookieName } from '@/lib/auth/admin'
 
+/**
+ * Invalida la sessione admin azzerando il cookie dedicato.
+ */
 export async function POST() {
   // Logout admin: si invalida il cookie impostando scadenza immediata (maxAge: 0).
   const response = NextResponse.json({ ok: true })

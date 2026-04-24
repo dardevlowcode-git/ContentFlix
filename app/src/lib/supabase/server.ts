@@ -14,6 +14,9 @@ import type { Database } from '@/lib/types/database'
  * Use this in Server Components, Server Actions, and Route Handlers
  * where you need to respect the currently authenticated user's session.
  */
+/**
+ * Crea client Supabase server-side legato ai cookie della richiesta corrente.
+ */
 export async function createClient() {
   const cookieStore = await cookies()
 

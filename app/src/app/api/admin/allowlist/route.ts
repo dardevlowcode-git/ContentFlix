@@ -14,15 +14,24 @@ interface AllowlistBody {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+/**
+ * Normalizza email per confronto/chiave univoca lato database.
+ */
 function normalizeEmail(value: string): string {
   // Normalizzazione unica per evitare duplicati (maiuscole/spazi) in DB.
   return value.trim().toLowerCase()
 }
 
+/**
+ * Valida il formato base email lato API.
+ */
 function isValidEmail(value: string): boolean {
   return emailPattern.test(value)
 }
 
+/**
+ * Mappa errori tecnici Supabase in messaggi piu` chiari per l'admin.
+ */
 function mapSupabaseError(errorMessage: string): string {
   // Traduce errori tecnici ricorrenti in messaggi comprensibili lato UI admin.
   const lower = errorMessage.toLowerCase()
@@ -32,6 +41,9 @@ function mapSupabaseError(errorMessage: string): string {
   return errorMessage
 }
 
+/**
+ * Aggiunge o riattiva una email in allowlist.
+ */
 export async function POST(request: Request) {
   // Protezione endpoint: solo super-admin con cookie valido puo autorizzare email.
   const adminSession = await getAdminSession()
@@ -70,6 +82,9 @@ export async function POST(request: Request) {
   })
 }
 
+/**
+ * Revoca una email dall'allowlist (soft revoke con `is_active=false`).
+ */
 export async function DELETE(request: Request) {
   // Revoca soft: non cancelliamo il record, impostiamo `is_active = false`.
   // In questo modo rimane lo storico e si puo riattivare in seguito.
