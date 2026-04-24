@@ -146,7 +146,12 @@
     "ago": "ago",
     "settings": "Settings",
     "notifications": "Notifications",
-    "profile": "Profile"
+    "profile": "Profile",
+    "theme": {
+      "label": "Website theme selector",
+      "normal": "Normal",
+      "dark": "Dark"
+    }
   },
   "channels": {
     "refreshError": "Unable to refresh channel list",
@@ -261,6 +266,13 @@
       "error": "Error",
       "empty": "No queued jobs.",
       "retry": "Retry",
+      "retryConfirm": "Re-queue this failed job?",
+      "retryError": "Error while re-queuing job",
+      "retried": "Job re-queued successfully",
+      "delete": "Delete job",
+      "deleteConfirm": "Delete this queued job?",
+      "deleteError": "Error while deleting job",
+      "deleted": "Job deleted successfully",
       "status": {
         "pending": "Pending",
         "running": "Running",

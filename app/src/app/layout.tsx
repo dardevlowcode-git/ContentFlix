@@ -7,6 +7,7 @@
 import type { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
+import { cookies } from 'next/headers'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -35,9 +36,12 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale()
   const messages = await getMessages()
+  const cookieStore = await cookies()
+  const themeFromCookie = cookieStore.get('theme')?.value
+  const initialTheme = themeFromCookie === 'dark' ? 'dark' : 'light'
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-theme={initialTheme} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

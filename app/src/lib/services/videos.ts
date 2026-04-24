@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { AppError } from '@/lib/utils/errors'
 import type { VideoWithContext } from '@/lib/types/domain'
 import type { Database, Json } from '@/lib/types/database'
@@ -271,12 +272,45 @@ async function listRecentPlaylistItems(youtubeApiKey: string, playlistId: string
   return json.items ?? []
 }
 
+async function resolveChannelIdFromHandle(youtubeApiKey: string, handle: string): Promise<{ channelId: string; title: string | null }> {
+  const normalizedHandle = handle.replace(/^@/, '').trim().toLowerCase()
+  if (!normalizedHandle) {
+    throw new AppError('Handle canale non valido', 'validation', 400)
+  }
+
+  const url = new URL('https://www.googleapis.com/youtube/v3/channels')
+  url.searchParams.set('part', 'id,snippet')
+  url.searchParams.set('forHandle', normalizedHandle)
+  url.searchParams.set('key', youtubeApiKey)
+
+  type HandleResolveResponse = {
+    items?: Array<{
+      id?: string
+      snippet?: { title?: string }
+    }>
+  }
+
+  const json = await fetchJson<HandleResolveResponse>(url)
+  const item = json.items?.[0]
+  const resolvedId = item?.id
+
+  if (!resolvedId) {
+    throw new AppError(`Impossibile risolvere @${normalizedHandle} in channel ID`, 'not_found', 404)
+  }
+
+  return {
+    channelId: resolvedId,
+    title: item?.snippet?.title?.trim() ?? null,
+  }
+}
+
 export async function importChannelVideos(params: {
   userId: string
   channelId: string
   maxResults?: number
 }): Promise<{ channelId: string; importedCount: number; scannedCount: number }> {
   const supabase = await createClient()
+  const admin = createAdminClient()
 
   const { data: userChannel, error: ucError } = await supabase
     .from('user_channels')
@@ -300,17 +334,32 @@ export async function importChannelVideos(params: {
     throw new AppError('Canale non trovato', 'not_found', 404, { cause: channelError?.message })
   }
 
-  if (channel.youtube_channel_id.startsWith('handle:')) {
-    throw new AppError(
-      'Il canale e stato aggiunto tramite handle locale. Serve la risoluzione al channel ID reale prima dell\'import.',
-      'structural',
-      422
-    )
-  }
-
   const youtubeApiKey = await getProviderApiKeyForUser(params.userId, 'youtube')
   if (!youtubeApiKey) {
     throw new AppError('Configura prima la chiave YouTube API', 'validation', 400)
+  }
+
+  if (channel.youtube_channel_id.startsWith('handle:')) {
+    const handle = channel.youtube_channel_id.slice('handle:'.length)
+    const resolved = await resolveChannelIdFromHandle(youtubeApiKey, handle)
+
+    // Aggiorna il canale globale alla forma canonica `UC...` appena disponibile.
+    const { error: channelUpdateError } = await admin
+      .from('channels')
+      .update({
+        youtube_channel_id: resolved.channelId,
+        title: resolved.title ?? channel.title,
+        handle: handle,
+      })
+      .eq('id', channel.id)
+
+    if (channelUpdateError) {
+      throw new AppError('Risoluzione handle completata ma update canale fallito', 'unknown', 500, {
+        cause: channelUpdateError.message,
+      })
+    }
+
+    channel.youtube_channel_id = resolved.channelId
   }
 
   const maxResults = params.maxResults ?? 20

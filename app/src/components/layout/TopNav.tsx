@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { AuthSession } from '@/lib/types/domain'
+import ThemeToggle from '@/components/theme/ThemeToggle'
 
 interface TopNavProps {
   variant: 'public' | 'private' | 'admin'
@@ -36,7 +37,7 @@ export default function TopNav({ variant, session }: TopNavProps) {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-glass border-b-0">
+    <header className="fixed top-0 left-0 right-0 z-50 topnav-surface backdrop-blur-glass border-b-0">
       <div className="flex items-center justify-between w-full px-6 py-3 max-w-[1920px] mx-auto">
 
         {/* Logo */}
@@ -72,6 +73,10 @@ export default function TopNav({ variant, session }: TopNavProps) {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          {/* Selettore tema globale:
+              aggiorna html[data-theme] e persiste la scelta per tutte le pagine. */}
+          <ThemeToggle />
+
           {variant === 'public' && (
             <Link
               href="/login"

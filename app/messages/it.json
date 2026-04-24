@@ -276,6 +276,13 @@
     "jobs": {
       "title": "Job e operazioni",
       "retry": "Riprova",
+      "retryConfirm": "Riaccodare questo job fallito?",
+      "retryError": "Errore durante riaccodamento job",
+      "retried": "Job riaccodato correttamente",
+      "delete": "Elimina job",
+      "deleteConfirm": "Eliminare questo job in coda?",
+      "deleteError": "Errore durante eliminazione job",
+      "deleted": "Job eliminato correttamente",
       "status": {
         "pending": "In attesa",
         "running": "In esecuzione",
@@ -357,6 +364,11 @@
     "ago": "fa",
     "settings": "Impostazioni",
     "notifications": "Notifiche",
-    "profile": "Profilo"
+    "profile": "Profilo",
+    "theme": {
+      "label": "Selettore tema sito",
+      "normal": "Normale",
+      "dark": "Dark"
+    }
   }
 }

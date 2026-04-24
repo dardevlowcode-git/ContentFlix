@@ -9,6 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { AppError } from '@/lib/utils/errors'
 import { normalizeChannelUrl, parseYouTubeChannelUrl } from '@/lib/utils/youtube-url'
 import type { Database } from '@/lib/types/database'
+import { importChannelVideos } from '@/lib/services/videos'
 
 type UserChannelRow = Database['public']['Tables']['user_channels']['Row']
 type ChannelRow = Database['public']['Tables']['channels']['Row']
@@ -191,29 +192,12 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
     )
 
   const normalized = normalizeChannelUrl(parsed)
-  const deduplicationKey = `sync:channel:${channel.id}`
 
-  // Coda job asincrono:
-  // il worker leggera `jobs` e avviera la sync reale senza bloccare la risposta API.
-  // La deduplicazione evita di accodare piu job identici in rapida sequenza.
-  await supabase
-    .from('jobs')
-    .upsert(
-      {
-        job_type: 'sync_channel_delta',
-        status: 'pending',
-        priority: 4,
-        payload: {
-          channelId: channel.id,
-          userId: params.userId,
-          source: 'add_channel',
-          normalizedChannelUrl: normalized,
-        },
-        deduplication_key: deduplicationKey,
-        created_by_user_id: params.userId,
-      },
-      { onConflict: 'deduplication_key' }
-    )
+  // Prima scansione immediata: evita di lasciare job pendenti senza worker dedicato.
+  await requestScanNowForUser({
+    userId: params.userId,
+    channelId: channel.id,
+  })
 
   return {
     channelId: channel.id,
@@ -280,7 +264,7 @@ export async function requestScanNowForUser(params: { userId: string; channelId:
 
   // Chiave dedup con finestra temporale: permette scansioni ripetute,
   // ma evita spam di job multipli nello stesso minuto.
-  const { error: jobError } = await admin.from('jobs').insert({
+  const { data: jobRow, error: jobError } = await admin.from('jobs').insert({
     job_type: 'sync_channel_delta',
     status: 'pending',
     priority: 3,
@@ -291,12 +275,67 @@ export async function requestScanNowForUser(params: { userId: string; channelId:
     },
     deduplication_key: `manual_scan:${params.userId}:${params.channelId}:${windowKey}`,
     created_by_user_id: params.userId,
-  })
+  }).select('id').single()
 
-  if (jobError) {
+  if (jobError || !jobRow) {
     throw new AppError('Impossibile schedulare la scansione', 'unknown', 500, {
       cause: jobError.message,
     })
+  }
+
+  // In questa versione non esiste ancora un worker dedicato: eseguiamo subito il job.
+  // Manteniamo comunque la riga in tabella `jobs` per tracciamento storico in admin.
+  const startedAt = new Date().toISOString()
+  await admin
+    .from('jobs')
+    .update({ status: 'running', started_at: startedAt, error_message: null })
+    .eq('id', jobRow.id)
+
+  try {
+    await importChannelVideos({
+      userId: params.userId,
+      channelId: params.channelId,
+    })
+
+    const completedAt = new Date().toISOString()
+    await admin
+      .from('jobs')
+      .update({ status: 'completed', completed_at: completedAt, error_message: null })
+      .eq('id', jobRow.id)
+
+    await admin.from('job_attempts').insert({
+      job_id: jobRow.id,
+      attempt_number: 1,
+      status: 'completed',
+      started_at: startedAt,
+      completed_at: completedAt,
+      error_message: null,
+      error_details: null,
+    })
+  } catch (error) {
+    const message = error instanceof AppError
+      ? error.message
+      : error instanceof Error
+        ? error.message
+        : 'scan_failed'
+    const completedAt = new Date().toISOString()
+
+    await admin
+      .from('jobs')
+      .update({ status: 'failed', completed_at: completedAt, error_message: message })
+      .eq('id', jobRow.id)
+
+    await admin.from('job_attempts').insert({
+      job_id: jobRow.id,
+      attempt_number: 1,
+      status: 'failed',
+      started_at: startedAt,
+      completed_at: completedAt,
+      error_message: message,
+      error_details: null,
+    })
+
+    throw error
   }
 
   return { queued: true }

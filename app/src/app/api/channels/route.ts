@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       // Scansione manuale: crea un job asincrono senza bloccare la richiesta HTTP.
       await requestScanNowForUser({ userId, channelId: body.channelId })
       return Response.json({
-        data: { message: 'Scansione accodata' },
+        data: { message: 'Scansione completata' },
         error: null,
         errorType: null,
       })
