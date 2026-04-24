@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: intercetta le richieste prima delle pagine/API per applicare regole trasversali (es. auth, lingua, redirect).
+ * Moduli richiamati: `@supabase/ssr`, `next/server`, `@/lib/auth/allowlist`
+ * Flusso: Middleware legge la richiesta, applica controlli condivisi e decide se continuare, riscrivere o reindirizzare il flusso.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isEmailAllowlisted } from '@/lib/auth/allowlist'
@@ -5,14 +11,18 @@ import { isEmailAllowlisted } from '@/lib/auth/allowlist'
 const adminSessionCookieName = 'cf_admin_session'
 
 /**
- * Middleware for ContentFlix.
+ * Middleware centrale di ContentFlix.
  *
- * Responsibilities:
- * 1. Refresh Supabase session on every request
- * 2. Protect private routes — redirect to login if not authenticated
- * 3. Enforce allowlist — redirect with error if not authorized
- * 4. Protect admin routes — dedicated super-admin username/password session
- * 5. Redirect authenticated users away from /login
+ * Responsabilita principali:
+ * 1. Aggiornare la sessione Supabase ad ogni richiesta.
+ * 2. Proteggere le pagine private (redirect a /login se utente non autenticato).
+ * 3. Applicare allowlist (email autorizzate).
+ * 4. Proteggere area admin con cookie dedicato (non dipende da Google OAuth).
+ * 5. Evitare che utenti gia autenticati restino sulla pagina /login.
+ *
+ * Moduli richiamati:
+ * - `isEmailAllowlisted` in `lib/auth/allowlist.ts` per la regola di accesso.
+ * - Cookie admin emesso da `lib/auth/admin.ts` e API `api/admin/auth/*`.
  */
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -26,6 +36,8 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
+          // Copia i cookie sia nella request che nella response:
+          // serve a mantenere allineato il refresh token durante la stessa richiesta.
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
@@ -38,13 +50,14 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session — IMPORTANT: do not write any logic between these calls
+  // Refresh session: questa chiamata e il punto base di tutto il controllo accessi.
+  // Evitare logica intermedia prima di leggere `user`, per non lavorare su stato vecchio.
   const { data: { user } } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
   const hasAdminSessionCookie = Boolean(request.cookies.get(adminSessionCookieName)?.value)
 
-  // --- Public routes (no auth required) ---
+  // --- Route pubbliche (non richiedono login) ---
   if (
     pathname === '/' ||
     pathname === '/login' ||
@@ -54,11 +67,23 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon')
   ) {
-    // Redirect authenticated + allowlisted users away from /login
+    // Se l'utente e gia autenticato e autorizzato, non ha senso restare su /login.
     if (pathname === '/login' && user?.email) {
       const allowlisted = await isEmailAllowlisted(user.email)
       if (allowlisted) {
-        return NextResponse.redirect(new URL('/dashboard', request.url))
+        // Evita loop login/dashboard:
+        // utente presente in Supabase Auth ma non ancora provisionato in tabella `users`.
+        // Il provisioning avviene nel callback OAuth (`api/auth/callback/route.ts`).
+        const { data: appUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('id', user.id)
+          .eq('status', 'active')
+          .maybeSingle()
+
+        if (appUser) {
+          return NextResponse.redirect(new URL('/dashboard', request.url))
+        }
       }
     }
 
@@ -69,7 +94,7 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // --- Admin API routes (session required, except auth endpoints handled above) ---
+  // --- API admin (richiedono cookie admin, esclusi endpoint auth gia gestiti) ---
   if (pathname.startsWith('/api/admin/')) {
     if (!hasAdminSessionCookie) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -77,7 +102,7 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // --- Super-admin routes (independent from Google OAuth) ---
+  // --- Route super-admin (flusso indipendente da Google OAuth) ---
   if (pathname.startsWith('/admin')) {
     if (!hasAdminSessionCookie) {
       const adminLoginUrl = new URL('/admin/login', request.url)
@@ -87,15 +112,15 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // --- Protected routes (everything else) ---
+  // --- Route protette utente standard (tutto il resto) ---
   if (!user || !user.email) {
-    // Not authenticated — redirect to login
+    // Utente non autenticato: salviamo la destinazione per tornare dopo il login.
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirectTo', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // --- Allowlist check ---
+  // --- Verifica allowlist ---
   const isAllowlisted = await isEmailAllowlisted(user.email)
   if (!isAllowlisted) {
     const loginUrl = new URL('/login', request.url)

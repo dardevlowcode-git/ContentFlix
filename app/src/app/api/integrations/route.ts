@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: gestisce una API route: riceve richieste HTTP, valida i dati e restituisce una risposta al frontend.
+ * Moduli richiamati: `@/lib/auth/provider`, `@/lib/utils/errors`
+ * Flusso: La route viene richiamata dal client (o da altre parti server), usa servizi/utilita` in `src/lib` e poi ritorna JSON/HTTP status.
+ */
+
 import { getCurrentSession } from '@/lib/auth/provider'
 import {
   getCredentialStatusesForUser,
@@ -18,6 +24,7 @@ interface IntegrationDeleteBody {
 }
 
 function requireUserId(userId: string | null | undefined): string {
+  // Verifica minima richiesta da tutte le azioni integrazioni.
   if (!userId) {
     throw new AppError('Sessione non valida', 'unauthorized', 401)
   }
@@ -29,6 +36,7 @@ export async function GET() {
     const session = await getCurrentSession()
     const userId = requireUserId(session?.userId)
 
+    // Restituisce solo stato/masking chiavi: mai la chiave in chiaro.
     const statuses = await getCredentialStatusesForUser(userId)
 
     return Response.json({
@@ -57,6 +65,7 @@ export async function POST(request: Request) {
     }
 
     if (body?.action === 'validate') {
+      // Validazione esplicita: utile quando la chiave e gia salvata e si vuole ricontrollare.
       const result = await validateApiKey({ userId, provider })
       return Response.json({ data: result, error: null, errorType: null })
     }
@@ -66,6 +75,7 @@ export async function POST(request: Request) {
       return errorResponse('apiKey mancante', 'validation', 400)
     }
 
+    // Salvataggio e validazione immediata per feedback UX piu chiaro.
     const result = await saveApiKey({
       userId,
       provider,

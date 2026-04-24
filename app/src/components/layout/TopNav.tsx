@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: contiene un componente di interfaccia per la struttura visiva (navigazione, footer, sidebar).
+ * Moduli richiamati: `next/link`, `next-intl`, `@/lib/supabase/client`, `next/navigation`, `@/lib/types/domain`
+ * Flusso: Il componente riceve dati da pagine/layout parent, usa eventuali hook/utilita` e restituisce markup riusabile.
+ */
+
 'use client'
 
 import Link from 'next/link'

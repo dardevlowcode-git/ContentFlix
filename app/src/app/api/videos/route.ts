@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: gestisce una API route: riceve richieste HTTP, valida i dati e restituisce una risposta al frontend.
+ * Moduli richiamati: `@/lib/auth/provider`, `@/lib/services/videos`, `@/lib/utils/errors`
+ * Flusso: La route viene richiamata dal client (o da altre parti server), usa servizi/utilita` in `src/lib` e poi ritorna JSON/HTTP status.
+ */
+
 import { getCurrentSession } from '@/lib/auth/provider'
 import { getVideosForUser, importChannelVideos } from '@/lib/services/videos'
 import { AppError, errorResponse } from '@/lib/utils/errors'
@@ -9,6 +15,7 @@ interface VideosPostBody {
 }
 
 function parseBoolean(value: string | null): boolean {
+  // Supporta sia true/false sia 1/0 per compatibilita con client diversi.
   return value === 'true' || value === '1'
 }
 
@@ -46,6 +53,7 @@ export async function GET(request: Request) {
     const limit = limitParam ? Number(limitParam) : undefined
     const page = pageParam ? Number(pageParam) : undefined
 
+    // Delega filtri/paginazione al service, mantenendo il route handler sottile.
     const data = await getVideosForUser({
       userId,
       channelId,
@@ -86,6 +94,7 @@ export async function POST(request: Request) {
 
     const maxResults = typeof body?.maxResults === 'number' ? body.maxResults : undefined
 
+    // Import da canale YouTube: il service gestisce API esterna e upsert video.
     const result = await importChannelVideos({
       userId,
       channelId,

@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: definisce una pagina o layout pubblico, visibile prima dell'accesso o senza permessi riservati.
+ * Moduli richiamati: `next`, `next/link`, `next-intl/server`, `@/components/i18n/LanguageSwitcher`
+ * Flusso: Questa pagina/layout richiama componenti e servizi: i dati arrivano da API o funzioni server, poi vengono passati alla UI per il rendering.
+ */
+
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'

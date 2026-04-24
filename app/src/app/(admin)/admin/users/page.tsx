@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: definisce una pagina o layout amministrativo, usato per operazioni di controllo e gestione avanzata.
+ * Moduli richiamati: `next`, `@/lib/supabase/admin`, `./AdminUsersClient`
+ * Flusso: Questa pagina/layout richiama componenti e servizi: i dati arrivano da API o funzioni server, poi vengono passati alla UI per il rendering.
+ */
+
 import type { Metadata } from 'next'
 import { createAdminClient } from '@/lib/supabase/admin'
 import AdminUsersClient from './AdminUsersClient'
@@ -12,8 +18,7 @@ export default async function AdminUsersPage() {
     .from('users')
     .select(`
       *,
-      user_roles(role_id, roles(name)),
-      allowlist_entries(is_active)
+      user_roles!user_roles_user_id_fkey(role_id, roles(name))
     `)
     .order('created_at', { ascending: false })
 

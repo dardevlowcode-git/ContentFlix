@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: definisce una pagina o layout protetto: viene usato dopo l'autenticazione dell'utente.
+ * Moduli richiamati: `@/components/layout/TopNav`, `@/components/layout/SideNav`, `@/components/layout/Footer`, `@/lib/auth/provider`, `next/navigation`
+ * Flusso: Questa pagina/layout richiama componenti e servizi: i dati arrivano da API o funzioni server, poi vengono passati alla UI per il rendering.
+ */
+
 import TopNav from '@/components/layout/TopNav'
 import SideNav from '@/components/layout/SideNav'
 import Footer from '@/components/layout/Footer'

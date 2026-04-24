@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: dichiara tipi TypeScript condivisi, utili per rendere il codice piu` sicuro e leggibile.
+ * Moduli richiamati: nessun import esterno: il file usa logica locale o sole primitive del linguaggio.
+ * Flusso: I tipi dichiarati qui sono importati da servizi, API e componenti per controllare forma e coerenza dei dati.
+ */
+
 /**
  * Database types generated from the ContentFlix schema.
  *

@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: incapsula la logica di accesso ai dati e le operazioni di dominio, separandole dalla UI.
+ * Moduli richiamati: `node:crypto`, `@/lib/supabase/server`, `@/lib/utils/errors`, `@/lib/types/domain`, `@/lib/types/database`
+ * Flusso: Le funzioni del servizio vengono chiamate da API route o pagine server: qui avviene l'orchestrazione delle query e delle trasformazioni dati.
+ */
+
 import { createHash, createCipheriv, createDecipheriv, randomBytes } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
 import { AppError, classifyError } from '@/lib/utils/errors'
@@ -11,6 +17,7 @@ type CredentialRow = Database['public']['Tables']['user_provider_credentials']['
 const PROVIDERS: Provider[] = ['youtube', 'gemini']
 
 function getEncryptionSecret(): string {
+  // La chiave resta solo server-side: il client non deve mai conoscerla.
   const secret = process.env.CREDENTIAL_ENCRYPTION_KEY
   if (!secret) {
     throw new AppError(
@@ -23,6 +30,7 @@ function getEncryptionSecret(): string {
 }
 
 function deriveKey(secret: string): Buffer {
+  // Derivazione deterministica della chiave AES-256 dal segreto applicativo.
   return createHash('sha256').update(secret).digest()
 }
 
@@ -37,6 +45,7 @@ function encryptSecret(plainText: string): string {
   ])
 
   const authTag = cipher.getAuthTag()
+  // Formato versionato: facilita eventuali rotazioni future dell'algoritmo.
   return `v1:${iv.toString('base64')}:${authTag.toString('base64')}:${encrypted.toString('base64')}`
 }
 
@@ -59,6 +68,7 @@ function decryptSecret(cipherText: string): string {
 }
 
 function maskApiKey(value: string | null): string | null {
+  // Mostra solo parte finale per UX, senza esporre segreto completo.
   if (!value) return null
   const compact = value.trim()
   if (compact.length <= 4) return '****'
@@ -93,6 +103,7 @@ export async function getProviderApiKeyForUser(userId: string, provider: Provide
   if (!row?.encrypted_key || !row.is_configured) return null
 
   try {
+    // Decifra solo quando realmente necessario (principio least exposure).
     return decryptSecret(row.encrypted_key)
   } catch (error) {
     throw new AppError('Impossibile decifrare la chiave API', 'structural', 500, {
@@ -120,7 +131,7 @@ export async function getCredentialStatusesForUser(userId: string): Promise<Cred
     }
   }
 
-  const statuses: CredentialStatus[] = []
+  const statuses: CredentialStatus[] = [] // Risposta uniforme per tutti i provider supportati.
 
   for (const provider of PROVIDERS) {
     const row = byProvider.get(provider)
@@ -164,6 +175,7 @@ export async function saveApiKey(params: {
   const supabase = await createClient()
   const encrypted = encryptSecret(normalized)
 
+  // Upsert per provider: aggiorna in-place senza creare record duplicati.
   const { error } = await supabase
     .from('user_provider_credentials')
     .upsert(
@@ -206,6 +218,7 @@ export async function saveApiKey(params: {
 }
 
 async function validateYouTubeApiKey(apiKey: string): Promise<void> {
+  // Chiamata minima a endpoint YouTube per confermare validita credenziale.
   const url = new URL('https://www.googleapis.com/youtube/v3/search')
   url.searchParams.set('part', 'snippet')
   url.searchParams.set('q', 'youtube')
@@ -226,6 +239,7 @@ async function validateYouTubeApiKey(apiKey: string): Promise<void> {
 }
 
 async function validateGeminiApiKey(apiKey: string): Promise<void> {
+  // Chiamata minima a endpoint Gemini: se risponde 2xx la chiave e valida.
   const url = new URL('https://generativelanguage.googleapis.com/v1beta/models')
   url.searchParams.set('key', apiKey)
 
@@ -270,6 +284,7 @@ export async function validateApiKey(params: {
 
   const now = new Date().toISOString()
 
+  // Salva stato piu recente usato dalla UI integrazioni.
   const { error: updateError } = await supabase
     .from('user_provider_credentials')
     .update({
@@ -288,6 +303,7 @@ export async function validateApiKey(params: {
 
   const credential = await getCredentialRow(params.userId, params.provider)
   if (credential) {
+    // Audit storico tentativi di validazione (utile per diagnosi operative).
     await supabase.from('credential_checks').insert({
       credential_id: credential.id,
       is_valid: isValid,
@@ -311,6 +327,7 @@ export async function removeApiKey(params: {
 
   const supabase = await createClient()
 
+  // Soft reset dello stato: mantiene il record ma azzera dati sensibili e flag.
   const { error } = await supabase
     .from('user_provider_credentials')
     .update({

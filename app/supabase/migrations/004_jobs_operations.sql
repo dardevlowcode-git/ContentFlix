@@ -1,3 +1,7 @@
+-- Commento didattico:
+-- Scopo del file: migrazione database Supabase per creare/aggiornare tabelle, vincoli e policy di sicurezza.
+-- Flusso: viene eseguito in ordine cronologico; gli oggetti creati qui vengono poi usati da servizi API e pagine dell'app.
+
 -- ============================================================
 -- Migration 004: Jobs & Operations
 -- ContentFlix V1

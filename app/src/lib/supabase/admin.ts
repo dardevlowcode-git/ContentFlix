@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: configura i client Supabase per diversi contesti (browser, server o privilegi amministrativi).
+ * Moduli richiamati: `@supabase/supabase-js`, `@/lib/types/database`
+ * Flusso: I client creati qui vengono importati da servizi/API per eseguire query al database e operazioni di autenticazione.
+ */
+
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
 

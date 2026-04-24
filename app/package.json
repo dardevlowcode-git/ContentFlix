@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "check-comments": "node scripts/check-comments.mjs",
+    "validate": "npm run check-comments && npm run lint && npm run type-check"
   },
   "dependencies": {
     "next": "14.2.5",

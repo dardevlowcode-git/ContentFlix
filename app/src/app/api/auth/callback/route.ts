@@ -1,25 +1,34 @@
+/* Commento didattico:
+ * Scopo del file: gestisce una API route: riceve richieste HTTP, valida i dati e restituisce una risposta al frontend.
+ * Moduli richiamati: `@/lib/supabase/server`, `@/lib/auth/allowlist`, `next/server`
+ * Flusso: La route viene richiamata dal client (o da altre parti server), usa servizi/utilita` in `src/lib` e poi ritorna JSON/HTTP status.
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { provisionNewUser, isEmailAllowlisted } from '@/lib/auth/allowlist'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 /**
- * OAuth callback handler.
- * Called by Supabase after successful Google OAuth.
+ * Callback OAuth richiamato da Supabase dopo login Google.
  *
- * Flow:
- * 1. Exchange code for session
- * 2. Check allowlist
- * 3. Provision user if first login
- * 4. Redirect to dashboard or login with error
+ * Flusso end-to-end:
+ * 1. Scambia il `code` con sessione Supabase.
+ * 2. Verifica allowlist (`lib/auth/allowlist.ts`).
+ * 3. Esegue provisioning utente al primo accesso.
+ * 4. Redirige alla destinazione richiesta o a `/login` con errore.
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
+  const forwardedHost = request.headers.get('x-forwarded-host') ?? request.headers.get('host')
+  const forwardedProto = request.headers.get('x-forwarded-proto') ?? 'https'
+  // Usa gli header del reverse proxy per evitare redirect errati verso localhost.
+  const appOrigin = forwardedHost ? `${forwardedProto}://${forwardedHost}` : origin
   const code = searchParams.get('code')
   const redirectTo = searchParams.get('redirectTo') ?? '/dashboard'
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=no_code`)
+    return NextResponse.redirect(`${appOrigin}/login?error=no_code`)
   }
 
   const supabase = await createClient()
@@ -27,25 +36,25 @@ export async function GET(request: NextRequest) {
 
   if (exchangeError) {
     console.error('[Auth Callback] Exchange error:', exchangeError.message)
-    return NextResponse.redirect(`${origin}/login?error=exchange_failed`)
+    return NextResponse.redirect(`${appOrigin}/login?error=exchange_failed`)
   }
 
-  // Get the newly authenticated user
+  // Legge utente autenticato appena creato/aggiornato dallo scambio codice.
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user || !user.email) {
-    return NextResponse.redirect(`${origin}/login?error=no_user`)
+    return NextResponse.redirect(`${appOrigin}/login?error=no_user`)
   }
 
-  // Check allowlist
+  // Controllo autorizzazione applicativa (oltre all'autenticazione OAuth).
   const allowed = await isEmailAllowlisted(user.email)
   if (!allowed) {
-    // Sign them out immediately — they authenticated but are not authorized
+    // Logout immediato: autenticato ma non autorizzato all'uso del prodotto.
     await supabase.auth.signOut()
-    return NextResponse.redirect(`${origin}/login?error=access_denied`)
+    return NextResponse.redirect(`${appOrigin}/login?error=access_denied`)
   }
 
-  // Provision user on first login (upsert-safe)
+  // Provisioning idempotente: crea/aggiorna record applicativi necessari.
   const identity = user.identities?.[0]
   await provisionNewUser({
     supabaseUserId: user.id,
@@ -56,7 +65,7 @@ export async function GET(request: NextRequest) {
     providerUserId: identity?.id ?? user.id,
   })
 
-  // Redirect to the intended destination
+  // Difesa open-redirect: si accettano solo path interni che iniziano con `/`.
   const safeRedirect = redirectTo.startsWith('/') ? redirectTo : '/dashboard'
-  return NextResponse.redirect(`${origin}${safeRedirect}`)
+  return NextResponse.redirect(`${appOrigin}${safeRedirect}`)
 }

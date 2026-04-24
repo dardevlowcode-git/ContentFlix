@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: gestisce regole e utilita` legate ad autenticazione, permessi e controlli di accesso.
+ * Moduli richiamati: `node:crypto`, `next/headers`
+ * Flusso: Queste funzioni vengono usate da middleware, layout o API per decidere se un utente puo` accedere a una risorsa.
+ */
+
 import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import { cookies } from 'next/headers'
 
@@ -37,10 +43,12 @@ function requireAdminAuthConfig(): AdminAuthConfig {
 }
 
 function sha256Hex(value: string): string {
+  // La password in env e salvata come hash SHA-256 (mai in chiaro).
   return createHash('sha256').update(value).digest('hex')
 }
 
 function safeStringEquals(a: string, b: string): boolean {
+  // Confronto a tempo costante: riduce il rischio di timing attacks.
   const aBuffer = Buffer.from(a)
   const bBuffer = Buffer.from(b)
   if (aBuffer.length !== bBuffer.length) return false
@@ -56,10 +64,12 @@ function fromBase64Url(value: string): string {
 }
 
 function signPayload(payload: string, secret: string): string {
+  // Firma HMAC del payload: se il cookie viene alterato, la verifica fallisce.
   return createHmac('sha256', secret).update(payload).digest('base64url')
 }
 
 function createSessionToken(username: string, secret: string): string {
+  // Token "stateless": contiene utente + scadenza + nonce, firmati lato server.
   const exp = Date.now() + adminSessionDurationSeconds * 1000
   const nonce = randomBytes(8).toString('hex')
   const payload = toBase64Url(JSON.stringify({ u: username, exp, n: nonce }))
@@ -75,6 +85,7 @@ function parseAndVerifyToken(token: string, secret: string): AdminSession | null
   if (!safeStringEquals(signature, expectedSignature)) return null
 
   try {
+    // Se il token e valido ma scaduto, la sessione viene considerata non valida.
     const parsed = JSON.parse(fromBase64Url(payload)) as { u?: string; exp?: number }
     if (!parsed.u || typeof parsed.exp !== 'number') return null
     if (Date.now() > parsed.exp) return null
@@ -88,7 +99,7 @@ export function verifySuperAdminCredentials(username: string, password: string):
   const config = getAdminAuthConfig()
   if (!config) return false
   const normalizedUsername = username.trim()
-  const computedPasswordHash = sha256Hex(password)
+  const computedPasswordHash = sha256Hex(password) // Hash locale per confronto con env.
 
   return (
     safeStringEquals(normalizedUsername, config.username) &&
@@ -109,6 +120,7 @@ export function readAdminSessionFromCookieValue(cookieValue: string | undefined)
 }
 
 export async function getAdminSession(): Promise<AdminSession | null> {
+  // Usata da route handler admin (`api/admin/*`) per autorizzare azioni sensibili.
   const cookieStore = await cookies()
   return readAdminSessionFromCookieValue(cookieStore.get(adminSessionCookieName)?.value)
 }

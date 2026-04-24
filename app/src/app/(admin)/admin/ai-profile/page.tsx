@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: definisce una pagina o layout amministrativo, usato per operazioni di controllo e gestione avanzata.
+ * Moduli richiamati: `next`, `next-intl/server`
+ * Flusso: Questa pagina/layout richiama componenti e servizi: i dati arrivano da API o funzioni server, poi vengono passati alla UI per il rendering.
+ */
+
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 

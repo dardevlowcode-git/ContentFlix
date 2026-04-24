@@ -1,7 +1,14 @@
+/* Commento didattico:
+ * Scopo del file: definisce una pagina o layout protetto: viene usato dopo l'autenticazione dell'utente.
+ * Moduli richiamati: `next`, `@/lib/auth/provider`, `@/lib/supabase/server`, `next-intl/server`, `next/navigation`
+ * Flusso: Questa pagina/layout richiama componenti e servizi: i dati arrivano da API o funzioni server, poi vengono passati alla UI per il rendering.
+ */
+
 import type { Metadata } from 'next'
 import { getCurrentSession } from '@/lib/auth/provider'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale, getTranslations } from 'next-intl/server'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -9,6 +16,10 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   const session = await getCurrentSession()
+  if (!session) {
+    redirect('/login')
+  }
+
   const supabase = await createClient()
   const t = await getTranslations()
   const locale = await getLocale()
@@ -16,7 +27,7 @@ export default async function DashboardPage() {
   const { data: userChannels } = await supabase
     .from('user_channels')
     .select('*, channels(*)')
-    .eq('user_id', session!.userId)
+    .eq('user_id', session.userId)
     .eq('is_active', true)
     .order('added_at', { ascending: false })
     .limit(10)
