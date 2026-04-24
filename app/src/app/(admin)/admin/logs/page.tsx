@@ -15,7 +15,7 @@ export default async function AdminLogsPage() {
   const t = await getTranslations()
   const locale = await getLocale()
 
-  const [{ data: appLogs }, { data: auditLogs }] = await Promise.all([
+  const [{ data: appLogs }, { data: auditLogs }, { data: failedJobAttempts }, { data: failedJobs }] = await Promise.all([
     supabase
       .from('app_logs')
       .select('*')
@@ -26,6 +26,18 @@ export default async function AdminLogsPage() {
       .select('*, users(email, display_name)')
       .order('created_at', { ascending: false })
       .limit(50),
+    supabase
+      .from('job_attempts')
+      .select('id, job_id, attempt_number, status, started_at, completed_at, error_message, error_details, jobs(id, job_type, status)')
+      .eq('status', 'failed')
+      .order('started_at', { ascending: false })
+      .limit(50),
+    supabase
+      .from('jobs')
+      .select('id, job_type, status, created_at, completed_at, error_message')
+      .eq('status', 'failed')
+      .order('completed_at', { ascending: false })
+      .limit(20),
   ])
 
   const levelColor: Record<string, string> = {
@@ -43,6 +55,72 @@ export default async function AdminLogsPage() {
         </h1>
         <p className="text-on-surface-variant text-sm">{t('admin.logs.retention')}</p>
       </header>
+
+      <div className="mb-8">
+        <h2 className="font-headline text-lg font-bold text-on-surface mb-4">{t('admin.logs.failedJobLogs')}</h2>
+        <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient max-h-[420px] overflow-y-auto">
+          {!failedJobAttempts || failedJobAttempts.length === 0 ? (
+            !failedJobs || failedJobs.length === 0 ? (
+              <p className="text-on-surface-variant text-center py-8 px-4">{t('admin.logs.emptyFailedJobs')}</p>
+            ) : (
+              failedJobs.map((job, i) => (
+                <div
+                  key={job.id}
+                  className={`px-5 py-4 border-b border-surface-container-high last:border-0
+                               ${i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low'}`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-on-surface">
+                        {job.job_type} · {job.id.slice(0, 8)}…
+                      </p>
+                      <p className="text-xs text-error mt-1">
+                        {job.error_message ?? t('admin.logs.unknownError')}
+                      </p>
+                    </div>
+                    <span className="text-xs text-outline shrink-0">
+                      {new Date(job.completed_at ?? job.created_at).toLocaleString(locale)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )
+          ) : (
+            failedJobAttempts.map((attempt, i) => (
+              <div
+                key={attempt.id}
+                className={`px-5 py-4 border-b border-surface-container-high last:border-0
+                             ${i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low'}`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-on-surface">
+                      {/* @ts-expect-error — joined jobs */}
+                      {attempt.jobs?.job_type ?? t('admin.logs.unknownJobType')}
+                      {' · '}
+                      {/* @ts-expect-error — joined jobs */}
+                      {(attempt.jobs?.id ?? attempt.job_id).slice(0, 8)}…
+                      {' · '}
+                      #{attempt.attempt_number}
+                    </p>
+                    <p className="text-xs text-error mt-1 break-words">
+                      {attempt.error_message ?? t('admin.logs.unknownError')}
+                    </p>
+                    {attempt.error_details && (
+                      <pre className="mt-2 text-[11px] leading-relaxed text-on-surface-variant bg-surface-container-high rounded-lg p-2 overflow-x-auto">
+                        {JSON.stringify(attempt.error_details, null, 2)}
+                      </pre>
+                    )}
+                  </div>
+                  <span className="text-xs text-outline shrink-0">
+                    {new Date(attempt.completed_at ?? attempt.started_at).toLocaleString(locale)}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* App logs */}
