@@ -9,10 +9,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
+import { useResizableColumns } from '@/components/admin/useResizableColumns'
 
 interface JobRow {
   id: string
   job_type: string
+  job_label?: string
   status: 'pending' | 'running' | 'completed' | 'failed'
   priority: number
   created_at: string
@@ -36,6 +38,7 @@ export default function AdminJobsClient({ initialJobs }: AdminJobsClientProps) {
   const [busy, setBusy] = useState<BusyState>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { templateColumns, onStartResize } = useResizableColumns([420, 160, 110, 170, 260, 140], { minWidth: 90 })
 
   const statusColor: Record<JobRow['status'], string> = {
     pending: 'bg-amber-100 text-amber-700',
@@ -137,78 +140,104 @@ export default function AdminJobsClient({ initialJobs }: AdminJobsClientProps) {
       {message && <p className="mb-4 text-sm text-green-700">{message}</p>}
       {error && <p className="mb-4 text-sm text-error">{error}</p>}
 
-      <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient">
-        <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-surface-container-low">
-          <div className="col-span-3 text-label-caps text-on-surface-variant">{t('admin.jobs.type')}</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.users.status')}</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.jobs.priority')}</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.jobs.createdAt')}</div>
-          <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.jobs.error')}</div>
-          <div className="col-span-1 text-label-caps text-on-surface-variant text-right">{t('admin.users.actions')}</div>
-        </div>
-
-        {jobs.length === 0 ? (
-          <div className="p-12 text-center text-on-surface-variant">
-            {t('admin.jobs.empty')}
+      <div className="bg-surface-container-lowest rounded-2xl shadow-ambient overflow-auto">
+        <div className="min-w-max">
+          <div className="grid px-6 py-3 bg-surface-container-low" style={{ gridTemplateColumns: templateColumns }}>
+            {[
+              t('admin.jobs.type'),
+              t('admin.users.status'),
+              t('admin.jobs.priority'),
+              t('admin.jobs.createdAt'),
+              t('admin.jobs.error'),
+              t('admin.users.actions'),
+            ].map((label, index, arr) => (
+              <div key={label} className="relative pr-3">
+                <div className={`text-label-caps text-on-surface-variant ${index === arr.length - 1 ? 'text-right' : ''}`}>
+                  {label}
+                </div>
+                {index < arr.length - 1 && (
+                  <button
+                    type="button"
+                    aria-label={`Resize ${label}`}
+                    onMouseDown={(event) => onStartResize(index, event.clientX)}
+                    className="absolute top-0 right-0 h-full w-2 cursor-col-resize hover:bg-primary/20"
+                  />
+                )}
+              </div>
+            ))}
           </div>
-        ) : (
-          jobs.map((job, i) => {
-            const deleteBusy = busy?.jobId === job.id && busy.action === 'delete'
-            const retryBusy = busy?.jobId === job.id && busy.action === 'retry'
-            return (
-              <div
-                key={job.id}
-                className={`grid grid-cols-12 gap-4 px-6 py-4 items-center
+
+          {jobs.length === 0 ? (
+            <div className="p-12 text-center text-on-surface-variant">
+              {t('admin.jobs.empty')}
+            </div>
+          ) : (
+            jobs.map((job, i) => {
+              const deleteBusy = busy?.jobId === job.id && busy.action === 'delete'
+              const retryBusy = busy?.jobId === job.id && busy.action === 'retry'
+              return (
+                <div
+                  key={job.id}
+                  className={`grid px-6 py-4 items-center
                            ${i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low'}
                            hover:bg-surface-container transition-colors`}
-              >
-                <div className="col-span-3">
-                  <p className="text-sm font-mono font-semibold text-on-surface truncate">{job.job_type}</p>
-                </div>
-                <div className="col-span-2">
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColor[job.status]}`}>
-                    {statusLabel[job.status]}
-                  </span>
-                </div>
-                <div className="col-span-2 text-sm text-on-surface-variant">{job.priority}</div>
-                <div className="col-span-2 text-sm text-on-surface-variant">
-                  {new Date(job.created_at).toLocaleDateString(locale)}
-                </div>
-                <div className="col-span-2 text-xs text-error truncate">
-                  {job.error_message ?? '—'}
-                </div>
-                <div className="col-span-1 flex justify-end">
-                  {job.status === 'pending' && (
-                    <button
-                      type="button"
-                      disabled={deleteBusy}
-                      title={t('admin.jobs.delete')}
-                      onClick={() => handleDeletePendingJob(job.id)}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-error
+                  style={{ gridTemplateColumns: templateColumns }}
+                >
+                  <div className="pr-3">
+                    <p className="text-sm font-mono font-semibold text-on-surface truncate">
+                      {job.job_label ?? job.job_type}
+                    </p>
+                    {job.job_label && (
+                      <p className="text-xs text-on-surface-variant truncate mt-0.5">
+                        {job.job_type}
+                      </p>
+                    )}
+                  </div>
+                  <div className="pr-3">
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColor[job.status]}`}>
+                      {statusLabel[job.status]}
+                    </span>
+                  </div>
+                  <div className="text-sm text-on-surface-variant pr-3">{job.priority}</div>
+                  <div className="text-sm text-on-surface-variant pr-3">
+                    {new Date(job.created_at).toLocaleDateString(locale)}
+                  </div>
+                  <div className="text-xs text-error truncate pr-3">
+                    {job.error_message ?? '—'}
+                  </div>
+                  <div className="flex justify-end">
+                    {job.status === 'pending' && (
+                      <button
+                        type="button"
+                        disabled={deleteBusy}
+                        title={t('admin.jobs.delete')}
+                        onClick={() => handleDeletePendingJob(job.id)}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-error
                                  hover:bg-error-container/40 transition-all
                                  disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                      {t('admin.jobs.delete')}
-                    </button>
-                  )}
-                  {job.status === 'failed' && (
-                    <button
-                      type="button"
-                      disabled={retryBusy}
-                      title={t('admin.jobs.retry')}
-                      onClick={() => handleRetryFailedJob(job.id)}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-primary
+                      >
+                        {t('admin.jobs.delete')}
+                      </button>
+                    )}
+                    {job.status === 'failed' && (
+                      <button
+                        type="button"
+                        disabled={retryBusy}
+                        title={t('admin.jobs.retry')}
+                        onClick={() => handleRetryFailedJob(job.id)}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-primary
                                  hover:bg-primary-fixed transition-all
                                  disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                      {t('admin.jobs.retry')}
-                    </button>
-                  )}
+                      >
+                        {t('admin.jobs.retry')}
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )
-          })
-        )}
+              )
+            })
+          )}
+        </div>
       </div>
     </div>
   )

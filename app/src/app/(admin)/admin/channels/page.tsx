@@ -7,6 +7,7 @@
 import type { Metadata } from 'next'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getLocale, getTranslations } from 'next-intl/server'
+import AdminScanNowButton from './AdminScanNowButton'
 
 export const metadata: Metadata = { title: 'Admin — Canali' }
 
@@ -37,11 +38,12 @@ export default async function AdminChannelsPage() {
 
       <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient">
         <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-surface-container-low">
-          <div className="col-span-5 text-label-caps text-on-surface-variant">{t('nav.channels')}</div>
+          <div className="col-span-4 text-label-caps text-on-surface-variant">{t('nav.channels')}</div>
           <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.channels.subscribers')}</div>
           <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.channels.lastSync')}</div>
           <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.users.status')}</div>
           <div className="col-span-1 text-label-caps text-on-surface-variant">{t('admin.channels.videos')}</div>
+          <div className="col-span-1 text-label-caps text-on-surface-variant text-right">{t('admin.users.actions')}</div>
         </div>
         {channelRows.length === 0 ? (
           <div className="p-12 text-center text-on-surface-variant">{t('admin.channels.empty')}</div>
@@ -56,7 +58,7 @@ export default async function AdminChannelsPage() {
                              ${i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low'}
                              hover:bg-surface-container transition-colors`}
               >
-                <div className="col-span-5 flex items-center gap-3">
+                <div className="col-span-4 flex items-center gap-3">
                   {ch.thumbnail_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={ch.thumbnail_url} alt="" className="w-8 h-8 rounded-full" />
@@ -84,6 +86,9 @@ export default async function AdminChannelsPage() {
                 </div>
                 <div className="col-span-1 text-sm text-on-surface-variant">
                   {ch.video_count ?? sync?.videos_found_count ?? '—'}
+                </div>
+                <div className="col-span-1 flex justify-end">
+                  <AdminScanNowButton channelId={ch.id} />
                 </div>
               </div>
             )

@@ -256,7 +256,10 @@
       "subscribers": "Subscribers",
       "lastSync": "Last sync",
       "videos": "Videos",
-      "empty": "No channels in archive."
+      "empty": "No channels in archive.",
+      "scanNowAdmin": "Scan now",
+      "scanStarted": "Scan started",
+      "scanError": "Failed to start scan"
     },
     "jobs": {
       "subtitle": "Monitor and manage background processing jobs.",

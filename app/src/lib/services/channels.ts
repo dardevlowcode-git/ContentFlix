@@ -266,8 +266,11 @@ export async function removeChannelForUser(params: { userId: string; channelId: 
  * Accoda (ed esegue subito in V1) una scansione manuale del canale.
  * Registra sempre il job in tabella per audit/diagnosi in console admin.
  */
-export async function requestScanNowForUser(params: { userId: string; channelId: string }) {
-  const supabase = await createClient()
+export async function requestScanNowForUser(
+  params: { userId: string; channelId: string },
+  options?: { asAdmin?: boolean }
+) {
+  const supabase = options?.asAdmin ? createAdminClient() : await createClient()
 
   const { data: userChannel, error: userChannelError } = await supabase
     .from('user_channels')
@@ -319,6 +322,7 @@ export async function requestScanNowForUser(params: { userId: string; channelId:
     await importChannelVideos({
       userId: params.userId,
       channelId: params.channelId,
+      bypassUserChannelGuard: Boolean(options?.asAdmin),
     })
 
     const completedAt = new Date().toISOString()
@@ -342,6 +346,11 @@ export async function requestScanNowForUser(params: { userId: string; channelId:
       : error instanceof Error
         ? error.message
         : 'scan_failed'
+    const details = error instanceof AppError
+      ? (error.context ?? null)
+      : error instanceof Error
+        ? { message: error.message }
+        : null
     const completedAt = new Date().toISOString()
 
     await admin
@@ -356,7 +365,7 @@ export async function requestScanNowForUser(params: { userId: string; channelId:
       started_at: startedAt,
       completed_at: completedAt,
       error_message: message,
-      error_details: null,
+      error_details: details,
     })
 
     throw error

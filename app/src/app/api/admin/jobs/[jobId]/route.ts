@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getAdminSession } from '@/lib/auth/admin'
+import { buildJobLabel, collectJobChannelIds, collectJobUserIds } from '@/lib/utils/job-label'
 
 interface RouteContext {
   params: {
@@ -78,6 +79,25 @@ export async function POST(_request: Request, context: RouteContext) {
     return NextResponse.json({ data: null, error: insertError.message, errorType: 'unknown' }, { status: 500 })
   }
 
+  const labelSource = [{
+    id: retriedJob.id,
+    created_by_user_id: job.created_by_user_id,
+    payload: job.payload,
+  }]
+  const userIds = collectJobUserIds(labelSource)
+  const channelIds = collectJobChannelIds(labelSource)
+  const [usersResult, channelsResult] = await Promise.all([
+    userIds.length === 0
+      ? Promise.resolve({ data: [] as Array<{ id: string; display_name: string | null; email: string }> })
+      : supabase.from('users').select('id, display_name, email').in('id', userIds),
+    channelIds.length === 0
+      ? Promise.resolve({ data: [] as Array<{ id: string; title: string }> })
+      : supabase.from('channels').select('id, title').in('id', channelIds),
+  ])
+  const usersById = Object.fromEntries((usersResult.data ?? []).map((u) => [u.id, u.display_name ?? u.email]))
+  const channelsById = Object.fromEntries((channelsResult.data ?? []).map((c) => [c.id, c.title]))
+  const retriedJobLabel = buildJobLabel(labelSource[0], usersById, channelsById)
+
   await supabase.from('audit_logs').insert({
     user_id: null,
     action: 'admin_retry_failed_job',
@@ -93,7 +113,10 @@ export async function POST(_request: Request, context: RouteContext) {
     data: {
       message: 'Job riaccodato correttamente',
       sourceJobId: jobId,
-      retriedJob,
+      retriedJob: {
+        ...retriedJob,
+        job_label: retriedJobLabel,
+      },
     },
     error: null,
     errorType: null,

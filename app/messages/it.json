@@ -333,7 +333,10 @@
       "subscribers": "Iscritti",
       "lastSync": "Ultima sync",
       "videos": "Video",
-      "empty": "Nessun canale nell'archivio."
+      "empty": "Nessun canale nell'archivio.",
+      "scanNowAdmin": "Scansione ora",
+      "scanStarted": "Scansione avviata",
+      "scanError": "Errore avvio scansione"
     },
     "incidents": {
       "openIncidents": "Incidenti aperti",

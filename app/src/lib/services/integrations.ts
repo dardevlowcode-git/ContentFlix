@@ -6,6 +6,7 @@
 
 import { createHash, createCipheriv, createDecipheriv, randomBytes } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { AppError, classifyError } from '@/lib/utils/errors'
 import type { CredentialStatus } from '@/lib/types/domain'
 import type { Database } from '@/lib/types/database'
@@ -129,6 +130,33 @@ export async function getProviderApiKeyForUser(userId: string, provider: Provide
 
   try {
     // Decifra solo quando realmente necessario (principio least exposure).
+    return decryptSecret(row.encrypted_key)
+  } catch (error) {
+    throw new AppError('Impossibile decifrare la chiave API', 'structural', 500, {
+      cause: error instanceof Error ? error.message : 'decrypt_failed',
+    })
+  }
+}
+
+/**
+ * Variante admin-only: legge la chiave API bypassando RLS utente.
+ */
+export async function getProviderApiKeyForUserAsAdmin(userId: string, provider: Provider): Promise<string | null> {
+  const admin = createAdminClient()
+  const { data: row, error } = await admin
+    .from('user_provider_credentials')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('provider', provider)
+    .maybeSingle()
+
+  if (error) {
+    throw new AppError('Impossibile leggere le credenziali utente', 'unknown', 500, { cause: error.message })
+  }
+
+  if (!row?.encrypted_key || !row.is_configured) return null
+
+  try {
     return decryptSecret(row.encrypted_key)
   } catch (error) {
     throw new AppError('Impossibile decifrare la chiave API', 'structural', 500, {

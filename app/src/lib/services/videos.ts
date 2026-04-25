@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { AppError } from '@/lib/utils/errors'
 import type { VideoWithContext } from '@/lib/types/domain'
 import type { Database, Json } from '@/lib/types/database'
-import { getProviderApiKeyForUser } from '@/lib/services/integrations'
+import { getProviderApiKeyForUser, getProviderApiKeyForUserAsAdmin } from '@/lib/services/integrations'
 
 type AnalysisStatus = Database['public']['Tables']['video_analysis']['Row']['analysis_status']
 
@@ -337,11 +337,13 @@ export async function importChannelVideos(params: {
   userId: string
   channelId: string
   maxResults?: number
+  bypassUserChannelGuard?: boolean
 }): Promise<{ channelId: string; importedCount: number; scannedCount: number }> {
   const supabase = await createClient()
   const admin = createAdminClient()
 
-  const { data: userChannel, error: ucError } = await supabase
+  const queryClient = params.bypassUserChannelGuard ? admin : supabase
+  const { data: userChannel, error: ucError } = await queryClient
     .from('user_channels')
     .select('id')
     .eq('user_id', params.userId)
@@ -353,7 +355,7 @@ export async function importChannelVideos(params: {
     throw new AppError('Canale non disponibile per questo utente', 'forbidden', 403, { cause: ucError?.message })
   }
 
-  const { data: channel, error: channelError } = await supabase
+  const { data: channel, error: channelError } = await queryClient
     .from('channels')
     .select('*')
     .eq('id', params.channelId)
@@ -363,7 +365,9 @@ export async function importChannelVideos(params: {
     throw new AppError('Canale non trovato', 'not_found', 404, { cause: channelError?.message })
   }
 
-  const youtubeApiKey = await getProviderApiKeyForUser(params.userId, 'youtube')
+  const youtubeApiKey = params.bypassUserChannelGuard
+    ? await getProviderApiKeyForUserAsAdmin(params.userId, 'youtube')
+    : await getProviderApiKeyForUser(params.userId, 'youtube')
   if (!youtubeApiKey) {
     throw new AppError('Configura prima la chiave YouTube API', 'validation', 400)
   }
@@ -424,7 +428,7 @@ export async function importChannelVideos(params: {
     .filter((row): row is NonNullable<typeof row> => row !== null)
 
   if (upsertRows.length === 0) {
-    await supabase
+    await queryClient
       .from('canonical_sync_state')
       .upsert({
         channel_id: params.channelId,
@@ -440,25 +444,31 @@ export async function importChannelVideos(params: {
     }
   }
 
-  const { data: insertedRows, error: insertError } = await supabase
+  // Deduplica locale per evitare errore Postgres quando lo stesso youtube_video_id
+  // compare piu volte nello stesso batch di upsert.
+  const dedupedRows = Array.from(
+    new Map(upsertRows.map((row) => [row.youtube_video_id, row])).values()
+  )
+
+  const { data: insertedRows, error: insertError } = await queryClient
     .from('videos')
-    .upsert(upsertRows, { onConflict: 'youtube_video_id' })
+    .upsert(dedupedRows, { onConflict: 'youtube_video_id' })
     .select('id')
 
   if (insertError) {
     throw new AppError('Import video fallito', 'unknown', 500, { cause: insertError.message })
   }
 
-  await supabase
+  await queryClient
     .from('canonical_sync_state')
     .upsert({
       channel_id: params.channelId,
       last_sync_at: new Date().toISOString(),
       last_sync_status: 'success',
-      videos_found_count: upsertRows.length,
+      videos_found_count: dedupedRows.length,
     }, { onConflict: 'channel_id' })
 
-  await supabase
+  await queryClient
     .from('user_provider_credentials')
     .update({
       is_valid: true,
@@ -468,9 +478,9 @@ export async function importChannelVideos(params: {
     .eq('user_id', params.userId)
     .eq('provider', 'youtube')
 
-  return {
-    channelId: params.channelId,
-    importedCount: insertedRows?.length ?? upsertRows.length,
-    scannedCount: items.length,
-  }
+    return {
+      channelId: params.channelId,
+      importedCount: insertedRows?.length ?? dedupedRows.length,
+      scannedCount: items.length,
+    }
 }
