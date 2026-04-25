@@ -33,6 +33,113 @@ export interface VideoListResponse {
 }
 
 /**
+ * Aggiorna lo stato visto/non visto di un video per l'utente.
+ */
+export async function setVideoSeenStatusForUser(params: {
+  userId: string
+  videoId: string
+  seenStatus: 'seen' | 'unseen'
+}): Promise<{ seenStatus: 'seen' | 'unseen' }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('user_video_states')
+    .upsert(
+      {
+        user_id: params.userId,
+        video_id: params.videoId,
+        seen_status: params.seenStatus,
+        seen_at: params.seenStatus === 'seen' ? new Date().toISOString() : null,
+      },
+      { onConflict: 'user_id,video_id' }
+    )
+
+  if (error) {
+    throw new AppError('Impossibile aggiornare stato visto', 'unknown', 500, { cause: error.message })
+  }
+
+  return { seenStatus: params.seenStatus }
+}
+
+/**
+ * Aggiorna appartenenza del video alla watchlist di default dell'utente.
+ */
+export async function setVideoWatchlistForUser(params: {
+  userId: string
+  videoId: string
+  inWatchlist: boolean
+}): Promise<{ isInWatchlist: boolean }> {
+  const supabase = await createClient()
+
+  const { data: existingWatchlist, error: watchlistReadError } = await supabase
+    .from('watchlists')
+    .select('id')
+    .eq('user_id', params.userId)
+    .eq('is_default', true)
+    .maybeSingle()
+
+  if (watchlistReadError) {
+    throw new AppError('Impossibile leggere watchlist utente', 'unknown', 500, {
+      cause: watchlistReadError.message,
+    })
+  }
+
+  let watchlistId = existingWatchlist?.id ?? null
+
+  if (!watchlistId) {
+    const { data: insertedWatchlist, error: watchlistInsertError } = await supabase
+      .from('watchlists')
+      .insert({
+        user_id: params.userId,
+        name: 'Da guardare',
+        is_default: true,
+      })
+      .select('id')
+      .single()
+
+    if (watchlistInsertError || !insertedWatchlist) {
+      throw new AppError('Impossibile creare watchlist di default', 'unknown', 500, {
+        cause: watchlistInsertError?.message,
+      })
+    }
+
+    watchlistId = insertedWatchlist.id
+  }
+
+  if (params.inWatchlist) {
+    const { error: addError } = await supabase
+      .from('watchlist_items')
+      .upsert(
+        {
+          watchlist_id: watchlistId,
+          video_id: params.videoId,
+        },
+        { onConflict: 'watchlist_id,video_id' }
+      )
+
+    if (addError) {
+      throw new AppError('Impossibile aggiungere il video alla watchlist', 'unknown', 500, {
+        cause: addError.message,
+      })
+    }
+  } else {
+    const { error: removeError } = await supabase
+      .from('watchlist_items')
+      .delete()
+      .eq('watchlist_id', watchlistId)
+      .eq('video_id', params.videoId)
+
+    if (removeError) {
+      throw new AppError('Impossibile rimuovere il video dalla watchlist', 'unknown', 500, {
+        cause: removeError.message,
+      })
+    }
+  }
+
+  return { isInWatchlist: params.inWatchlist }
+}
+
+/**
  * Applica limiti di sicurezza per paginazione (anti valori eccessivi o negativi).
  */
 function normalizePagination(limit?: number, page?: number) {

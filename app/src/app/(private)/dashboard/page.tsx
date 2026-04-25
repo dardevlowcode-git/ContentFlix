@@ -50,8 +50,23 @@ export default async function DashboardPage() {
         .limit(12)
     : { data: [] }
 
+  const videoIds = (recentVideos ?? []).map((v) => v.id)
+  const { data: userVideoStates } = videoIds.length > 0
+    ? await supabase
+        .from('user_video_states')
+        .select('video_id, seen_status')
+        .eq('user_id', session.userId)
+        .in('video_id', videoIds)
+    : { data: [] }
+
+  const seenMap = new Map((userVideoStates ?? []).map((s) => [s.video_id, s.seen_status]))
+  const recentVideosWithState = (recentVideos ?? []).map((video) => ({
+    ...video,
+    __seenStatus: seenMap.get(video.id) ?? 'unseen',
+  }))
+
   const hasChannels = (userChannels?.length ?? 0) > 0
-  const newAnalysesCount = recentVideos?.filter(
+  const newAnalysesCount = recentVideosWithState?.filter(
     (v) => v.video_analysis?.[0]?.analysis_status === 'completed'
   ).length ?? 0
 
@@ -78,10 +93,11 @@ export default async function DashboardPage() {
         />
       ) : (
         <VideoBentoGrid
-          videos={recentVideos ?? []}
+          videos={recentVideosWithState ?? []}
           locale={locale}
           labels={{
             unseen: t('dashboard.unseen'),
+            seen: t('dashboard.seen'),
             analysisComplete: t('dashboard.analysisComplete'),
             processing: t('dashboard.analysisInProgress'),
             unknownChannel: t('dashboard.unknownChannel'),
@@ -133,6 +149,7 @@ function VideoBentoGrid({
   locale: string
   labels: {
     unseen: string
+    seen: string
     analysisComplete: string
     processing: string
     unknownChannel: string
@@ -157,6 +174,7 @@ function VideoBentoGrid({
         const analysis = video.video_analysis?.[0]
         const content = video.video_localized_content?.[0]
         const channel = video.channels
+        const seenStatus = video.__seenStatus
 
         return (
           <article
@@ -185,7 +203,11 @@ function VideoBentoGrid({
                 )}
 
                 <div className="absolute top-3 left-3">
-                  {!analysis || analysis.analysis_status === 'pending' ? (
+                  {seenStatus === 'seen' ? (
+                    <span className="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-full">
+                      {labels.seen}
+                    </span>
+                  ) : !analysis || analysis.analysis_status === 'pending' ? (
                     <span className="badge-unseen">{labels.unseen}</span>
                   ) : analysis.analysis_status === 'completed' ? (
                     <span className="badge-ai">{labels.analysisComplete}</span>

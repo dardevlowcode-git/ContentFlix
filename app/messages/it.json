@@ -94,6 +94,8 @@
     "readDigest": "Leggi digest",
     "watchLater": "Guarda dopo",
     "markSeen": "Segna come visto",
+    "markUnseen": "Segna come non visto",
+    "seen": "VISTO",
     "addToWatchlist": "Aggiungi alla lista",
     "removeFromWatchlist": "Rimuovi dalla lista",
     "unseen": "NON VISTO",

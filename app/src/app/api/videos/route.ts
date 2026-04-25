@@ -5,13 +5,21 @@
  */
 
 import { getCurrentSession } from '@/lib/auth/provider'
-import { getVideosForUser, importChannelVideos } from '@/lib/services/videos'
+import {
+  getVideosForUser,
+  importChannelVideos,
+  setVideoSeenStatusForUser,
+  setVideoWatchlistForUser,
+} from '@/lib/services/videos'
 import { AppError, errorResponse } from '@/lib/utils/errors'
 
 interface VideosPostBody {
-  action?: 'import_channel'
+  action?: 'import_channel' | 'set_seen_status' | 'set_watchlist'
   channelId?: string
   maxResults?: number
+  videoId?: string
+  seenStatus?: 'seen' | 'unseen'
+  inWatchlist?: boolean
 }
 
 /**
@@ -95,32 +103,66 @@ export async function POST(request: Request) {
     const body = (await request.json().catch(() => null)) as VideosPostBody | null
     const action = body?.action ?? 'import_channel'
 
-    if (action !== 'import_channel') {
-      return errorResponse('Azione non supportata', 'validation', 400)
+    if (action === 'import_channel') {
+      const channelId = body?.channelId?.trim()
+      if (!channelId) {
+        return errorResponse('channelId mancante', 'validation', 400)
+      }
+
+      const maxResults = typeof body?.maxResults === 'number' ? body.maxResults : undefined
+
+      // Import da canale YouTube: il service gestisce API esterna e upsert video.
+      const result = await importChannelVideos({
+        userId,
+        channelId,
+        maxResults,
+      })
+
+      return Response.json({
+        data: {
+          ...result,
+          message: 'Import canale completato',
+        },
+        error: null,
+        errorType: null,
+      })
     }
 
-    const channelId = body?.channelId?.trim()
-    if (!channelId) {
-      return errorResponse('channelId mancante', 'validation', 400)
+    if (action === 'set_seen_status') {
+      const videoId = body?.videoId?.trim()
+      const seenStatus = body?.seenStatus
+
+      if (!videoId || (seenStatus !== 'seen' && seenStatus !== 'unseen')) {
+        return errorResponse('Parametri aggiornamento stato visto non validi', 'validation', 400)
+      }
+
+      const result = await setVideoSeenStatusForUser({ userId, videoId, seenStatus })
+
+      return Response.json({
+        data: result,
+        error: null,
+        errorType: null,
+      })
     }
 
-    const maxResults = typeof body?.maxResults === 'number' ? body.maxResults : undefined
+    if (action === 'set_watchlist') {
+      const videoId = body?.videoId?.trim()
+      const inWatchlist = body?.inWatchlist
 
-    // Import da canale YouTube: il service gestisce API esterna e upsert video.
-    const result = await importChannelVideos({
-      userId,
-      channelId,
-      maxResults,
-    })
+      if (!videoId || typeof inWatchlist !== 'boolean') {
+        return errorResponse('Parametri watchlist non validi', 'validation', 400)
+      }
 
-    return Response.json({
-      data: {
-        ...result,
-        message: 'Import canale completato',
-      },
-      error: null,
-      errorType: null,
-    })
+      const result = await setVideoWatchlistForUser({ userId, videoId, inWatchlist })
+
+      return Response.json({
+        data: result,
+        error: null,
+        errorType: null,
+      })
+    }
+
+    return errorResponse('Azione non supportata', 'validation', 400)
   } catch (error) {
     if (error instanceof AppError) {
       return errorResponse(error.message, error.type, error.statusCode ?? 500)

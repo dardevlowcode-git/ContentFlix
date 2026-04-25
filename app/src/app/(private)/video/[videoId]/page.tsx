@@ -9,6 +9,7 @@ import { getCurrentSession } from '@/lib/auth/provider'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { getLocale, getTranslations } from 'next-intl/server'
+import VideoActionsClient from './VideoActionsClient'
 
 export const metadata: Metadata = {
   title: 'Analisi Video',
@@ -38,6 +39,21 @@ export default async function VideoDetailPage({ params }: Props) {
     .single()
 
   if (!video) notFound()
+
+  const [{ data: userVideoState }, { data: watchlistItem }] = await Promise.all([
+    supabase
+      .from('user_video_states')
+      .select('seen_status')
+      .eq('user_id', session.userId)
+      .eq('video_id', videoId)
+      .maybeSingle(),
+    supabase
+      .from('watchlist_items')
+      .select('id, watchlists!inner(user_id)')
+      .eq('video_id', videoId)
+      .eq('watchlists.user_id', session.userId)
+      .maybeSingle(),
+  ])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const analysis = (video as any).video_analysis?.[0]
@@ -111,26 +127,18 @@ export default async function VideoDetailPage({ params }: Props) {
 
             {/* Action buttons */}
             <div className="flex items-center gap-3">
-              <button
-                className="flex items-center gap-2 bg-surface-container-low hover:bg-surface-container
-                           text-on-surface px-5 py-2.5 rounded-full font-semibold text-sm transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {t('dashboard.markSeen')}
-              </button>
-              <button
-                className="flex items-center gap-2 bg-surface-container-low hover:bg-surface-container
-                           text-on-surface px-5 py-2.5 rounded-full font-semibold text-sm transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-                </svg>
-                {t('dashboard.addToWatchlist')}
-              </button>
+              <VideoActionsClient
+                videoId={video.id}
+                initialSeen={userVideoState?.seen_status === 'seen'}
+                initialInWatchlist={Boolean(watchlistItem?.id)}
+                labels={{
+                  markSeen: t('dashboard.markSeen'),
+                  markUnseen: t('dashboard.markUnseen'),
+                  addToWatchlist: t('dashboard.addToWatchlist'),
+                  removeFromWatchlist: t('dashboard.removeFromWatchlist'),
+                  genericError: t('common.error'),
+                }}
+              />
               <a
                 href={video.video_url}
                 target="_blank"
