@@ -9,7 +9,7 @@ const requiredHeaderByExt = {
   '.sql': '-- Commento didattico:',
   default: '/* Commento didattico:',
 }
-const rootFiles = ['next.config.ts', 'postcss.config.js', 'tailwind.config.ts']
+const rootFiles = ['next.config.mjs', 'postcss.config.js', 'tailwind.config.ts']
 
 function walk(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

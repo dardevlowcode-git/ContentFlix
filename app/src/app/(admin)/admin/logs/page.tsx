@@ -39,6 +39,15 @@ export default async function AdminLogsPage() {
       .order('completed_at', { ascending: false })
       .limit(20),
   ])
+  // Tipizzazione difensiva per query Supabase con join/shape eterogenee.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const appLogRows = (appLogs ?? []) as any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const auditLogRows = (auditLogs ?? []) as any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const failedAttemptRows = (failedJobAttempts ?? []) as any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const failedJobRows = (failedJobs ?? []) as any[]
 
   const levelColor: Record<string, string> = {
     info: 'text-primary',
@@ -59,11 +68,11 @@ export default async function AdminLogsPage() {
       <div className="mb-8">
         <h2 className="font-headline text-lg font-bold text-on-surface mb-4">{t('admin.logs.failedJobLogs')}</h2>
         <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient max-h-[420px] overflow-y-auto">
-          {!failedJobAttempts || failedJobAttempts.length === 0 ? (
-            !failedJobs || failedJobs.length === 0 ? (
+          {failedAttemptRows.length === 0 ? (
+            failedJobRows.length === 0 ? (
               <p className="text-on-surface-variant text-center py-8 px-4">{t('admin.logs.emptyFailedJobs')}</p>
             ) : (
-              failedJobs.map((job, i) => (
+              failedJobRows.map((job, i) => (
                 <div
                   key={job.id}
                   className={`px-5 py-4 border-b border-surface-container-high last:border-0
@@ -86,7 +95,7 @@ export default async function AdminLogsPage() {
               ))
             )
           ) : (
-            failedJobAttempts.map((attempt, i) => (
+            failedAttemptRows.map((attempt, i) => (
               <div
                 key={attempt.id}
                 className={`px-5 py-4 border-b border-surface-container-high last:border-0
@@ -95,10 +104,8 @@ export default async function AdminLogsPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-on-surface">
-                      {/* @ts-expect-error — joined jobs */}
                       {attempt.jobs?.job_type ?? t('admin.logs.unknownJobType')}
                       {' · '}
-                      {/* @ts-expect-error — joined jobs */}
                       {(attempt.jobs?.id ?? attempt.job_id).slice(0, 8)}…
                       {' · '}
                       #{attempt.attempt_number}
@@ -127,10 +134,10 @@ export default async function AdminLogsPage() {
         <div>
           <h2 className="font-headline text-lg font-bold text-on-surface mb-4">{t('admin.logs.appLogs')}</h2>
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-ambient font-mono text-xs space-y-1 max-h-[600px] overflow-y-auto">
-            {!appLogs || appLogs.length === 0 ? (
+            {appLogRows.length === 0 ? (
               <p className="text-on-surface-variant text-center py-8">{t('admin.logs.empty')}</p>
             ) : (
-              appLogs.map((log) => (
+              appLogRows.map((log) => (
                 <div key={log.id} className="flex gap-2 py-1 border-b border-surface-container-high last:border-0">
                   <span className="text-outline shrink-0 w-14">
                     {new Date(log.created_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
@@ -151,10 +158,10 @@ export default async function AdminLogsPage() {
         <div>
           <h2 className="font-headline text-lg font-bold text-on-surface mb-4">{t('admin.logs.auditTrail')}</h2>
           <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient max-h-[600px] overflow-y-auto">
-            {!auditLogs || auditLogs.length === 0 ? (
+            {auditLogRows.length === 0 ? (
               <p className="text-on-surface-variant text-center py-8 px-4">{t('admin.logs.emptyAudit')}</p>
             ) : (
-              auditLogs.map((log, i) => (
+              auditLogRows.map((log, i) => (
                 <div
                   key={log.id}
                   className={`px-5 py-3 border-b border-surface-container-high last:border-0
@@ -164,7 +171,6 @@ export default async function AdminLogsPage() {
                     <div>
                       <p className="text-sm font-semibold text-on-surface">{log.action}</p>
                       <p className="text-xs text-on-surface-variant">
-                        {/* @ts-expect-error — joined users */}
                         {log.users?.email ?? t('admin.logs.system')} · {log.resource_type}
                         {log.resource_id ? ` / ${log.resource_id.slice(0, 8)}…` : ''}
                       </p>

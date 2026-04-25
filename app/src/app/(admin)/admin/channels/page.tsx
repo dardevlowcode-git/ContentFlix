@@ -20,6 +20,9 @@ export default async function AdminChannelsPage() {
     .select('*, canonical_sync_state(*)')
     .order('created_at', { ascending: false })
     .limit(50)
+  // Tipizzazione esplicita difensiva: la select con relazione annidata puo` essere inferita come `never`.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const channelRows = (channels ?? []) as any[]
 
   return (
     <div className="p-8 max-w-6xl">
@@ -40,12 +43,11 @@ export default async function AdminChannelsPage() {
           <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.users.status')}</div>
           <div className="col-span-1 text-label-caps text-on-surface-variant">{t('admin.channels.videos')}</div>
         </div>
-        {!channels || channels.length === 0 ? (
+        {channelRows.length === 0 ? (
           <div className="p-12 text-center text-on-surface-variant">{t('admin.channels.empty')}</div>
         ) : (
-          channels.map((ch, i) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const sync = (ch as any).canonical_sync_state
+          channelRows.map((ch, i) => {
+            const sync = ch.canonical_sync_state
 
             return (
               <div
