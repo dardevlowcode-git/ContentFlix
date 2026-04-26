@@ -25,6 +25,39 @@ export default async function AdminChannelsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const channelRows = (channels ?? []) as any[]
 
+  const channelIds = channelRows.map((c) => c.id as string)
+  const [userChannelsResult, videosResult] = await Promise.all([
+    channelIds.length === 0
+      ? Promise.resolve({ data: [] as Array<{ channel_id: string }> })
+      : supabase
+        .from('user_channels')
+        .select('channel_id')
+        .in('channel_id', channelIds)
+        .eq('is_active', true),
+    channelIds.length === 0
+      ? Promise.resolve({ data: [] as Array<{ channel_id: string }> })
+      : supabase
+        .from('videos')
+        .select('channel_id')
+        .in('channel_id', channelIds),
+  ])
+
+  const followerCountByChannelId = new Map<string, number>()
+  for (const row of userChannelsResult.data ?? []) {
+    followerCountByChannelId.set(
+      row.channel_id,
+      (followerCountByChannelId.get(row.channel_id) ?? 0) + 1
+    )
+  }
+
+  const canonicalVideoCountByChannelId = new Map<string, number>()
+  for (const row of videosResult.data ?? []) {
+    canonicalVideoCountByChannelId.set(
+      row.channel_id,
+      (canonicalVideoCountByChannelId.get(row.channel_id) ?? 0) + 1
+    )
+  }
+
   return (
     <div className="p-8 max-w-6xl">
       <header className="mb-10">
@@ -73,7 +106,9 @@ export default async function AdminChannelsPage() {
                   </div>
                 </div>
                 <div className="col-span-2 text-sm text-on-surface-variant">
-                  {ch.subscriber_count ? `${(ch.subscriber_count / 1000).toFixed(0)}K` : '—'}
+                  {new Intl.NumberFormat(locale).format(
+                    followerCountByChannelId.get(ch.id as string) ?? 0
+                  )}
                 </div>
                 <div className="col-span-2 text-sm text-on-surface-variant">
                   {sync?.last_sync_at ? new Date(sync.last_sync_at).toLocaleDateString(locale) : '—'}
@@ -85,7 +120,9 @@ export default async function AdminChannelsPage() {
                   </span>
                 </div>
                 <div className="col-span-1 text-sm text-on-surface-variant">
-                  {ch.video_count ?? sync?.videos_found_count ?? '—'}
+                  {new Intl.NumberFormat(locale).format(
+                    canonicalVideoCountByChannelId.get(ch.id as string) ?? 0
+                  )}
                 </div>
                 <div className="col-span-1 flex justify-end">
                   <AdminScanNowButton channelId={ch.id} />

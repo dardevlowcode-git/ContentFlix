@@ -7,13 +7,15 @@
   "nav": {
     "dashboard": "Dashboard",
     "channels": "Channels",
+    "tracker": "Tracker",
     "analysis": "Analysis",
     "integrations": "Integrations",
     "watchlist": "Watchlist",
     "admin": "Admin Console",
     "help": "Help Center",
     "logout": "Sign out",
-    "login": "Sign in"
+    "login": "Sign in",
+    "traker": "Traker"
   },
   "auth": {
     "loginWithGoogle": "Sign in with Google",
@@ -221,6 +223,29 @@
     "removeFromList": "Remove from watchlist",
     "subtitle": "Videos you saved for later.",
     "title": "Watchlist"
+  },
+  "tracker": {
+    "title": "Video tracker",
+    "subtitle": "Quickly monitor what you already watched and what is still pending.",
+    "empty": "No videos to track yet.",
+    "addChannels": "Add channels to get started",
+    "allCaughtUp": "You are all caught up. No pending videos.",
+    "noneWatchedYet": "You have not marked any videos as watched yet.",
+    "viewSummary": "View summary",
+    "badges": {
+      "seen": "SEEN",
+      "unseen": "TO WATCH",
+      "watchlist": "WATCHLIST"
+    },
+    "sections": {
+      "toWatch": "To watch ({count})",
+      "watched": "Watched ({count})"
+    },
+    "metrics": {
+      "toWatch": "To watch",
+      "watched": "Watched",
+      "inWatchlist": "In watchlist"
+    }
   },
   "admin": {
     "system": "System",

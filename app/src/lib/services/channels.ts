@@ -135,27 +135,50 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
 
   const supabase = createAdminClient()
   const fallback = buildFallbackChannel(parsed.type, parsed.value)
+  let channel: ChannelRow | null = null
 
-  // Upsert canale globale: evita duplicati se utenti diversi seguono lo stesso canale.
-  const { data: channel, error: channelError } = await supabase
-    .from('channels')
-    .upsert(
-      {
-        youtube_channel_id: fallback.youtubeChannelId,
-        handle: fallback.handle,
-        title: fallback.title,
-        custom_url: fallback.customUrl,
-        status: 'active',
-      },
-      { onConflict: 'youtube_channel_id' }
-    )
-    .select('*')
-    .single()
+  // Evita duplicati su `@handle`: se esiste gia un canale attivo con lo stesso handle, riusalo.
+  if (parsed.type === 'handle') {
+    const { data: existingByHandle, error: byHandleError } = await supabase
+      .from('channels')
+      .select('*')
+      .eq('handle', fallback.handle)
+      .eq('status', 'active')
+      .maybeSingle()
 
-  if (channelError || !channel) {
-    throw new AppError('Impossibile creare/aggiornare il canale', 'unknown', 500, {
-      cause: channelError?.message,
-    })
+    if (byHandleError) {
+      throw new AppError('Impossibile verificare canale esistente per handle', 'unknown', 500, {
+        cause: byHandleError.message,
+      })
+    }
+
+    channel = existingByHandle
+  }
+
+  if (!channel) {
+    // Upsert canale globale: evita duplicati quando arriva gia un `UC...`.
+    const { data: upsertedChannel, error: channelError } = await supabase
+      .from('channels')
+      .upsert(
+        {
+          youtube_channel_id: fallback.youtubeChannelId,
+          handle: fallback.handle,
+          title: fallback.title,
+          custom_url: fallback.customUrl,
+          status: 'active',
+        },
+        { onConflict: 'youtube_channel_id' }
+      )
+      .select('*')
+      .single()
+
+    if (channelError || !upsertedChannel) {
+      throw new AppError('Impossibile creare/aggiornare il canale', 'unknown', 500, {
+        cause: channelError?.message,
+      })
+    }
+
+    channel = upsertedChannel
   }
 
   // Upsert associazione utente<->canale: riattiva una riga esistente se era stata rimossa.

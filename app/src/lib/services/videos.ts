@@ -363,26 +363,71 @@ async function fetchJson<T>(url: URL): Promise<T> {
 }
 
 /**
- * Recupera l'uploads playlist di un canale YouTube.
+ * Recupera snapshot canale YouTube (playlist uploads + metadati/statistiche utili).
  */
-async function getUploadsPlaylistId(youtubeApiKey: string, youtubeChannelId: string): Promise<string> {
+async function getChannelSnapshot(youtubeApiKey: string, youtubeChannelId: string): Promise<{
+  uploadsPlaylistId: string
+  title: string | null
+  description: string | null
+  thumbnailUrl: string | null
+  subscriberCount: number | null
+  videoCount: number | null
+  customUrl: string | null
+  raw: Json | null
+}> {
   const url = new URL('https://www.googleapis.com/youtube/v3/channels')
-  url.searchParams.set('part', 'contentDetails')
+  url.searchParams.set('part', 'contentDetails,snippet,statistics')
   url.searchParams.set('id', youtubeChannelId)
   url.searchParams.set('key', youtubeApiKey)
 
   type ChannelsResponse = {
-    items?: Array<{ contentDetails?: { relatedPlaylists?: { uploads?: string } } }>
+    items?: Array<{
+      contentDetails?: { relatedPlaylists?: { uploads?: string } }
+      snippet?: {
+        title?: string
+        description?: string
+        customUrl?: string
+        thumbnails?: {
+          high?: { url?: string }
+          medium?: { url?: string }
+          default?: { url?: string }
+        }
+      }
+      statistics?: {
+        subscriberCount?: string
+        videoCount?: string
+      }
+    }>
   }
 
   const json = await fetchJson<ChannelsResponse>(url)
-  const uploads = json.items?.[0]?.contentDetails?.relatedPlaylists?.uploads
+  const item = json.items?.[0]
+  const uploads = item?.contentDetails?.relatedPlaylists?.uploads
 
   if (!uploads) {
     throw new AppError('Impossibile trovare playlist uploads del canale', 'not_found', 404)
   }
 
-  return uploads
+  const toInt = (value: string | undefined): number | null => {
+    if (!value) return null
+    const n = Number(value)
+    return Number.isFinite(n) ? n : null
+  }
+
+  return {
+    uploadsPlaylistId: uploads,
+    title: item?.snippet?.title?.trim() ?? null,
+    description: item?.snippet?.description ?? null,
+    thumbnailUrl:
+      item?.snippet?.thumbnails?.high?.url ??
+      item?.snippet?.thumbnails?.medium?.url ??
+      item?.snippet?.thumbnails?.default?.url ??
+      null,
+    subscriberCount: toInt(item?.statistics?.subscriberCount),
+    videoCount: toInt(item?.statistics?.videoCount),
+    customUrl: item?.snippet?.customUrl ? `https://www.youtube.com/${item.snippet.customUrl}` : null,
+    raw: (item as unknown as Json) ?? null,
+  }
 }
 
 /**
@@ -462,15 +507,16 @@ export async function importChannelVideos(params: {
     throw new AppError('Canale non disponibile per questo utente', 'forbidden', 403, { cause: ucError?.message })
   }
 
-  const { data: channel, error: channelError } = await queryClient
+  const { data: channelData, error: channelError } = await queryClient
     .from('channels')
     .select('*')
     .eq('id', params.channelId)
     .single()
 
-  if (channelError || !channel) {
+  if (channelError || !channelData) {
     throw new AppError('Canale non trovato', 'not_found', 404, { cause: channelError?.message })
   }
+  let channel = channelData
 
   const youtubeApiKey = params.bypassUserChannelGuard
     ? await getProviderApiKeyForUserAsAdmin(params.userId, 'youtube')
@@ -483,27 +529,103 @@ export async function importChannelVideos(params: {
     const handle = channel.youtube_channel_id.slice('handle:'.length)
     const resolved = await resolveChannelIdFromHandle(youtubeApiKey, handle)
 
-    // Aggiorna il canale globale alla forma canonica `UC...` appena disponibile.
-    const { error: channelUpdateError } = await admin
+    const { data: existingCanonical, error: existingCanonicalError } = await admin
       .from('channels')
-      .update({
-        youtube_channel_id: resolved.channelId,
-        title: resolved.title ?? channel.title,
-        handle: handle,
-      })
-      .eq('id', channel.id)
+      .select('*')
+      .eq('youtube_channel_id', resolved.channelId)
+      .maybeSingle()
 
-    if (channelUpdateError) {
-      throw new AppError('Risoluzione handle completata ma update canale fallito', 'unknown', 500, {
-        cause: channelUpdateError.message,
+    if (existingCanonicalError) {
+      throw new AppError('Risoluzione handle completata ma lookup canale canonico fallito', 'unknown', 500, {
+        cause: existingCanonicalError.message,
       })
     }
 
-    channel.youtube_channel_id = resolved.channelId
+    if (existingCanonical && existingCanonical.id !== channel.id) {
+      // Merge automatico: collega l'utente al canale canonico gia esistente.
+      const { error: relinkError } = await admin
+        .from('user_channels')
+        .upsert(
+          {
+            user_id: params.userId,
+            channel_id: existingCanonical.id,
+            is_active: true,
+            removed_at: null,
+          },
+          { onConflict: 'user_id,channel_id' }
+        )
+
+      if (relinkError) {
+        throw new AppError('Risoluzione handle completata ma merge user_channel fallito', 'unknown', 500, {
+          cause: relinkError.message,
+        })
+      }
+
+      await admin
+        .from('user_channels')
+        .update({
+          is_active: false,
+          removed_at: new Date().toISOString(),
+        })
+        .eq('user_id', params.userId)
+        .eq('channel_id', channel.id)
+
+      await admin
+        .from('canonical_sync_state')
+        .upsert({ channel_id: existingCanonical.id }, { onConflict: 'channel_id' })
+
+      const { count: activeReferences } = await admin
+        .from('user_channels')
+        .select('*', { head: true, count: 'exact' })
+        .eq('channel_id', channel.id)
+        .eq('is_active', true)
+
+      if ((activeReferences ?? 0) === 0) {
+        await admin
+          .from('channels')
+          .update({ status: 'inactive' })
+          .eq('id', channel.id)
+      }
+
+      channel = existingCanonical
+    } else {
+      // Aggiorna il canale globale alla forma canonica `UC...` appena disponibile.
+      const { error: channelUpdateError } = await admin
+        .from('channels')
+        .update({
+          youtube_channel_id: resolved.channelId,
+          title: resolved.title ?? channel.title,
+          handle: handle,
+        })
+        .eq('id', channel.id)
+
+      if (channelUpdateError) {
+        throw new AppError('Risoluzione handle completata ma update canale fallito', 'unknown', 500, {
+          cause: channelUpdateError.message,
+        })
+      }
+
+      channel.youtube_channel_id = resolved.channelId
+    }
   }
 
   const maxResults = params.maxResults ?? 20
-  const uploadsPlaylistId = await getUploadsPlaylistId(youtubeApiKey, channel.youtube_channel_id)
+  const channelSnapshot = await getChannelSnapshot(youtubeApiKey, channel.youtube_channel_id)
+  const uploadsPlaylistId = channelSnapshot.uploadsPlaylistId
+
+  await admin
+    .from('channels')
+    .update({
+      title: channelSnapshot.title ?? channel.title,
+      description: channelSnapshot.description ?? channel.description,
+      thumbnail_url: channelSnapshot.thumbnailUrl ?? channel.thumbnail_url,
+      subscriber_count: channelSnapshot.subscriberCount,
+      video_count: channelSnapshot.videoCount,
+      custom_url: channelSnapshot.customUrl ?? channel.custom_url,
+      youtube_metadata: channelSnapshot.raw,
+    })
+    .eq('id', channel.id)
+
   const items = await listRecentPlaylistItems(youtubeApiKey, uploadsPlaylistId, maxResults)
 
   const upsertRows = items

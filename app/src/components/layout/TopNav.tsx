@@ -53,6 +53,7 @@ export default function TopNav({ variant, session }: TopNavProps) {
             <nav className="hidden md:flex items-center gap-6">
               <NavLink href="/dashboard">{t('nav.dashboard')}</NavLink>
               <NavLink href="/channels">{t('nav.channels')}</NavLink>
+              <NavLink href="/traker">{t('nav.traker')}</NavLink>
               <NavLink href="/watchlist">{t('nav.watchlist')}</NavLink>
               <NavLink href="/integrations">{t('nav.integrations')}</NavLink>
             </nav>

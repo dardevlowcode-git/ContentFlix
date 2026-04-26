@@ -42,6 +42,18 @@ export default function SideNav({ session }: SideNavProps) {
       ),
     },
     {
+      href: '/traker',
+      label: t('nav.traker'),
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M3.75 6.75a3 3 0 013-3h10.5a3 3 0 013 3v10.5a3 3 0 01-3 3H6.75a3 3 0 01-3-3V6.75z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M7.5 7.5h3v3h-3v-3zm0 6h3v3h-3v-3zm6-6h3v3h-3v-3z" />
+        </svg>
+      ),
+    },
+    {
       href: '/watchlist',
       label: t('nav.watchlist'),
       icon: (

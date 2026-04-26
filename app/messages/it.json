@@ -7,13 +7,15 @@
   "nav": {
     "dashboard": "Dashboard",
     "channels": "Canali",
+    "tracker": "Tracker",
     "analysis": "Analisi",
     "integrations": "Integrazioni",
     "watchlist": "Lista da vedere",
     "admin": "Console Admin",
     "help": "Centro assistenza",
     "logout": "Esci",
-    "login": "Accedi"
+    "login": "Accedi",
+    "traker": "Traker"
   },
   "auth": {
     "loginWithGoogle": "Accedi con Google",
@@ -221,6 +223,29 @@
     "removeFromList": "Rimuovi dalla lista",
     "count": "{count} video salvati per la tua revisione.",
     "backToDashboard": "Torna alla dashboard"
+  },
+  "tracker": {
+    "title": "Tracker video",
+    "subtitle": "Monitora velocemente i contenuti già visti e quelli ancora da vedere.",
+    "empty": "Non ci sono ancora video da tracciare.",
+    "addChannels": "Aggiungi canali per iniziare",
+    "allCaughtUp": "Hai visto tutto. Nessun video in sospeso.",
+    "noneWatchedYet": "Non hai ancora segnato nessun video come visto.",
+    "viewSummary": "Vedi riepilogo",
+    "badges": {
+      "seen": "VISTO",
+      "unseen": "DA VEDERE",
+      "watchlist": "LISTA"
+    },
+    "sections": {
+      "toWatch": "Da vedere ({count})",
+      "watched": "Visti ({count})"
+    },
+    "metrics": {
+      "toWatch": "Da vedere",
+      "watched": "Visti",
+      "inWatchlist": "In lista"
+    }
   },
   "admin": {
     "title": "Console Admin",
