@@ -67,6 +67,9 @@ export default async function VideoDetailPage({ params }: Props) {
   const channel = (video as any).channels
 
   const isAnalyzed = analysis?.analysis_status === 'completed'
+  const embedUrl = video.youtube_video_id
+    ? `https://www.youtube-nocookie.com/embed/${video.youtube_video_id}`
+    : null
 
   // Format duration
   function formatDuration(seconds: number | null): string {
@@ -85,7 +88,16 @@ export default async function VideoDetailPage({ params }: Props) {
 
           {/* Thumbnail / video embed */}
           <div className="relative rounded-2xl overflow-hidden bg-surface-container aspect-video shadow-ambient">
-            {video.thumbnail_url ? (
+            {embedUrl ? (
+              <iframe
+                src={embedUrl}
+                title={video.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            ) : video.thumbnail_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={video.thumbnail_url}
