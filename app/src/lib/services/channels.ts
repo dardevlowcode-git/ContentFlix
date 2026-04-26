@@ -209,15 +209,37 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
 
   const normalized = normalizeChannelUrl(parsed)
 
-  // Prima scansione immediata: evita di lasciare job pendenti senza worker dedicato.
-  await requestScanNowForUser({
-    userId: params.userId,
-    channelId: channel.id,
-  })
+  let initialScanError: string | null = null
+
+  // Prima scansione immediata best-effort:
+  // il canale deve risultare aggiunto anche se la scansione fallisce.
+  try {
+    await requestScanNowForUser({
+      userId: params.userId,
+      channelId: channel.id,
+    })
+  } catch (error) {
+    initialScanError = error instanceof AppError
+      ? error.message
+      : error instanceof Error
+        ? error.message
+        : 'scan_failed'
+
+    await supabase.from('app_logs').insert({
+      level: 'warn',
+      message: 'Canale aggiunto ma scansione iniziale fallita',
+      context: {
+        userId: params.userId,
+        channelId: channel.id,
+        error: initialScanError,
+      },
+    })
+  }
 
   return {
     channelId: channel.id,
     normalizedChannelUrl: normalized,
+    initialScanError,
   }
 }
 
@@ -322,7 +344,9 @@ export async function requestScanNowForUser(
     await importChannelVideos({
       userId: params.userId,
       channelId: params.channelId,
-      bypassUserChannelGuard: Boolean(options?.asAdmin),
+      // Import canonico richiede scrittura su tabelle admin-only (`videos`).
+      // Il controllo ownership canale e` gia` effettuato sopra.
+      bypassUserChannelGuard: true,
     })
 
     const completedAt = new Date().toISOString()
@@ -347,10 +371,14 @@ export async function requestScanNowForUser(
         ? error.message
         : 'scan_failed'
     const details = error instanceof AppError
-      ? (error.context ?? null)
+      ? {
+        type: error.type,
+        statusCode: error.statusCode ?? null,
+        ...(error.context ?? {}),
+      }
       : error instanceof Error
         ? { message: error.message }
-        : null
+        : { message: 'scan_failed' }
     const completedAt = new Date().toISOString()
 
     await admin
@@ -368,8 +396,20 @@ export async function requestScanNowForUser(
       error_details: details,
     })
 
+    await admin.from('app_logs').insert({
+      level: 'error',
+      message: 'Job scan canale fallito',
+      context: {
+        jobId: jobRow.id,
+        userId: params.userId,
+        channelId: params.channelId,
+        errorMessage: message,
+        errorDetails: details,
+      },
+    })
+
     throw error
   }
 
-  return { queued: true }
+  return { queued: true, jobId: jobRow.id }
 }

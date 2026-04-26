@@ -19,6 +19,7 @@ interface JobRow {
   priority: number
   created_at: string
   error_message: string | null
+  failure_detail?: string | null
 }
 
 interface AdminJobsClientProps {
@@ -38,7 +39,7 @@ export default function AdminJobsClient({ initialJobs }: AdminJobsClientProps) {
   const [busy, setBusy] = useState<BusyState>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const { templateColumns, onStartResize } = useResizableColumns([420, 160, 110, 170, 260, 140], { minWidth: 90 })
+  const { templateColumns, onStartResize } = useResizableColumns([420, 160, 110, 170, 360, 140], { minWidth: 90 })
 
   const statusColor: Record<JobRow['status'], string> = {
     pending: 'bg-amber-100 text-amber-700',
@@ -202,8 +203,15 @@ export default function AdminJobsClient({ initialJobs }: AdminJobsClientProps) {
                   <div className="text-sm text-on-surface-variant pr-3">
                     {new Date(job.created_at).toLocaleDateString(locale)}
                   </div>
-                  <div className="text-xs text-error truncate pr-3">
-                    {job.error_message ?? '—'}
+                  <div className="pr-3">
+                    <p className="text-xs text-error truncate">
+                      {job.error_message ?? '—'}
+                    </p>
+                    {job.failure_detail ? (
+                      <p className="text-[11px] text-on-surface-variant truncate mt-0.5" title={job.failure_detail}>
+                        {job.failure_detail}
+                      </p>
+                    ) : null}
                   </div>
                   <div className="flex justify-end">
                     {job.status === 'pending' && (

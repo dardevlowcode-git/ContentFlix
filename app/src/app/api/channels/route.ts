@@ -70,9 +70,9 @@ export async function POST(request: Request) {
       }
 
       // Scansione manuale: crea un job asincrono senza bloccare la richiesta HTTP.
-      await requestScanNowForUser({ userId, channelId: body.channelId })
+      const scanResult = await requestScanNowForUser({ userId, channelId: body.channelId })
       return Response.json({
-        data: { message: 'Scansione completata' },
+        data: { message: 'Scansione avviata', ...scanResult },
         error: null,
         errorType: null,
       })
@@ -88,7 +88,9 @@ export async function POST(request: Request) {
 
     return Response.json({
       data: {
-        message: 'Canale aggiunto correttamente',
+        message: result.initialScanError
+          ? `Canale aggiunto. Scansione iniziale fallita: ${result.initialScanError}`
+          : 'Canale aggiunto correttamente',
         ...result,
       },
       error: null,

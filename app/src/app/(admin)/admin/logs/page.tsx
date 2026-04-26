@@ -85,10 +85,14 @@ export default async function AdminLogsPage() {
           created_by_user_id: (attempt.jobs?.created_by_user_id as string | null | undefined) ?? null,
           payload: attempt.jobs?.payload,
         }
+        const detail = attempt.error_details
+          ? (typeof attempt.error_details === 'string' ? attempt.error_details : JSON.stringify(attempt.error_details))
+          : null
         return {
           id: attempt.id as string,
           label: buildJobLabel(source, usersById, channelsById),
           errorMessage: (attempt.error_message as string | null) ?? t('admin.logs.unknownError'),
+          errorDetail: detail,
           timestampIso: (attempt.completed_at as string | null) ?? (attempt.started_at as string),
           attemptLabel: `#${attempt.attempt_number}`,
         }
@@ -99,10 +103,14 @@ export default async function AdminLogsPage() {
           created_by_user_id: (job.created_by_user_id as string | null | undefined) ?? null,
           payload: job.payload,
         }
+        const detail = job.payload
+          ? (typeof job.payload === 'string' ? job.payload : JSON.stringify(job.payload))
+          : null
         return {
           id: job.id as string,
           label: buildJobLabel(source, usersById, channelsById),
           errorMessage: (job.error_message as string | null) ?? t('admin.logs.unknownError'),
+          errorDetail: detail,
           timestampIso: (job.completed_at as string | null) ?? (job.created_at as string),
           attemptLabel: '—',
         }

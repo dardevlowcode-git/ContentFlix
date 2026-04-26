@@ -12,6 +12,7 @@ interface FailedJobRow {
   id: string
   label: string
   errorMessage: string
+  errorDetail: string | null
   timestampIso: string
   attemptLabel: string
 }
@@ -23,13 +24,13 @@ interface FailedJobsTableClientProps {
 }
 
 export default function FailedJobsTableClient({ rows, emptyLabel, locale }: FailedJobsTableClientProps) {
-  const { templateColumns, onStartResize } = useResizableColumns([460, 360, 170, 120], { minWidth: 90 })
+  const { templateColumns, onStartResize } = useResizableColumns([360, 250, 360, 170, 120], { minWidth: 90 })
 
   return (
     <div className="bg-surface-container-lowest rounded-2xl overflow-auto shadow-ambient max-h-[420px]">
       <div className="min-w-max">
         <div className="grid px-5 py-3 bg-surface-container-low" style={{ gridTemplateColumns: templateColumns }}>
-          {['Job', 'Errore', 'Quando', 'Tentativo'].map((label, index, arr) => (
+          {['Job', 'Errore', 'Dettaglio', 'Quando', 'Tentativo'].map((label, index, arr) => (
             <div key={label} className="relative pr-3">
               <p className={`text-label-caps text-on-surface-variant ${index === arr.length - 1 ? 'text-right' : ''}`}>
                 {label}
@@ -58,6 +59,9 @@ export default function FailedJobsTableClient({ rows, emptyLabel, locale }: Fail
             >
               <p className="text-sm font-semibold text-on-surface truncate pr-3">{row.label}</p>
               <p className="text-xs text-error truncate pr-3">{row.errorMessage}</p>
+              <p className="text-[11px] text-on-surface-variant truncate pr-3" title={row.errorDetail ?? '—'}>
+                {row.errorDetail ?? '—'}
+              </p>
               <p className="text-xs text-outline pr-3">
                 {new Date(row.timestampIso).toLocaleString(locale)}
               </p>

@@ -50,6 +50,18 @@ export default async function AdminJobsPage() {
   )
 
   const jobsWithLabel = jobRows.map((job) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...(() => {
+      const attempts = (job.job_attempts ?? []) as any[]
+      const latestAttempt = attempts
+        .slice()
+        .sort((a, b) => Number(b.attempt_number ?? 0) - Number(a.attempt_number ?? 0))[0]
+      const details = latestAttempt?.error_details
+      const failureDetail = details
+        ? (typeof details === 'string' ? details : JSON.stringify(details))
+        : null
+      return { failure_detail: failureDetail }
+    })(),
     ...job,
     job_label: buildJobLabel(job, usersById, channelsById),
   }))
