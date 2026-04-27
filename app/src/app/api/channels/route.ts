@@ -17,6 +17,7 @@ interface ChannelPostBody {
   action?: 'add' | 'scan_now'
   channelUrl?: string
   channelId?: string
+  markExistingVideosAsSeen?: boolean
 }
 
 interface ChannelDeleteBody {
@@ -84,7 +85,11 @@ export async function POST(request: Request) {
     }
 
     // Aggiunta canale: parsing URL + upsert + enqueue sync iniziale.
-    const result = await addChannelForUser({ userId, channelUrl })
+    const result = await addChannelForUser({
+      userId,
+      channelUrl,
+      markExistingVideosAsSeen: body?.markExistingVideosAsSeen ?? true,
+    })
 
     return Response.json({
       data: {
@@ -105,7 +110,7 @@ export async function POST(request: Request) {
 }
 
 /**
- * Rimuove (soft) il collegamento utente-canale.
+ * Rimuove il canale dal profilo utente e pulisce i riferimenti collegati.
  */
 export async function DELETE(request: Request) {
   try {

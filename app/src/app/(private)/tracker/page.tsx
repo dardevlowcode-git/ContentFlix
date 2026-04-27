@@ -209,13 +209,18 @@ function TrackerCard({
       <div className="flex-1 min-w-0 flex flex-col justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-2">
-            <span className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-full ${
-              isSeen
-                ? 'bg-surface-container-high text-on-surface-variant'
-                : 'bg-primary-fixed text-on-primary-fixed'
-            }`}>
-              {isSeen ? labels.seen : labels.unseen}
-            </span>
+            <SeenStatusButton
+              videoId={item.video.id}
+              initialSeen={isSeen}
+              variant="badge"
+              labels={{
+                seen: labels.seen,
+                unseen: labels.unseen,
+                markSeen: labels.markSeen,
+                markUnseen: labels.markUnseen,
+                error: labels.error,
+              }}
+            />
             {item.userState.isInWatchlist ? (
               <span className="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-tertiary-fixed text-on-tertiary-fixed">
                 {labels.watchlist}
@@ -238,15 +243,6 @@ function TrackerCard({
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <SeenStatusButton
-            videoId={item.video.id}
-            initialSeen={isSeen}
-            labels={{
-              markSeen: labels.markSeen,
-              markUnseen: labels.markUnseen,
-              error: labels.error,
-            }}
-          />
           {hasCompletedAnalysis ? (
             <Link
               href={`/video/${item.video.id}`}

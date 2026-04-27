@@ -186,7 +186,17 @@
     "syncFrequency": "Sync frequency",
     "title": "Channels",
     "videos": "videos",
-    "weekly": "Weekly"
+    "weekly": "Weekly",
+    "addPolicy": {
+      "title": "Handling already published videos",
+      "description": "When you add a new channel, how should existing videos be handled?",
+      "markSeen": "Mark all as already seen",
+      "markSeenHint": "Recommended default. Historical videos will not appear in your to-watch list.",
+      "keepUnseen": "Keep videos as to-watch",
+      "keepUnseenHint": "Existing videos will appear as unseen in tracker and dashboard.",
+      "confirm": "Confirm and add",
+      "nativePrompt": "Mark all already published videos from this channel as seen?\n\nOK = Yes (recommended default)\nCancel = No, keep them as to-watch"
+    }
   },
   "integrations": {
     "refreshError": "Unable to refresh integration status",

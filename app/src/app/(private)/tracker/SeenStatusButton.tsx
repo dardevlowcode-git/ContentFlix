@@ -13,16 +13,20 @@ interface SeenStatusButtonProps {
   videoId: string
   initialSeen: boolean
   labels: {
+    seen: string
+    unseen: string
     markSeen: string
     markUnseen: string
     error: string
   }
+  variant?: 'badge' | 'button'
 }
 
 export default function SeenStatusButton({
   videoId,
   initialSeen,
   labels,
+  variant = 'button',
 }: SeenStatusButtonProps) {
   const router = useRouter()
   const [isSeen, setIsSeen] = useState(initialSeen)
@@ -67,13 +71,23 @@ export default function SeenStatusButton({
         type="button"
         onClick={toggleSeenStatus}
         disabled={loading}
-        className={`px-4 py-2 rounded-full text-xs font-bold transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
-          isSeen
-            ? 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
-            : 'bg-primary text-on-primary hover:bg-primary-container'
-        }`}
+        aria-label={isSeen ? labels.markUnseen : labels.markSeen}
+        title={isSeen ? labels.markUnseen : labels.markSeen}
+        className={
+          variant === 'badge'
+            ? `px-2.5 py-1 text-[10px] font-bold uppercase rounded-full transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+              isSeen
+                ? 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+                : 'bg-primary-fixed text-on-primary-fixed hover:brightness-95'
+            }`
+            : `px-4 py-2 rounded-full text-xs font-bold transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+              isSeen
+                ? 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+                : 'bg-primary text-on-primary hover:bg-primary-container'
+            }`
+        }
       >
-        {isSeen ? labels.markUnseen : labels.markSeen}
+        {isSeen ? labels.seen : labels.unseen}
       </button>
       {error ? <p className="text-[11px] text-error">{error}</p> : null}
     </div>

@@ -38,6 +38,38 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
     setError(null)
   }
 
+  async function submitAddChannel(channelUrlToAdd: string, markExistingVideosAsSeen: boolean) {
+    setBusy({ type: 'add' })
+
+    try {
+      const response = await fetch('/api/channels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channelUrl: channelUrlToAdd,
+          markExistingVideosAsSeen,
+        }),
+      })
+
+      const payload = (await response.json().catch(() => null)) as
+        | { data: { message?: string } | null; error: string | null }
+        | null
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? t('channels.addError'))
+      }
+
+      setChannelUrl('')
+      setMessage(payload?.data?.message ?? t('channels.added'))
+      await refreshChannels()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('common.error')
+      setError(message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
   async function refreshChannels() {
     setBusy({ type: 'refresh' })
 
@@ -68,32 +100,8 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
       return
     }
 
-    setBusy({ type: 'add' })
-
-    try {
-      const response = await fetch('/api/channels', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channelUrl: value }),
-      })
-
-      const payload = (await response.json().catch(() => null)) as
-        | { data: { message?: string } | null; error: string | null }
-        | null
-
-      if (!response.ok) {
-        throw new Error(payload?.error ?? t('channels.addError'))
-      }
-
-      setChannelUrl('')
-      setMessage(payload?.data?.message ?? t('channels.added'))
-      await refreshChannels()
-    } catch (err) {
-      const message = err instanceof Error ? err.message : t('common.error')
-      setError(message)
-    } finally {
-      setBusy(null)
-    }
+    const markExistingVideosAsSeen = window.confirm(t('channels.addPolicy.nativePrompt'))
+    await submitAddChannel(value, markExistingVideosAsSeen)
   }
 
   async function handleRemoveChannel(channelId: string) {
@@ -348,6 +356,7 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
           </div>
         )}
       </section>
+
     </div>
   )
 }

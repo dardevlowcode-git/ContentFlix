@@ -152,7 +152,17 @@
     "adding": "Aggiunta...",
     "supportedFormats": "Formati supportati",
     "statusLabel": "Stato",
-    "everyNHoursPrefix": "Ogni"
+    "everyNHoursPrefix": "Ogni",
+    "addPolicy": {
+      "title": "Gestione video già pubblicati",
+      "description": "Quando aggiungi un nuovo canale, come vuoi trattare i video già presenti?",
+      "markSeen": "Segna tutti come già visti",
+      "markSeenHint": "Scelta predefinita consigliata. I video storici non compariranno tra quelli da vedere.",
+      "keepUnseen": "Mantieni i video come da vedere",
+      "keepUnseenHint": "I video già presenti verranno mostrati come non visti nel tracker/dashboard.",
+      "confirm": "Conferma e aggiungi",
+      "nativePrompt": "Segnare tutti i video già pubblicati di questo canale come visti?\n\nOK = Sì (predefinito consigliato)\nAnnulla = No, mantienili da vedere"
+    }
   },
   "video": {
     "publishedBy": "Pubblicato da",

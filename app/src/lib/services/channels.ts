@@ -23,6 +23,62 @@ export interface UserChannelListItem {
   syncState: CanonicalSyncStateRow | null
 }
 
+function chunkArray<T>(values: T[], size: number): T[][] {
+  if (values.length === 0) return []
+
+  const chunks: T[][] = []
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size))
+  }
+  return chunks
+}
+
+async function markChannelVideosSeenForUser(params: {
+  admin: ReturnType<typeof createAdminClient>
+  userId: string
+  channelId: string
+}): Promise<number> {
+  const { data: channelVideos, error: videosError } = await params.admin
+    .from('videos')
+    .select('id')
+    .eq('channel_id', params.channelId)
+
+  if (videosError) {
+    throw new AppError('Canale aggiunto ma stato visto/non visto non aggiornato', 'unknown', 500, {
+      cause: videosError.message,
+    })
+  }
+
+  const videoIds = (channelVideos ?? []).map((video) => video.id)
+  if (videoIds.length === 0) {
+    return 0
+  }
+
+  const seenAt = new Date().toISOString()
+
+  for (const chunk of chunkArray(videoIds, 400)) {
+    const { error: upsertError } = await params.admin
+      .from('user_video_states')
+      .upsert(
+        chunk.map((videoId) => ({
+          user_id: params.userId,
+          video_id: videoId,
+          seen_status: 'seen' as const,
+          seen_at: seenAt,
+        })),
+        { onConflict: 'user_id,video_id' }
+      )
+
+    if (upsertError) {
+      throw new AppError('Canale aggiunto ma stato visto/non visto non aggiornato', 'unknown', 500, {
+        cause: upsertError.message,
+      })
+    }
+  }
+
+  return videoIds.length
+}
+
 /**
  * Normalizza valori opzionali provenienti da relazioni Supabase.
  * Alcune select annidate restituiscono array, altre oggetti singoli.
@@ -122,7 +178,7 @@ export async function getChannelsForUser(userId: string): Promise<UserChannelLis
  * Aggiunge un canale al profilo utente.
  * Flusso: parse URL -> upsert canale canonico -> upsert relazione utente -> init preferenze -> scan iniziale.
  */
-export async function addChannelForUser(params: { userId: string; channelUrl: string }) {
+export async function addChannelForUser(params: { userId: string; channelUrl: string; markExistingVideosAsSeen?: boolean }) {
   const parsed = parseYouTubeChannelUrl(params.channelUrl)
 
   if (parsed.type === 'invalid') {
@@ -233,6 +289,8 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
   const normalized = normalizeChannelUrl(parsed)
 
   let initialScanError: string | null = null
+  const shouldMarkExistingVideosAsSeen = params.markExistingVideosAsSeen ?? true
+  let markedSeenCount = 0
 
   // Prima scansione immediata best-effort:
   // il canale deve risultare aggiunto anche se la scansione fallisce.
@@ -259,19 +317,28 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
     })
   }
 
+  if (shouldMarkExistingVideosAsSeen) {
+    markedSeenCount = await markChannelVideosSeenForUser({
+      admin: supabase,
+      userId: params.userId,
+      channelId: channel.id,
+    })
+  }
+
   return {
     channelId: channel.id,
     normalizedChannelUrl: normalized,
     initialScanError,
+    markedSeenCount,
   }
 }
 
 /**
- * Disattiva il collegamento utente-canale senza eliminare il contenuto canonico.
- * Mantiene il comportamento idempotente: se gia` disattivo ritorna `alreadyRemoved: true`.
+ * Rimuove il collegamento utente-canale e pulisce i riferimenti utente al suo contenuto.
+ * Mantiene il comportamento idempotente: se gia` non attivo ritorna `alreadyRemoved: true`.
  */
 export async function removeChannelForUser(params: { userId: string; channelId: string }) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: userChannel, error: lookupError } = await supabase
     .from('user_channels')
@@ -286,16 +353,81 @@ export async function removeChannelForUser(params: { userId: string; channelId: 
     })
   }
 
-  if (!userChannel.is_active) {
-    return { alreadyRemoved: true }
+  const wasAlreadyRemoved = !userChannel.is_active
+
+  const { data: channelVideos, error: channelVideosError } = await supabase
+    .from('videos')
+    .select('id')
+    .eq('channel_id', params.channelId)
+
+  if (channelVideosError) {
+    throw new AppError('Impossibile rimuovere i riferimenti video del canale', 'unknown', 500, {
+      cause: channelVideosError.message,
+    })
+  }
+
+  const videoIds = (channelVideos ?? []).map((video) => video.id)
+
+  if (videoIds.length > 0) {
+    for (const chunk of chunkArray(videoIds, 400)) {
+      const { error: deleteSeenError } = await supabase
+        .from('user_video_states')
+        .delete()
+        .eq('user_id', params.userId)
+        .in('video_id', chunk)
+
+      if (deleteSeenError) {
+        throw new AppError('Impossibile pulire lo stato visto/non visto del canale', 'unknown', 500, {
+          cause: deleteSeenError.message,
+        })
+      }
+    }
+  }
+
+  const { data: userWatchlists, error: watchlistsError } = await supabase
+    .from('watchlists')
+    .select('id')
+    .eq('user_id', params.userId)
+
+  if (watchlistsError) {
+    throw new AppError('Impossibile leggere le watchlist utente', 'unknown', 500, {
+      cause: watchlistsError.message,
+    })
+  }
+
+  const watchlistIds = (userWatchlists ?? []).map((watchlist) => watchlist.id)
+  if (watchlistIds.length > 0 && videoIds.length > 0) {
+    for (const watchlistChunk of chunkArray(watchlistIds, 200)) {
+      for (const videoChunk of chunkArray(videoIds, 200)) {
+        const { error: deleteWatchlistError } = await supabase
+          .from('watchlist_items')
+          .delete()
+          .in('watchlist_id', watchlistChunk)
+          .in('video_id', videoChunk)
+
+        if (deleteWatchlistError) {
+          throw new AppError('Impossibile pulire la watchlist del canale', 'unknown', 500, {
+            cause: deleteWatchlistError.message,
+          })
+        }
+      }
+    }
+  }
+
+  const { error: preferenceDeleteError } = await supabase
+    .from('user_channel_preferences')
+    .delete()
+    .eq('user_channel_id', userChannel.id)
+
+  if (preferenceDeleteError) {
+    throw new AppError('Impossibile rimuovere le preferenze del canale', 'unknown', 500, {
+      cause: preferenceDeleteError.message,
+    })
   }
 
   const { error: removeError } = await supabase
     .from('user_channels')
-    .update({
-      is_active: false,
-      removed_at: new Date().toISOString(),
-    })
+    .delete()
     .eq('id', userChannel.id)
 
   if (removeError) {
@@ -304,7 +436,7 @@ export async function removeChannelForUser(params: { userId: string; channelId: 
     })
   }
 
-  return { alreadyRemoved: false }
+  return { alreadyRemoved: wasAlreadyRemoved }
 }
 
 /**
