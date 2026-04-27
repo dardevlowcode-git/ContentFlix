@@ -253,6 +253,33 @@
       "unseen": "Da vedere",
       "hidden": "Nascosto"
     },
+    "views": {
+      "ribbon": "Ribbon",
+      "list": "Lista",
+      "latest": "Solo ultimo video"
+    },
+    "scope": {
+      "allChannels": "Tutti i canali",
+      "selectedChannelPrefix": "Canale selezionato"
+    },
+    "statusInfo": {
+      "seenWithDate": "Visto · {date}",
+      "hiddenWithDate": "Nascosto · {date}"
+    },
+    "latest": {
+      "emptyChannel": "Nessun video non visto disponibile per questo canale."
+    },
+    "list": {
+      "headers": {
+        "video": "Video",
+        "channel": "Canale",
+        "actions": "Azioni",
+        "generalCategory": "General category",
+        "subcategory": "Subcategory",
+        "shortSummary": "Short summary"
+      },
+      "noData": "-"
+    },
     "actions": {
       "hide": "Nascondi",
       "unhide": "Mostra"

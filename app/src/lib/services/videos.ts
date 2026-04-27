@@ -39,8 +39,11 @@ export async function setVideoSeenStatusForUser(params: {
   userId: string
   videoId: string
   seenStatus: 'seen' | 'unseen' | 'hidden'
-}): Promise<{ seenStatus: 'seen' | 'unseen' | 'hidden' }> {
+}): Promise<{ seenStatus: 'seen' | 'unseen' | 'hidden'; seenAt: string | null; hiddenAt: string | null }> {
   const supabase = await createClient()
+  const now = new Date().toISOString()
+  const seenAt = params.seenStatus === 'seen' ? now : null
+  const hiddenAt = params.seenStatus === 'hidden' ? now : null
 
   const { error } = await supabase
     .from('user_video_states')
@@ -49,7 +52,8 @@ export async function setVideoSeenStatusForUser(params: {
         user_id: params.userId,
         video_id: params.videoId,
         seen_status: params.seenStatus,
-        seen_at: params.seenStatus === 'seen' ? new Date().toISOString() : null,
+        seen_at: seenAt,
+        hidden_at: hiddenAt,
       },
       { onConflict: 'user_id,video_id' }
     )
@@ -58,7 +62,7 @@ export async function setVideoSeenStatusForUser(params: {
     throw new AppError('Impossibile aggiornare stato visto', 'unknown', 500, { cause: error.message })
   }
 
-  return { seenStatus: params.seenStatus }
+  return { seenStatus: params.seenStatus, seenAt, hiddenAt }
 }
 
 /**
@@ -155,7 +159,7 @@ function mapVideoWithContext(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   row: any,
   preferredLanguage: string,
-  userSeenMap: Map<string, 'seen' | 'unseen' | 'hidden'>,
+  userStateMap: Map<string, { seenStatus: 'seen' | 'unseen' | 'hidden'; seenAt: string | null; hiddenAt: string | null }>,
   watchlistVideoIds: Set<string>
 ): VideoWithContext {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,7 +170,8 @@ function mapVideoWithContext(
     ?? row.video_localized_content?.[0]
     ?? null
 
-  const seenStatus = userSeenMap.get(row.id) ?? 'unseen'
+  const state = userStateMap.get(row.id)
+  const seenStatus = state?.seenStatus ?? 'unseen'
 
   return {
     video: {
@@ -205,6 +210,8 @@ function mapVideoWithContext(
     userState: {
       seenStatus,
       isInWatchlist: watchlistVideoIds.has(row.id),
+      seenAt: state?.seenAt ?? null,
+      hiddenAt: state?.hiddenAt ?? null,
     },
   }
 }
@@ -271,14 +278,18 @@ export async function getVideosForUser(params: GetVideosForUserParams): Promise<
   const { data: states } = videoIds.length
     ? await supabase
       .from('user_video_states')
-      .select('video_id, seen_status')
+      .select('video_id, seen_status, seen_at, hidden_at')
       .eq('user_id', params.userId)
       .in('video_id', videoIds)
-    : { data: [] as Array<{ video_id: string; seen_status: 'seen' | 'unseen' | 'hidden' }> }
+    : { data: [] as Array<{ video_id: string; seen_status: 'seen' | 'unseen' | 'hidden'; seen_at: string | null; hidden_at: string | null }> }
 
-  const userSeenMap = new Map<string, 'seen' | 'unseen' | 'hidden'>()
+  const userStateMap = new Map<string, { seenStatus: 'seen' | 'unseen' | 'hidden'; seenAt: string | null; hiddenAt: string | null }>()
   for (const state of states ?? []) {
-    userSeenMap.set(state.video_id, state.seen_status)
+    userStateMap.set(state.video_id, {
+      seenStatus: state.seen_status,
+      seenAt: state.seen_at,
+      hiddenAt: state.hidden_at,
+    })
   }
 
   const { data: watchlistRows } = videoIds.length
@@ -293,7 +304,7 @@ export async function getVideosForUser(params: GetVideosForUserParams): Promise<
 
   const preferredLanguage = params.languageCode?.trim() || 'it'
 
-  let items = (rows ?? []).map((row) => mapVideoWithContext(row, preferredLanguage, userSeenMap, watchlistVideoIds))
+  let items = (rows ?? []).map((row) => mapVideoWithContext(row, preferredLanguage, userStateMap, watchlistVideoIds))
 
   if (params.analysisStatus) {
     items = items.filter((item) => item.analysis?.analysis_status === params.analysisStatus)

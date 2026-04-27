@@ -6,9 +6,11 @@
 
 'use client'
 
+import Link from 'next/link'
 import { useMemo, useState, type FormEvent } from 'react'
 import type { UserChannelListItem } from '@/lib/services/channels'
 import { useLocale, useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
 
 interface ChannelsClientProps {
   initialChannels: UserChannelListItem[]
@@ -22,6 +24,7 @@ type BusyAction = {
 export default function ChannelsClient({ initialChannels }: ChannelsClientProps) {
   const t = useTranslations()
   const locale = useLocale()
+  const searchParams = useSearchParams()
   const [channelUrl, setChannelUrl] = useState('')
   const [channels, setChannels] = useState<UserChannelListItem[]>(initialChannels)
   const [busy, setBusy] = useState<BusyAction>(null)
@@ -32,6 +35,7 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
     () => `${channels.length} ${t('channels.videos')}`,
     [channels.length, t]
   )
+  const trackerView = searchParams.get('view')
 
   const clearFeedback = () => {
     setMessage(null)
@@ -281,7 +285,14 @@ export default function ChannelsClient({ initialChannels }: ChannelsClientProps)
                       </div>
                     )}
                     <div>
-                      <p className="font-semibold text-on-surface text-sm">{channel.title}</p>
+                      <Link
+                        href={trackerView
+                          ? `/tracker?channelId=${channel.id}&view=${trackerView}`
+                          : `/tracker?channelId=${channel.id}`}
+                        className="font-semibold text-on-surface text-sm hover:text-primary transition-colors"
+                      >
+                        {channel.title}
+                      </Link>
                       <p className="text-xs text-on-surface-variant">
                         {channel.handle ? `@${channel.handle}` : channel.youtube_channel_id}
                       </p>

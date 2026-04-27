@@ -65,6 +65,7 @@ async function markChannelVideosSeenForUser(params: {
           video_id: videoId,
           seen_status: 'seen' as const,
           seen_at: seenAt,
+          hidden_at: null,
         })),
         { onConflict: 'user_id,video_id' }
       )

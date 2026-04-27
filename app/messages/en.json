@@ -253,6 +253,33 @@
       "unseen": "To watch",
       "hidden": "Hidden"
     },
+    "views": {
+      "ribbon": "Ribbon",
+      "list": "List",
+      "latest": "Latest only"
+    },
+    "scope": {
+      "allChannels": "All channels",
+      "selectedChannelPrefix": "Selected channel"
+    },
+    "statusInfo": {
+      "seenWithDate": "Seen · {date}",
+      "hiddenWithDate": "Hidden · {date}"
+    },
+    "latest": {
+      "emptyChannel": "No unseen video available for this channel."
+    },
+    "list": {
+      "headers": {
+        "video": "Video",
+        "channel": "Channel",
+        "actions": "Actions",
+        "generalCategory": "General category",
+        "subcategory": "Subcategory",
+        "shortSummary": "Short summary"
+      },
+      "noData": "-"
+    },
     "actions": {
       "hide": "Hide",
       "unhide": "Show"

@@ -40,6 +40,8 @@ export interface VideoWithContext {
 export interface VideoUserState {
   seenStatus: 'seen' | 'unseen' | 'hidden'
   isInWatchlist: boolean
+  seenAt: string | null
+  hiddenAt: string | null
 }
 
 /**

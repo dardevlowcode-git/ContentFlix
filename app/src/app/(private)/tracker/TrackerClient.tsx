@@ -1,19 +1,27 @@
 /* Commento didattico:
- * Scopo del file: renderizza il tracker lato client con filtri a flag e aggiornamento immediato dello stato video.
- * Moduli richiamati: `next/link`, `react`, `./SeenStatusButton`, `@/lib/types/domain`
- * Flusso: mantiene lista e filtri in stato locale, filtra i video visibili e aggiorna le card dopo ogni azione utente.
+ * Scopo del file: renderizza il tracker lato client con filtri stato, selezione vista e supporto filtro canale.
+ * Moduli richiamati: `next/link`, `next/navigation`, `react`, `./SeenStatusButton`, `@/lib/types/domain`
+ * Flusso: mantiene stato locale video/filtri/vista, aggiorna query URL e proietta i dati nelle viste ribbon/list/latest.
  */
 
 'use client'
 
 import Link from 'next/link'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import SeenStatusButton from './SeenStatusButton'
 import type { VideoWithContext } from '@/lib/types/domain'
+
+type TrackerViewMode = 'ribbon' | 'list' | 'latest'
+type SeenStatus = 'seen' | 'unseen' | 'hidden'
 
 interface TrackerClientProps {
   items: VideoWithContext[]
   locale: string
+  initialView: TrackerViewMode
+  selectedChannelId: string | null
+  channels: Array<{ id: string; title: string }>
   labels: {
     title: string
     subtitle: string
@@ -23,6 +31,11 @@ interface TrackerClientProps {
     noneWatchedYet: string
     noVideosForFilters: string
     viewSummary: string
+    scope: {
+      allChannels: string
+      selectedChannelPrefix: string
+      selectedChannelFallback: string
+    }
     badges: {
       unseen: string
       seen: string
@@ -33,6 +46,29 @@ interface TrackerClientProps {
       seen: string
       unseen: string
       hidden: string
+    }
+    views: {
+      ribbon: string
+      list: string
+      latest: string
+    }
+    latest: {
+      emptyChannel: string
+    }
+    list: {
+      headers: {
+        video: string
+        channel: string
+        actions: string
+        generalCategory: string
+        subcategory: string
+        shortSummary: string
+      }
+      noData: string
+    }
+    statusInfo: {
+      seenWithDate: string
+      hiddenWithDate: string
     }
     metrics: {
       toWatch: string
@@ -49,13 +85,30 @@ interface TrackerClientProps {
   }
 }
 
-export default function TrackerClient({ items, locale, labels }: TrackerClientProps) {
+type LatestRow = {
+  channelId: string
+  channelTitle: string
+  item: VideoWithContext | null
+}
+
+export default function TrackerClient({
+  items,
+  locale,
+  initialView,
+  selectedChannelId,
+  channels,
+  labels,
+}: TrackerClientProps) {
   const [videos, setVideos] = useState(items)
+  const [view, setView] = useState<TrackerViewMode>(initialView)
   const [filters, setFilters] = useState({
     seen: false,
     unseen: true,
     hidden: false,
   })
+  const pathname = usePathname()
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const counts = useMemo(() => {
     return {
@@ -69,11 +122,36 @@ export default function TrackerClient({ items, locale, labels }: TrackerClientPr
     return videos.filter((item) => filters[item.userState.seenStatus])
   }, [videos, filters])
 
-  function toggleFilter(filterKey: 'seen' | 'unseen' | 'hidden') {
+  const channelScopeLabel = selectedChannelId
+    ? `${labels.scope.selectedChannelPrefix}: ${labels.scope.selectedChannelFallback}`
+    : labels.scope.allChannels
+
+  const latestRows = useMemo(() => {
+    if (view !== 'latest') return []
+    return buildLatestRows(videos, channels, selectedChannelId, locale)
+  }, [channels, locale, selectedChannelId, videos, view])
+
+  function updateView(nextView: TrackerViewMode) {
+    setView(nextView)
+
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('view', nextView)
+
+    if (selectedChannelId) {
+      params.set('channelId', selectedChannelId)
+    } else {
+      params.delete('channelId')
+    }
+
+    const query = params.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+  }
+
+  function toggleFilter(filterKey: SeenStatus) {
     setFilters((current) => ({ ...current, [filterKey]: !current[filterKey] }))
   }
 
-  function updateVideoStatus(videoId: string, nextStatus: 'seen' | 'unseen' | 'hidden') {
+  function updateVideoStatus(videoId: string, nextState: { seenStatus: SeenStatus; seenAt: string | null; hiddenAt: string | null }) {
     setVideos((current) =>
       current.map((item) => {
         if (item.video.id !== videoId) return item
@@ -81,7 +159,9 @@ export default function TrackerClient({ items, locale, labels }: TrackerClientPr
           ...item,
           userState: {
             ...item.userState,
-            seenStatus: nextStatus,
+            seenStatus: nextState.seenStatus,
+            seenAt: nextState.seenAt,
+            hiddenAt: nextState.hiddenAt,
           },
         }
       })
@@ -89,13 +169,16 @@ export default function TrackerClient({ items, locale, labels }: TrackerClientPr
   }
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-8 max-w-[1400px]">
       <header className="mb-8">
         <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
           {labels.title}
         </h1>
-        <p className="text-on-surface-variant text-lg mb-5">
+        <p className="text-on-surface-variant text-lg mb-2">
           {labels.subtitle}
+        </p>
+        <p className="text-sm font-semibold text-primary mb-5">
+          {channelScopeLabel}
         </p>
 
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
@@ -104,22 +187,25 @@ export default function TrackerClient({ items, locale, labels }: TrackerClientPr
           <MetricCard label={labels.metrics.hidden} value={counts.hidden} tone="danger" />
         </section>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <FilterPill
-            label={labels.filters.unseen}
-            checked={filters.unseen}
-            onToggle={() => toggleFilter('unseen')}
-          />
-          <FilterPill
-            label={labels.filters.seen}
-            checked={filters.seen}
-            onToggle={() => toggleFilter('seen')}
-          />
-          <FilterPill
-            label={labels.filters.hidden}
-            checked={filters.hidden}
-            onToggle={() => toggleFilter('hidden')}
-          />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <FilterPill
+              label={labels.filters.unseen}
+              checked={filters.unseen}
+              onToggle={() => toggleFilter('unseen')}
+            />
+            <FilterPill
+              label={labels.filters.seen}
+              checked={filters.seen}
+              onToggle={() => toggleFilter('seen')}
+            />
+            <FilterPill
+              label={labels.filters.hidden}
+              checked={filters.hidden}
+              onToggle={() => toggleFilter('hidden')}
+            />
+          </div>
+          <ViewSelector view={view} labels={labels.views} onChange={updateView} />
         </div>
       </header>
 
@@ -130,10 +216,24 @@ export default function TrackerClient({ items, locale, labels }: TrackerClientPr
             {labels.addChannels}
           </Link>
         </div>
+      ) : view === 'latest' ? (
+        <LatestView
+          rows={latestRows}
+          locale={locale}
+          labels={labels}
+          onStatusChange={updateVideoStatus}
+        />
       ) : filteredItems.length === 0 ? (
         <div className="bg-surface-container-low rounded-2xl p-10 text-center">
           <p className="text-on-surface-variant">{labels.noVideosForFilters}</p>
         </div>
+      ) : view === 'list' ? (
+        <DenseListView
+          items={filteredItems}
+          locale={locale}
+          labels={labels}
+          onStatusChange={updateVideoStatus}
+        />
       ) : (
         <div className="space-y-4">
           {filteredItems.map((item) => (
@@ -142,12 +242,66 @@ export default function TrackerClient({ items, locale, labels }: TrackerClientPr
               item={item}
               locale={locale}
               labels={labels}
-              onStatusChange={(nextStatus) => updateVideoStatus(item.video.id, nextStatus)}
+              onStatusChange={(nextState) => updateVideoStatus(item.video.id, nextState)}
             />
           ))}
         </div>
       )}
     </div>
+  )
+}
+
+function ViewSelector({
+  view,
+  labels,
+  onChange,
+}: {
+  view: TrackerViewMode
+  labels: TrackerClientProps['labels']['views']
+  onChange: (nextView: TrackerViewMode) => void
+}) {
+  return (
+    <div className="inline-flex rounded-xl bg-surface-container-high p-1">
+      <ViewButton label={labels.ribbon} active={view === 'ribbon'} onClick={() => onChange('ribbon')} icon={
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4h14v3H3V4zm0 5h14v3H3V9zm0 5h14v3H3v-3z" /></svg>
+      } />
+      <ViewButton label={labels.list} active={view === 'list'} onClick={() => onChange('list')} icon={
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4h3v3H3V4zm5 0h9v3H8V4zM3 9h3v3H3V9zm5 0h9v3H8V9zM3 14h3v3H3v-3zm5 0h9v3H8v-3z" /></svg>
+      } />
+      <ViewButton label={labels.latest} active={view === 'latest'} onClick={() => onChange('latest')} icon={
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 3a7 7 0 100 14 7 7 0 000-14zm1 3H9v5l4 2 .9-1.8L11 10.2V6z" /></svg>
+      } />
+    </div>
+  )
+}
+
+function ViewButton({
+  label,
+  active,
+  onClick,
+  icon,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+  icon: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      title={label}
+      aria-label={label}
+      aria-pressed={active}
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+        active
+          ? 'bg-primary-fixed text-on-primary-fixed'
+          : 'text-on-surface-variant hover:bg-surface-container-highest'
+      }`}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
   )
 }
 
@@ -200,13 +354,14 @@ function TrackerCard({
   item: VideoWithContext
   locale: string
   labels: TrackerClientProps['labels']
-  onStatusChange: (nextStatus: 'seen' | 'unseen' | 'hidden') => void
+  onStatusChange: (nextState: { seenStatus: SeenStatus; seenAt: string | null; hiddenAt: string | null }) => void
 }) {
   const isSeen = item.userState.seenStatus === 'seen'
   const isHidden = item.userState.seenStatus === 'hidden'
   const publishedLabel = formatPublishedDate(item.video.published_at, locale)
   const durationLabel = formatDuration(item.video.duration_seconds)
   const hasCompletedAnalysis = item.analysis?.analysis_status === 'completed'
+  const statusTimestamp = getStatusTimestampLabel(item, locale, labels)
 
   return (
     <article className={`group flex flex-col md:flex-row gap-5 p-5 rounded-[1.75rem] transition-all ${
@@ -249,6 +404,8 @@ function TrackerCard({
             <SeenStatusButton
               videoId={item.video.id}
               initialStatus={item.userState.seenStatus}
+              initialSeenAt={item.userState.seenAt}
+              initialHiddenAt={item.userState.hiddenAt}
               variant="badge"
               onStatusChange={onStatusChange}
               labels={{
@@ -276,6 +433,9 @@ function TrackerCard({
           <p className="text-sm text-secondary font-semibold mt-1">
             {item.channel.title}
           </p>
+          {statusTimestamp ? (
+            <p className="text-xs text-on-surface-variant mt-1">{statusTimestamp}</p>
+          ) : null}
           {item.localizedContent?.short_summary ? (
             <p className="text-sm text-on-surface-variant mt-2 line-clamp-2 ai-content">
               {item.localizedContent.short_summary}
@@ -296,6 +456,223 @@ function TrackerCard({
       </div>
     </article>
   )
+}
+
+function DenseListView({
+  items,
+  locale,
+  labels,
+  onStatusChange,
+}: {
+  items: VideoWithContext[]
+  locale: string
+  labels: TrackerClientProps['labels']
+  onStatusChange: (videoId: string, nextState: { seenStatus: SeenStatus; seenAt: string | null; hiddenAt: string | null }) => void
+}) {
+  return (
+    <div className="bg-surface-container-lowest rounded-2xl overflow-auto shadow-ambient">
+      <table className="min-w-full text-sm">
+        <thead className="bg-surface-container-low text-on-surface-variant">
+          <tr>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.video}</th>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.channel}</th>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.actions}</th>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.generalCategory}</th>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.subcategory}</th>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.shortSummary}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item, index) => (
+            // Manteniamo le colonne AI presenti ma vuote, pronte per popolamento futuro.
+            <tr
+              key={item.video.id}
+              className={`align-top ${index % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low/50'}`}
+            >
+              <td className="px-3 py-3">
+                <Link href={`/video/${item.video.id}`} className="flex items-start gap-3">
+                  <div className="w-24 aspect-video rounded-lg overflow-hidden shrink-0 bg-surface-container">
+                    {item.video.thumbnail_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.video.thumbnail_url} alt={item.video.title} className="w-full h-full object-cover" />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-on-surface line-clamp-2">{item.video.title}</p>
+                    <p className="text-xs text-on-surface-variant mt-1">{formatPublishedDate(item.video.published_at, locale)}</p>
+                    {(() => {
+                      const statusInfo = getStatusTimestampLabel(item, locale, labels)
+                      if (!statusInfo) return null
+                      return <p className="text-xs text-on-surface-variant mt-1">{statusInfo}</p>
+                    })()}
+                  </div>
+                </Link>
+              </td>
+              <td className="px-3 py-3 text-on-surface font-medium">{item.channel.title}</td>
+              <td className="px-3 py-3">
+                <SeenStatusButton
+                  videoId={item.video.id}
+                  initialStatus={item.userState.seenStatus}
+                  initialSeenAt={item.userState.seenAt}
+                  initialHiddenAt={item.userState.hiddenAt}
+                  variant="button"
+                  onStatusChange={(nextState) => onStatusChange(item.video.id, nextState)}
+                  labels={{
+                    seen: labels.badges.seen,
+                    unseen: labels.badges.unseen,
+                    hidden: labels.badges.hidden,
+                    markSeen: labels.actions.markSeen,
+                    markUnseen: labels.actions.markUnseen,
+                    hide: labels.actions.hide,
+                    unhide: labels.actions.unhide,
+                    error: labels.error,
+                  }}
+                />
+              </td>
+              <td className="px-3 py-3 text-on-surface-variant">{labels.list.noData}</td>
+              <td className="px-3 py-3 text-on-surface-variant">{labels.list.noData}</td>
+              <td className="px-3 py-3 text-on-surface-variant">{labels.list.noData}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function LatestView({
+  rows,
+  locale,
+  labels,
+  onStatusChange,
+}: {
+  rows: LatestRow[]
+  locale: string
+  labels: TrackerClientProps['labels']
+  onStatusChange: (videoId: string, nextState: { seenStatus: SeenStatus; seenAt: string | null; hiddenAt: string | null }) => void
+}) {
+  return (
+    <div className="bg-surface-container-lowest rounded-2xl overflow-auto shadow-ambient">
+      <table className="min-w-full text-sm">
+        <thead className="bg-surface-container-low text-on-surface-variant">
+          <tr>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.video}</th>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.channel}</th>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.actions}</th>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.generalCategory}</th>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.subcategory}</th>
+            <th className="px-3 py-3 text-left font-bold uppercase tracking-[0.04em]">{labels.list.headers.shortSummary}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, index) => (
+            <tr key={row.channelId} className={index % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low/50'}>
+              <td className="px-3 py-3">
+                {row.item ? (
+                  <Link href={`/video/${row.item.video.id}`} className="flex items-start gap-3">
+                    <div className="w-24 aspect-video rounded-lg overflow-hidden shrink-0 bg-surface-container">
+                      {row.item.video.thumbnail_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={row.item.video.thumbnail_url} alt={row.item.video.title} className="w-full h-full object-cover" />
+                      ) : null}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-on-surface line-clamp-2">{row.item.video.title}</p>
+                      <p className="text-xs text-on-surface-variant mt-1">{formatPublishedDate(row.item.video.published_at, locale)}</p>
+                    </div>
+                  </Link>
+                ) : (
+                  <p className="text-on-surface-variant">{labels.latest.emptyChannel}</p>
+                )}
+              </td>
+              <td className="px-3 py-3 text-on-surface font-medium">{row.channelTitle}</td>
+              <td className="px-3 py-3">
+                {row.item ? (
+                  <SeenStatusButton
+                    videoId={row.item.video.id}
+                    initialStatus={row.item.userState.seenStatus}
+                    initialSeenAt={row.item.userState.seenAt}
+                    initialHiddenAt={row.item.userState.hiddenAt}
+                    variant="button"
+                    onStatusChange={(nextState) => onStatusChange(row.item!.video.id, nextState)}
+                    labels={{
+                      seen: labels.badges.seen,
+                      unseen: labels.badges.unseen,
+                      hidden: labels.badges.hidden,
+                      markSeen: labels.actions.markSeen,
+                      markUnseen: labels.actions.markUnseen,
+                      hide: labels.actions.hide,
+                      unhide: labels.actions.unhide,
+                      error: labels.error,
+                    }}
+                  />
+                ) : null}
+              </td>
+              <td className="px-3 py-3 text-on-surface-variant">{labels.list.noData}</td>
+              <td className="px-3 py-3 text-on-surface-variant">{labels.list.noData}</td>
+              <td className="px-3 py-3 text-on-surface-variant">{labels.list.noData}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function buildLatestRows(
+  videos: VideoWithContext[],
+  channels: Array<{ id: string; title: string }>,
+  selectedChannelId: string | null,
+  locale: string
+): LatestRow[] {
+  const scopedChannels = selectedChannelId
+    ? channels.filter((channel) => channel.id === selectedChannelId)
+    : channels
+
+  const sortedChannels = [...scopedChannels].sort((a, b) => a.title.localeCompare(b.title, locale))
+
+  return sortedChannels.map((channel) => {
+    const latestVideo = videos.find((item) => item.channel.id === channel.id && item.userState.seenStatus === 'unseen')
+    return {
+      channelId: channel.id,
+      channelTitle: channel.title,
+      item: latestVideo ?? null,
+    }
+  })
+}
+
+function getStatusTimestampLabel(
+  item: VideoWithContext,
+  locale: string,
+  labels: TrackerClientProps['labels']
+): string | null {
+  if (item.userState.seenStatus === 'seen' && item.userState.seenAt) {
+    return labels.statusInfo.seenWithDate.replace('{date}', formatDateWithRelative(item.userState.seenAt, locale))
+  }
+  if (item.userState.seenStatus === 'hidden' && item.userState.hiddenAt) {
+    return labels.statusInfo.hiddenWithDate.replace('{date}', formatDateWithRelative(item.userState.hiddenAt, locale))
+  }
+  return null
+}
+
+function formatDateWithRelative(date: string, locale: string): string {
+  const now = new Date()
+  const then = new Date(date)
+  const diffMs = now.getTime() - then.getTime()
+  const diffMinutes = Math.round(diffMs / (1000 * 60))
+  const absDiffMinutes = Math.abs(diffMinutes)
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
+
+  let relativeLabel = ''
+  if (absDiffMinutes < 60) {
+    relativeLabel = rtf.format(-diffMinutes, 'minute')
+  } else if (absDiffMinutes < 60 * 24) {
+    relativeLabel = rtf.format(-Math.round(diffMinutes / 60), 'hour')
+  } else {
+    relativeLabel = rtf.format(-Math.round(diffMinutes / (60 * 24)), 'day')
+  }
+
+  return `${relativeLabel} (${then.toLocaleString(locale)})`
 }
 
 function formatDuration(seconds: number | null): string {

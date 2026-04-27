@@ -1,7 +1,7 @@
 /* Commento didattico:
- * Scopo del file: carica dati tracker lato server e delega rendering interattivo al client.
- * Moduli richiamati: `next`, `next-intl/server`, `next/navigation`, `@/lib/auth/provider`, `@/lib/services/videos`
- * Flusso: verifica sessione, legge i video dell'utente e passa tutto a `TrackerClient`.
+ * Scopo del file: carica dati tracker lato server, applica filtro canale/view via URL e delega rendering interattivo al client.
+ * Moduli richiamati: `next`, `next-intl/server`, `next/navigation`, servizi auth/channels/videos
+ * Flusso: valida sessione, risolve filtro canale, carica tutti i video utili al tracker e passa stato iniziale a `TrackerClient`.
  */
 
 import type { Metadata } from 'next'
@@ -9,32 +9,98 @@ import { getLocale, getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import TrackerClient from './TrackerClient'
 import { getCurrentSession } from '@/lib/auth/provider'
+import { getChannelsForUser } from '@/lib/services/channels'
 import { getVideosForUser } from '@/lib/services/videos'
+import type { VideoWithContext } from '@/lib/types/domain'
 
 export const metadata: Metadata = {
   title: 'Tracker Video',
 }
 
-export default async function TrackerPage() {
+type TrackerViewMode = 'ribbon' | 'list' | 'latest'
+
+interface TrackerPageProps {
+  searchParams?: Promise<{
+    view?: string | string[]
+    channelId?: string | string[]
+  }>
+}
+
+function firstParam(value?: string | string[]): string | null {
+  if (!value) return null
+  return Array.isArray(value) ? (value[0] ?? null) : value
+}
+
+function normalizeView(value: string | null): TrackerViewMode {
+  if (value === 'list' || value === 'latest') return value
+  return 'ribbon'
+}
+
+async function loadTrackerVideos(params: {
+  userId: string
+  languageCode: string
+  channelId?: string
+}): Promise<VideoWithContext[]> {
+  const limit = 50
+  let page = 1
+  let total = Number.POSITIVE_INFINITY
+  const allItems: VideoWithContext[] = []
+
+  while (allItems.length < total) {
+    const response = await getVideosForUser({
+      userId: params.userId,
+      languageCode: params.languageCode,
+      channelId: params.channelId,
+      limit,
+      page,
+    })
+
+    allItems.push(...response.items)
+    total = response.total
+    if (response.items.length === 0) break
+    page += 1
+  }
+
+  return allItems
+}
+
+export default async function TrackerPage({ searchParams }: TrackerPageProps) {
   const session = await getCurrentSession()
   if (!session) {
     redirect('/login')
   }
 
-  const t = await getTranslations()
-  const locale = await getLocale()
+  const [t, locale, userChannels, resolvedSearchParams] = await Promise.all([
+    getTranslations(),
+    getLocale(),
+    getChannelsForUser(session.userId),
+    searchParams,
+  ])
 
-  const { items } = await getVideosForUser({
+  const queryView = firstParam(resolvedSearchParams?.view)
+  const queryChannelId = firstParam(resolvedSearchParams?.channelId)
+  const initialView = normalizeView(queryView)
+
+  const activeChannels = userChannels.map((item) => item.channel)
+  const allowedChannelIds = new Set(activeChannels.map((channel) => channel.id))
+  const selectedChannelId = queryChannelId && allowedChannelIds.has(queryChannelId) ? queryChannelId : null
+  const selectedChannel = selectedChannelId
+    ? activeChannels.find((channel) => channel.id === selectedChannelId) ?? null
+    : null
+
+  const items = await loadTrackerVideos({
     userId: session.userId,
     languageCode: session.preferredLanguage,
-    limit: 48,
-    page: 1,
+    channelId: selectedChannelId ?? undefined,
   })
 
   return (
     <TrackerClient
       items={items}
       locale={locale}
+      initialView={initialView}
+      selectedChannelId={selectedChannelId}
+      channels={activeChannels.map((channel) => ({ id: channel.id, title: channel.title }))}
       labels={{
         title: t('tracker.title'),
         subtitle: t('tracker.subtitle'),
@@ -44,6 +110,11 @@ export default async function TrackerPage() {
         noneWatchedYet: t('tracker.noneWatchedYet'),
         noVideosForFilters: t('tracker.noVideosForFilters'),
         viewSummary: t('tracker.viewSummary'),
+        scope: {
+          allChannels: t('tracker.scope.allChannels'),
+          selectedChannelPrefix: t('tracker.scope.selectedChannelPrefix'),
+          selectedChannelFallback: selectedChannel?.title ?? queryChannelId ?? t('tracker.scope.allChannels'),
+        },
         badges: {
           unseen: t('tracker.badges.unseen'),
           seen: t('tracker.badges.seen'),
@@ -54,6 +125,29 @@ export default async function TrackerPage() {
           seen: t('tracker.filters.seen'),
           unseen: t('tracker.filters.unseen'),
           hidden: t('tracker.filters.hidden'),
+        },
+        views: {
+          ribbon: t('tracker.views.ribbon'),
+          list: t('tracker.views.list'),
+          latest: t('tracker.views.latest'),
+        },
+        latest: {
+          emptyChannel: t('tracker.latest.emptyChannel'),
+        },
+        list: {
+          headers: {
+            video: t('tracker.list.headers.video'),
+            channel: t('tracker.list.headers.channel'),
+            actions: t('tracker.list.headers.actions'),
+            generalCategory: t('tracker.list.headers.generalCategory'),
+            subcategory: t('tracker.list.headers.subcategory'),
+            shortSummary: t('tracker.list.headers.shortSummary'),
+          },
+          noData: t('tracker.list.noData'),
+        },
+        statusInfo: {
+          seenWithDate: t('tracker.statusInfo.seenWithDate'),
+          hiddenWithDate: t('tracker.statusInfo.hiddenWithDate'),
         },
         metrics: {
           toWatch: t('tracker.metrics.toWatch'),

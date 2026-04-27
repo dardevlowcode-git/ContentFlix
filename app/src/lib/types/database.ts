@@ -449,6 +449,7 @@ export type Database = {
           video_id: string
           seen_status: 'unseen' | 'seen' | 'hidden'
           seen_at: string | null
+          hidden_at: string | null
         }
         Insert: {
           id?: string
@@ -456,10 +457,12 @@ export type Database = {
           video_id: string
           seen_status?: 'unseen' | 'seen' | 'hidden'
           seen_at?: string | null
+          hidden_at?: string | null
         }
         Update: {
           seen_status?: 'unseen' | 'seen' | 'hidden'
           seen_at?: string | null
+          hidden_at?: string | null
         }
       }
       watchlists: {

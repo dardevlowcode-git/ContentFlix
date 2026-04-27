@@ -11,6 +11,8 @@ import { useState } from 'react'
 interface SeenStatusButtonProps {
   videoId: string
   initialStatus: 'seen' | 'unseen' | 'hidden'
+  initialSeenAt?: string | null
+  initialHiddenAt?: string | null
   labels: {
     seen: string
     unseen: string
@@ -21,18 +23,22 @@ interface SeenStatusButtonProps {
     unhide: string
     error: string
   }
-  onStatusChange?: (nextStatus: 'seen' | 'unseen' | 'hidden') => void
+  onStatusChange?: (nextState: { seenStatus: 'seen' | 'unseen' | 'hidden'; seenAt: string | null; hiddenAt: string | null }) => void
   variant?: 'badge' | 'button'
 }
 
 export default function SeenStatusButton({
   videoId,
   initialStatus,
+  initialSeenAt = null,
+  initialHiddenAt = null,
   labels,
   onStatusChange,
   variant = 'button',
 }: SeenStatusButtonProps) {
   const [status, setStatus] = useState<'seen' | 'unseen' | 'hidden'>(initialStatus)
+  const [seenAt, setSeenAt] = useState<string | null>(initialSeenAt)
+  const [hiddenAt, setHiddenAt] = useState<string | null>(initialHiddenAt)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -57,8 +63,25 @@ export default function SeenStatusButton({
         throw new Error(payload?.error ?? labels.error)
       }
 
+      const resolvedSeenAt = typeof payload?.data?.seenAt === 'string'
+        ? payload.data.seenAt
+        : nextStatus === 'seen'
+          ? seenAt
+          : null
+      const resolvedHiddenAt = typeof payload?.data?.hiddenAt === 'string'
+        ? payload.data.hiddenAt
+        : nextStatus === 'hidden'
+          ? hiddenAt
+          : null
+
       setStatus(nextStatus)
-      onStatusChange?.(nextStatus)
+      setSeenAt(resolvedSeenAt)
+      setHiddenAt(resolvedHiddenAt)
+      onStatusChange?.({
+        seenStatus: nextStatus,
+        seenAt: resolvedSeenAt,
+        hiddenAt: resolvedHiddenAt,
+      })
     } catch (e) {
       setError(e instanceof Error ? e.message : labels.error)
     } finally {
