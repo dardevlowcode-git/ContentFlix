@@ -38,7 +38,7 @@ export interface VideoWithContext {
 
 /** User-specific video state (derived from sparse user_video_states + watchlist_items) */
 export interface VideoUserState {
-  seenStatus: 'seen' | 'unseen'
+  seenStatus: 'seen' | 'unseen' | 'hidden'
   isInWatchlist: boolean
 }
 

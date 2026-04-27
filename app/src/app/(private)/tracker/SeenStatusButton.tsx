@@ -1,44 +1,45 @@
 /* Commento didattico:
- * Scopo del file: gestisce l'azione rapida visto/non visto nella lista tracker.
- * Moduli richiamati: `next/navigation`, `react`
- * Flusso: al click invia una richiesta API per aggiornare lo stato e ricarica la pagina per riflettere i gruppi visti/non visti.
+ * Scopo del file: gestisce le azioni rapide visto/non visto e nascosto nella lista tracker.
+ * Moduli richiamati: `react`
+ * Flusso: al click invia la richiesta API e aggiorna lo stato locale per riflettere subito i filtri selezionati.
  */
 
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 interface SeenStatusButtonProps {
   videoId: string
-  initialSeen: boolean
+  initialStatus: 'seen' | 'unseen' | 'hidden'
   labels: {
     seen: string
     unseen: string
+    hidden: string
     markSeen: string
     markUnseen: string
+    hide: string
+    unhide: string
     error: string
   }
+  onStatusChange?: (nextStatus: 'seen' | 'unseen' | 'hidden') => void
   variant?: 'badge' | 'button'
 }
 
 export default function SeenStatusButton({
   videoId,
-  initialSeen,
+  initialStatus,
   labels,
+  onStatusChange,
   variant = 'button',
 }: SeenStatusButtonProps) {
-  const router = useRouter()
-  const [isSeen, setIsSeen] = useState(initialSeen)
+  const [status, setStatus] = useState<'seen' | 'unseen' | 'hidden'>(initialStatus)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function toggleSeenStatus() {
+  async function setVideoStatus(nextStatus: 'seen' | 'unseen' | 'hidden') {
     if (loading) return
     setLoading(true)
     setError(null)
-
-    const nextSeen = !isSeen
 
     try {
       const response = await fetch('/api/videos', {
@@ -47,7 +48,7 @@ export default function SeenStatusButton({
         body: JSON.stringify({
           action: 'set_seen_status',
           videoId,
-          seenStatus: nextSeen ? 'seen' : 'unseen',
+          seenStatus: nextStatus,
         }),
       })
 
@@ -56,8 +57,8 @@ export default function SeenStatusButton({
         throw new Error(payload?.error ?? labels.error)
       }
 
-      setIsSeen(nextSeen)
-      router.refresh()
+      setStatus(nextStatus)
+      onStatusChange?.(nextStatus)
     } catch (e) {
       setError(e instanceof Error ? e.message : labels.error)
     } finally {
@@ -65,30 +66,67 @@ export default function SeenStatusButton({
     }
   }
 
+  function toggleSeenStatus() {
+    const nextStatus = status === 'seen' ? 'unseen' : 'seen'
+    return setVideoStatus(nextStatus)
+  }
+
+  function toggleHiddenStatus() {
+    const nextStatus = status === 'hidden' ? 'unseen' : 'hidden'
+    return setVideoStatus(nextStatus)
+  }
+
+  const isSeen = status === 'seen'
+  const isHidden = status === 'hidden'
+
   return (
     <div className="space-y-1">
-      <button
-        type="button"
-        onClick={toggleSeenStatus}
-        disabled={loading}
-        aria-label={isSeen ? labels.markUnseen : labels.markSeen}
-        title={isSeen ? labels.markUnseen : labels.markSeen}
-        className={
-          variant === 'badge'
-            ? `px-2.5 py-1 text-[10px] font-bold uppercase rounded-full transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
-              isSeen
-                ? 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
-                : 'bg-primary-fixed text-on-primary-fixed hover:brightness-95'
-            }`
-            : `px-4 py-2 rounded-full text-xs font-bold transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
-              isSeen
-                ? 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
-                : 'bg-primary text-on-primary hover:bg-primary-container'
-            }`
-        }
-      >
-        {isSeen ? labels.seen : labels.unseen}
-      </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={toggleSeenStatus}
+          disabled={loading}
+          aria-label={isSeen ? labels.markUnseen : labels.markSeen}
+          title={isSeen ? labels.markUnseen : labels.markSeen}
+          className={
+            variant === 'badge'
+              ? `px-2.5 py-1 text-[10px] font-bold uppercase rounded-full transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                isSeen
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-primary-fixed text-on-primary-fixed hover:brightness-95'
+              }`
+              : `px-4 py-2 rounded-full text-xs font-bold transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                isSeen
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-primary text-on-primary hover:bg-primary-container'
+              }`
+          }
+        >
+          {isSeen ? labels.seen : labels.unseen}
+        </button>
+        <button
+          type="button"
+          onClick={toggleHiddenStatus}
+          disabled={loading}
+          aria-label={isHidden ? labels.unhide : labels.hide}
+          title={isHidden ? labels.unhide : labels.hide}
+          className={
+            variant === 'badge'
+              ? `px-2.5 py-1 text-[10px] font-bold uppercase rounded-full transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                isHidden
+                  ? 'bg-error text-white hover:brightness-95'
+                  : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+              }`
+              : `px-4 py-2 rounded-full text-xs font-bold transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                isHidden
+                  ? 'bg-error text-white hover:brightness-95'
+                  : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+              }`
+          }
+        >
+          {isHidden ? labels.hidden : labels.hide}
+        </button>
+      </div>
       {error ? <p className="text-[11px] text-error">{error}</p> : null}
     </div>
   )

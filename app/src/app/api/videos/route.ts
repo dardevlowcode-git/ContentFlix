@@ -18,7 +18,7 @@ interface VideosPostBody {
   channelId?: string
   maxResults?: number
   videoId?: string
-  seenStatus?: 'seen' | 'unseen'
+  seenStatus?: 'seen' | 'unseen' | 'hidden'
   inWatchlist?: boolean
 }
 
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
       | 'failed'
       | null) ?? undefined
 
-    const seenStatus = (searchParams.get('seenStatus') as 'seen' | 'unseen' | null) ?? undefined
+    const seenStatus = (searchParams.get('seenStatus') as 'seen' | 'unseen' | 'hidden' | null) ?? undefined
 
     const onlyWatchlist = parseBoolean(searchParams.get('onlyWatchlist'))
     const search = searchParams.get('search') ?? undefined
@@ -132,7 +132,7 @@ export async function POST(request: Request) {
       const videoId = body?.videoId?.trim()
       const seenStatus = body?.seenStatus
 
-      if (!videoId || (seenStatus !== 'seen' && seenStatus !== 'unseen')) {
+      if (!videoId || (seenStatus !== 'seen' && seenStatus !== 'unseen' && seenStatus !== 'hidden')) {
         return errorResponse('Parametri aggiornamento stato visto non validi', 'validation', 400)
       }
 

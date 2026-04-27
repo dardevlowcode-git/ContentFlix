@@ -245,7 +245,17 @@
     "badges": {
       "seen": "SEEN",
       "unseen": "TO WATCH",
+      "hidden": "HIDDEN",
       "watchlist": "WATCHLIST"
+    },
+    "filters": {
+      "seen": "Seen",
+      "unseen": "To watch",
+      "hidden": "Hidden"
+    },
+    "actions": {
+      "hide": "Hide",
+      "unhide": "Show"
     },
     "sections": {
       "toWatch": "To watch ({count})",
@@ -254,8 +264,10 @@
     "metrics": {
       "toWatch": "To watch",
       "watched": "Watched",
-      "inWatchlist": "In watchlist"
-    }
+      "inWatchlist": "In watchlist",
+      "hidden": "Hidden"
+    },
+    "noVideosForFilters": "No videos match the selected filters."
   },
   "admin": {
     "system": "System",

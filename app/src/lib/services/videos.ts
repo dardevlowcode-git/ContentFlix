@@ -17,7 +17,7 @@ export interface GetVideosForUserParams {
   userId: string
   channelId?: string
   analysisStatus?: AnalysisStatus
-  seenStatus?: 'seen' | 'unseen'
+  seenStatus?: 'seen' | 'unseen' | 'hidden'
   onlyWatchlist?: boolean
   search?: string
   languageCode?: string
@@ -38,8 +38,8 @@ export interface VideoListResponse {
 export async function setVideoSeenStatusForUser(params: {
   userId: string
   videoId: string
-  seenStatus: 'seen' | 'unseen'
-}): Promise<{ seenStatus: 'seen' | 'unseen' }> {
+  seenStatus: 'seen' | 'unseen' | 'hidden'
+}): Promise<{ seenStatus: 'seen' | 'unseen' | 'hidden' }> {
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -155,7 +155,7 @@ function mapVideoWithContext(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   row: any,
   preferredLanguage: string,
-  userSeenMap: Map<string, 'seen' | 'unseen'>,
+  userSeenMap: Map<string, 'seen' | 'unseen' | 'hidden'>,
   watchlistVideoIds: Set<string>
 ): VideoWithContext {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -274,9 +274,9 @@ export async function getVideosForUser(params: GetVideosForUserParams): Promise<
       .select('video_id, seen_status')
       .eq('user_id', params.userId)
       .in('video_id', videoIds)
-    : { data: [] as Array<{ video_id: string; seen_status: 'seen' | 'unseen' }> }
+    : { data: [] as Array<{ video_id: string; seen_status: 'seen' | 'unseen' | 'hidden' }> }
 
-  const userSeenMap = new Map<string, 'seen' | 'unseen'>()
+  const userSeenMap = new Map<string, 'seen' | 'unseen' | 'hidden'>()
   for (const state of states ?? []) {
     userSeenMap.set(state.video_id, state.seen_status)
   }

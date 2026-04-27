@@ -245,7 +245,17 @@
     "badges": {
       "seen": "VISTO",
       "unseen": "DA VEDERE",
+      "hidden": "NASCOSTO",
       "watchlist": "LISTA"
+    },
+    "filters": {
+      "seen": "Visto",
+      "unseen": "Da vedere",
+      "hidden": "Nascosto"
+    },
+    "actions": {
+      "hide": "Nascondi",
+      "unhide": "Mostra"
     },
     "sections": {
       "toWatch": "Da vedere ({count})",
@@ -254,8 +264,10 @@
     "metrics": {
       "toWatch": "Da vedere",
       "watched": "Visti",
-      "inWatchlist": "In lista"
-    }
+      "inWatchlist": "In lista",
+      "hidden": "Nascosti"
+    },
+    "noVideosForFilters": "Nessun video trovato con i filtri selezionati."
   },
   "admin": {
     "title": "Console Admin",

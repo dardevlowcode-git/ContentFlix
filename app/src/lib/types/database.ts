@@ -447,18 +447,18 @@ export type Database = {
           id: string
           user_id: string
           video_id: string
-          seen_status: 'unseen' | 'seen'
+          seen_status: 'unseen' | 'seen' | 'hidden'
           seen_at: string | null
         }
         Insert: {
           id?: string
           user_id: string
           video_id: string
-          seen_status?: 'unseen' | 'seen'
+          seen_status?: 'unseen' | 'seen' | 'hidden'
           seen_at?: string | null
         }
         Update: {
-          seen_status?: 'unseen' | 'seen'
+          seen_status?: 'unseen' | 'seen' | 'hidden'
           seen_at?: string | null
         }
       }
