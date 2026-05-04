@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "ContentFlix",
+    "name": "Utraya",
     "tagline": "Consuma YouTube più velocemente con l'AI",
-    "description": "ContentFlix analizza automaticamente i tuoi canali YouTube preferiti così rimani informato in pochi minuti, non ore."
+    "description": "Utraya analizza automaticamente i tuoi canali YouTube preferiti così rimani informato in pochi minuti, non ore."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -20,17 +20,17 @@
   "auth": {
     "loginWithGoogle": "Accedi con Google",
     "adminLogin": "Accesso Super Admin",
-    "loginTitle": "Accedi a ContentFlix",
+    "loginTitle": "Accedi a Utraya",
     "loginSubtitle": "Usa il tuo account Google per accedere alla piattaforma.",
     "accessDenied": "Accesso negato",
-    "accessDeniedDetail": "Il tuo account non è autorizzato ad accedere a ContentFlix. Contatta l'amministratore.",
+    "accessDeniedDetail": "Il tuo account non è autorizzato ad accedere a Utraya. Contatta l'amministratore.",
     "loggingIn": "Accesso in corso...",
     "logoutConfirm": "Vuoi davvero uscire?",
     "exchangeFailed": "Accesso fallito. Riprova tra qualche momento.",
     "noUser": "Impossibile recuperare le informazioni utente. Riprova.",
     "noCode": "Richiesta non valida. Riprova.",
     "inviteOnly": "Accesso su invito.",
-    "inviteOnlyDetail": "Solo gli utenti autorizzati dall'amministratore possono accedere a ContentFlix.",
+    "inviteOnlyDetail": "Solo gli utenti autorizzati dall'amministratore possono accedere a Utraya.",
     "backToHome": "Torna alla home",
     "admin": {
       "subtitle": "Accesso riservato al super admin con credenziali dedicate.",
@@ -48,7 +48,7 @@
       "badge": "Il futuro dei contenuti",
       "title": "Consuma YouTube",
       "titleHighlight": "più velocemente con l'AI",
-      "subtitle": "Smetti di sprecare ore su video lunghi. ContentFlix riassume automaticamente i tuoi canali preferiti così rimani informato in pochi minuti, non ore.",
+      "subtitle": "Smetti di sprecare ore su video lunghi. Utraya riassume automaticamente i tuoi canali preferiti così rimani informato in pochi minuti, non ore.",
       "ctaLogin": "Accedi con Google",
       "ctaDemo": "Guarda la demo"
     },
@@ -67,7 +67,7 @@
       "q1": "Quanto sono accurati i riepiloghi AI?",
       "a1": "I nostri modelli sono ottimizzati per contenuti video lunghi e catturano le sfumature tecniche, il contesto e l'intento principale del parlante.",
       "q2": "Posso ottenere riepiloghi in altre lingue?",
-      "a2": "Sì, ContentFlix supporta più lingue. I riepiloghi vengono generati nella tua lingua preferita indipendentemente dalla lingua audio del video.",
+      "a2": "Sì, Utraya supporta più lingue. I riepiloghi vengono generati nella tua lingua preferita indipendentemente dalla lingua audio del video.",
       "q3": "Quanti canali posso seguire?",
       "a3": "In V1 non ci sono limiti al numero di canali che puoi seguire.",
       "q4": "Come sono protetti i miei dati?",
@@ -106,7 +106,7 @@
     "notAnalyzed": "NON ANALIZZATO",
     "noChannels": "Non stai ancora seguendo nessun canale.",
     "addFirstChannel": "Aggiungi il tuo primo canale",
-    "emptyFeed": "Aggiungi canali YouTube tramite URL e ContentFlix analizzerà automaticamente i nuovi video.",
+    "emptyFeed": "Aggiungi canali YouTube tramite URL e Utraya analizzerà automaticamente i nuovi video.",
     "unknownChannel": "Canale sconosciuto",
     "noVideosYet": "I video dei tuoi canali appariranno qui non appena saranno importati."
   },
@@ -131,7 +131,7 @@
     },
     "existingChannel": {
       "title": "Canale già nell'archivio",
-      "description": "Questo canale è già presente nell'archivio ContentFlix. Vuoi importare i contenuti esistenti nel tuo account?",
+      "description": "Questo canale è già presente nell'archivio Utraya. Vuoi importare i contenuti esistenti nel tuo account?",
       "import": "Importa contenuti esistenti",
       "cancel": "Annulla"
     },
@@ -183,7 +183,7 @@
     "category": "Categoria",
     "subcategory": "Sottocategoria",
     "watchOnYoutube": "Guarda su YouTube",
-    "aiAnalysisTitle": "Analisi AI ContentFlix",
+    "aiAnalysisTitle": "Analisi AI Utraya",
     "analysisPendingDetail": "Il risultato sarà disponibile tra qualche momento."
   },
   "integrations": {
@@ -316,8 +316,8 @@
       "statusActive": "Attivo",
       "statusSuspended": "Sospeso",
       "statusDeleted": "Eliminato",
-      "subtitle": "Gestisci l'accesso a ContentFlix tramite allowlist.",
-      "allowlistDescription": "Inserisci l'indirizzo email da autorizzare ad accedere a ContentFlix.",
+      "subtitle": "Gestisci l'accesso a Utraya tramite allowlist.",
+      "allowlistDescription": "Inserisci l'indirizzo email da autorizzare ad accedere a Utraya.",
       "emailPlaceholder": "email@esempio.it",
       "authorizeAccess": "Autorizza accesso",
       "authorized": "Accesso autorizzato correttamente.",
@@ -351,6 +351,17 @@
     },
     "jobs": {
       "title": "Job e operazioni",
+      "scheduledTitle": "Prossimi job schedulati",
+      "scheduledSubtitle": "Anteprima delle prossime esecuzioni pianificate (in base alla prossima sync canale).",
+      "scheduledEmpty": "Nessuna esecuzione schedulata disponibile.",
+      "channel": "Canale",
+      "nextRun": "Prossima esecuzione",
+      "lastSyncStatus": "Ultimo esito sync",
+      "syncStatus": {
+        "success": "Successo",
+        "failed": "Fallita",
+        "partial": "Parziale"
+      },
       "retry": "Riprova",
       "retryConfirm": "Riaccodare questo job fallito?",
       "retryError": "Errore durante riaccodamento job",
@@ -405,7 +416,7 @@
     "system": "Sistema",
     "backToApp": "Torna all'app",
     "channels": {
-      "subtitle": "Tutti i canali nell'archivio ContentFlix ({count} canali).",
+      "subtitle": "Tutti i canali nell'archivio Utraya ({count} canali).",
       "subscribers": "Iscritti",
       "lastSync": "Ultima sync",
       "videos": "Video",

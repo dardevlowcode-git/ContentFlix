@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations()
 
   return {
-    title: `ContentFlix - ${t('app.tagline')}`,
+    title: `Utraya - ${t('app.tagline')}`,
     description: t('app.description'),
   }
 }

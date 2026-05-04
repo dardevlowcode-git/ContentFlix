@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 /**
  * Logica allowlist (lista email autorizzate).
  *
- * Un utente puo entrare in ContentFlix solo se:
+ * Un utente puo entrare in Utraya solo se:
  * 1. completa login OAuth (gestito da Supabase),
  * 2. la sua email risulta attiva in `allowlist_entries`.
  *

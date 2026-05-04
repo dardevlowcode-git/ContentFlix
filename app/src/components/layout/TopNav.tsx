@@ -44,7 +44,7 @@ export default function TopNav({ variant, session }: TopNavProps) {
         <div className="flex items-center gap-8">
           <Link href={session ? '/dashboard' : '/'} className="flex items-center gap-2">
             <span className="font-headline text-2xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">
-              ContentFlix
+              Utraya
             </span>
           </Link>
 

@@ -11,7 +11,7 @@ import { isEmailAllowlisted } from '@/lib/auth/allowlist'
 const adminSessionCookieName = 'cf_admin_session'
 
 /**
- * Middleware centrale di ContentFlix.
+ * Middleware centrale di Utraya.
  *
  * Responsabilita principali:
  * 1. Aggiornare la sessione Supabase ad ogni richiesta.

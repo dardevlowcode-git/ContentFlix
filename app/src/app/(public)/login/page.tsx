@@ -45,7 +45,7 @@ function LoginForm() {
         <div className="bg-surface-container-lowest rounded-3xl shadow-ambient p-10">
           <div className="text-center mb-8">
             <span className="font-headline text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">
-              ContentFlix
+              Utraya
             </span>
             <p className="text-on-surface-variant mt-2 text-sm">
               {t('auth.loginSubtitle')}

@@ -24,13 +24,19 @@ interface JobRow {
 
 interface AdminJobsClientProps {
   initialJobs: JobRow[]
+  upcomingSchedules: Array<{
+    channelId: string
+    channelTitle: string
+    nextSyncAt: string
+    lastSyncStatus: 'success' | 'failed' | 'partial' | null
+  }>
 }
 
 type BusyState =
   | { jobId: string; action: 'delete' | 'retry' }
   | null
 
-export default function AdminJobsClient({ initialJobs }: AdminJobsClientProps) {
+export default function AdminJobsClient({ initialJobs, upcomingSchedules }: AdminJobsClientProps) {
   const t = useTranslations()
   const locale = useLocale()
   const router = useRouter()
@@ -140,6 +146,46 @@ export default function AdminJobsClient({ initialJobs }: AdminJobsClientProps) {
 
       {message && <p className="mb-4 text-sm text-green-700">{message}</p>}
       {error && <p className="mb-4 text-sm text-error">{error}</p>}
+
+      <section className="mb-6 bg-surface-container-lowest rounded-2xl shadow-ambient p-5">
+        <h2 className="text-lg font-semibold text-on-surface mb-1">
+          {t('admin.jobs.scheduledTitle')}
+        </h2>
+        <p className="text-sm text-on-surface-variant mb-4">
+          {t('admin.jobs.scheduledSubtitle')}
+        </p>
+
+        {upcomingSchedules.length === 0 ? (
+          <p className="text-sm text-on-surface-variant">
+            {t('admin.jobs.scheduledEmpty')}
+          </p>
+        ) : (
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left text-on-surface-variant">
+                  <th className="py-2 pr-4 font-medium">{t('admin.jobs.channel')}</th>
+                  <th className="py-2 pr-4 font-medium">{t('admin.jobs.nextRun')}</th>
+                  <th className="py-2 font-medium">{t('admin.jobs.lastSyncStatus')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcomingSchedules.map((item) => (
+                  <tr key={`${item.channelId}:${item.nextSyncAt}`} className="border-t border-outline/30">
+                    <td className="py-2 pr-4 text-on-surface">{item.channelTitle}</td>
+                    <td className="py-2 pr-4 text-on-surface-variant">
+                      {new Date(item.nextSyncAt).toLocaleString(locale)}
+                    </td>
+                    <td className="py-2 text-on-surface-variant">
+                      {item.lastSyncStatus ? t(`admin.jobs.syncStatus.${item.lastSyncStatus}`) : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       <div className="bg-surface-container-lowest rounded-2xl shadow-ambient overflow-auto">
         <div className="min-w-max">

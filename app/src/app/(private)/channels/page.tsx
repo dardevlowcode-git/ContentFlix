@@ -11,7 +11,7 @@ import ChannelsClient from './ChannelsClient'
 
 export const metadata: Metadata = {
   title: 'Canali',
-  description: 'Gestisci i canali YouTube che segui su ContentFlix.',
+  description: 'Gestisci i canali YouTube che segui su Utraya.',
 }
 
 export default async function ChannelsPage() {

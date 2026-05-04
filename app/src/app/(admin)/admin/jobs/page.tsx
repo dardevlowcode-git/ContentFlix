@@ -13,16 +13,31 @@ export const metadata: Metadata = { title: 'Admin — Job' }
 
 export default async function AdminJobsPage() {
   const supabase = createAdminClient()
+  const nowIso = new Date().toISOString()
 
-  const { data: jobs } = await supabase
-    .from('jobs')
-    .select('*, job_attempts(*)')
-    .order('created_at', { ascending: false })
-    .limit(50)
+  const [jobsResult, upcomingResult] = await Promise.all([
+    supabase
+      .from('jobs')
+      .select('*, job_attempts(*)')
+      .order('created_at', { ascending: false })
+      .limit(50),
+    supabase
+      .from('canonical_sync_state')
+      .select(`
+        channel_id,
+        next_sync_at,
+        last_sync_status,
+        channels(id, title)
+      `)
+      .not('next_sync_at', 'is', null)
+      .gte('next_sync_at', nowIso)
+      .order('next_sync_at', { ascending: true })
+      .limit(20),
+  ])
 
   // Tipizzazione difensiva: le query annidate possono essere inferite in modo troppo restrittivo.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const jobRows = (jobs ?? []) as any[]
+  const jobRows = (jobsResult.data ?? []) as any[]
 
   const userIds = collectJobUserIds(jobRows)
   const channelIds = collectJobChannelIds(jobRows)
@@ -66,5 +81,25 @@ export default async function AdminJobsPage() {
     job_label: buildJobLabel(job, usersById, channelsById),
   }))
 
-  return <AdminJobsClient initialJobs={jobsWithLabel} />
+  const upcomingRows = (upcomingResult.data ?? []) as Array<{
+    channel_id: string
+    next_sync_at: string
+    last_sync_status: 'success' | 'failed' | 'partial' | null
+    channels?: { id: string; title: string } | Array<{ id: string; title: string }> | null
+  }>
+
+  const upcomingSchedules = upcomingRows
+    .map((row) => {
+      const channel = Array.isArray(row.channels) ? row.channels[0] : row.channels
+      if (!channel?.id || !row.next_sync_at) return null
+      return {
+        channelId: channel.id,
+        channelTitle: channel.title,
+        nextSyncAt: row.next_sync_at,
+        lastSyncStatus: row.last_sync_status ?? null,
+      }
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== null)
+
+  return <AdminJobsClient initialJobs={jobsWithLabel} upcomingSchedules={upcomingSchedules} />
 }

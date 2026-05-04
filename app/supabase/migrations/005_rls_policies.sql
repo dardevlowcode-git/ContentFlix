@@ -4,7 +4,7 @@
 
 -- ============================================================
 -- Migration 005: Row Level Security Policies
--- ContentFlix V1
+-- Utraya V1
 -- ============================================================
 
 -- Enable RLS on all tables

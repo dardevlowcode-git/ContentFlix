@@ -5,7 +5,7 @@
  */
 
 /**
- * Database types generated from the ContentFlix schema.
+ * Database types generated from the Utraya schema.
  *
  * In production, generate this file using:
  *   npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/lib/types/database.ts

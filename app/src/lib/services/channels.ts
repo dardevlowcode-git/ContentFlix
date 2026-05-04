@@ -446,7 +446,11 @@ export async function removeChannelForUser(params: { userId: string; channelId: 
  */
 export async function requestScanNowForUser(
   params: { userId: string; channelId: string },
-  options?: { asAdmin?: boolean }
+  options?: {
+    asAdmin?: boolean
+    source?: 'manual_scan' | 'scheduled_sync'
+    dedupeKey?: string
+  }
 ) {
   const supabase = options?.asAdmin ? createAdminClient() : await createClient()
 
@@ -465,7 +469,13 @@ export async function requestScanNowForUser(
   }
 
   const admin = createAdminClient()
+  const source = options?.source ?? 'manual_scan'
   const windowKey = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')
+  const dayKey = new Date().toISOString().slice(0, 10)
+  const dedupeKey = options?.dedupeKey
+    ?? (source === 'scheduled_sync'
+      ? `scheduled_sync:${params.channelId}:${dayKey}`
+      : `manual_scan:${params.userId}:${params.channelId}:${windowKey}`)
 
   // Chiave dedup con finestra temporale: permette scansioni ripetute,
   // ma evita spam di job multipli nello stesso minuto.
@@ -476,15 +486,20 @@ export async function requestScanNowForUser(
     payload: {
       channelId: params.channelId,
       userId: params.userId,
-      source: 'manual_scan',
+      source,
     },
-    deduplication_key: `manual_scan:${params.userId}:${params.channelId}:${windowKey}`,
+    deduplication_key: dedupeKey,
     created_by_user_id: params.userId,
   }).select('id').single()
 
+  // Idempotenza forte: se il job esiste gia` (dedup key), non trattare come errore.
+  if (jobError?.code === '23505') {
+    return { queued: false, jobId: null, deduplicated: true }
+  }
+
   if (jobError || !jobRow) {
     throw new AppError('Impossibile schedulare la scansione', 'unknown', 500, {
-      cause: jobError.message,
+      cause: jobError?.message ?? 'job_insert_failed',
     })
   }
 
@@ -567,5 +582,5 @@ export async function requestScanNowForUser(
     throw error
   }
 
-  return { queued: true, jobId: jobRow.id }
+  return { queued: true, jobId: jobRow.id, deduplicated: false }
 }

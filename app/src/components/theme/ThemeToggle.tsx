@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl'
 type SiteTheme = 'light' | 'dark'
 
 const themeCookieName = 'theme'
-const themeStorageKey = 'contentflix-theme'
+const themeStorageKey = 'utraya-theme'
 const oneYearInSeconds = 60 * 60 * 24 * 365
 
 function isValidTheme(value: string | null): value is SiteTheme {

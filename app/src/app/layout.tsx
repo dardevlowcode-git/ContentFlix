@@ -12,20 +12,20 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'ContentFlix',
-    template: '%s | ContentFlix',
+    default: 'Utraya',
+    template: '%s | Utraya',
   },
   description:
-    'ContentFlix analizza automaticamente i tuoi canali YouTube preferiti così rimani sempre informato in pochi minuti.',
+    'Utraya analizza automaticamente i tuoi canali YouTube preferiti così rimani sempre informato in pochi minuti.',
   keywords: ['YouTube', 'AI', 'riepiloghi', 'canali', 'video', 'intelligenza artificiale'],
-  authors: [{ name: 'ContentFlix' }],
+  authors: [{ name: 'Utraya' }],
   openGraph: {
     type: 'website',
     locale: 'it_IT',
-    title: 'ContentFlix — Consuma YouTube più velocemente con l\'AI',
+    title: 'Utraya — Consuma YouTube più velocemente con l\'AI',
     description:
       'Riepiloghi AI dei tuoi canali YouTube preferiti. Capisci video da 30 minuti in 60 secondi.',
-    siteName: 'ContentFlix',
+    siteName: 'Utraya',
   },
 }
 

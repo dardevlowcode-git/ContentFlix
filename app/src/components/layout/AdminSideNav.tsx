@@ -100,7 +100,7 @@ export default function AdminSideNav() {
             </svg>
           </div>
           <div>
-            <p className="text-sm font-bold text-on-surface">ContentFlix</p>
+            <p className="text-sm font-bold text-on-surface">Utraya</p>
             <p className="text-xs text-on-surface-variant">{t('admin.title')}</p>
           </div>
         </div>

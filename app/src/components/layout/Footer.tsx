@@ -15,7 +15,7 @@ export default async function Footer() {
     <footer className="bg-surface-container-low w-full py-6 mt-auto">
       <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-4">
         <p className="text-xs text-on-surface-variant">
-          © {year} ContentFlix. {t('landing.footer.copyright')}
+          © {year} Utraya. {t('landing.footer.copyright')}
         </p>
         <div className="flex gap-6">
           {[

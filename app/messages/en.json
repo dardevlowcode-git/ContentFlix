@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "ContentFlix",
+    "name": "Utraya",
     "tagline": "Consume YouTube faster with AI",
-    "description": "ContentFlix automatically analyzes your favorite YouTube channels so you stay informed in minutes, not hours."
+    "description": "Utraya automatically analyzes your favorite YouTube channels so you stay informed in minutes, not hours."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -20,17 +20,17 @@
   "auth": {
     "loginWithGoogle": "Sign in with Google",
     "adminLogin": "Super Admin Login",
-    "loginTitle": "Sign in to ContentFlix",
+    "loginTitle": "Sign in to Utraya",
     "loginSubtitle": "Use your Google account to access the platform.",
     "accessDenied": "Access denied",
-    "accessDeniedDetail": "Your account is not authorized to access ContentFlix. Contact the administrator.",
+    "accessDeniedDetail": "Your account is not authorized to access Utraya. Contact the administrator.",
     "loggingIn": "Signing in...",
     "logoutConfirm": "Do you really want to sign out?",
     "exchangeFailed": "Sign-in failed. Please try again shortly.",
     "noUser": "Unable to retrieve user information. Please try again.",
     "noCode": "Invalid request. Please try again.",
     "inviteOnly": "Invite-only access.",
-    "inviteOnlyDetail": "Only users authorized by the administrator can access ContentFlix.",
+    "inviteOnlyDetail": "Only users authorized by the administrator can access Utraya.",
     "backToHome": "Back to home",
     "admin": {
       "subtitle": "Restricted access for super admin using dedicated credentials.",
@@ -48,7 +48,7 @@
       "badge": "The future of content",
       "title": "Consume YouTube",
       "titleHighlight": "faster with AI",
-      "subtitle": "Stop wasting hours on long videos. ContentFlix automatically summarizes your favorite channels so you stay informed in minutes, not hours.",
+      "subtitle": "Stop wasting hours on long videos. Utraya automatically summarizes your favorite channels so you stay informed in minutes, not hours.",
       "ctaLogin": "Sign in with Google",
       "ctaDemo": "Watch demo"
     },
@@ -67,7 +67,7 @@
       "q1": "How accurate are AI summaries?",
       "a1": "Our models are optimized for long-form video content and capture technical nuances, context, and speaker intent.",
       "q2": "Can I get summaries in other languages?",
-      "a2": "Yes, ContentFlix supports multiple languages. Summaries are generated in your preferred language regardless of the video's audio language.",
+      "a2": "Yes, Utraya supports multiple languages. Summaries are generated in your preferred language regardless of the video's audio language.",
       "q3": "How many channels can I follow?",
       "a3": "In V1 there are no limits to the number of channels you can follow.",
       "q4": "How is my data protected?",
@@ -106,7 +106,7 @@
     "notAnalyzed": "NOT ANALYZED",
     "noChannels": "You are not following any channels yet.",
     "addFirstChannel": "Add your first channel",
-    "emptyFeed": "Add YouTube channels via URL and ContentFlix will automatically analyze new videos.",
+    "emptyFeed": "Add YouTube channels via URL and Utraya will automatically analyze new videos.",
     "unknownChannel": "Unknown channel",
     "noVideosYet": "Videos from your channels will appear here as soon as they are imported."
   },
@@ -114,7 +114,7 @@
     "bottomLine": "Bottom line",
     "category": "Technology",
     "watchOnYoutube": "Watch on YouTube",
-    "aiAnalysisTitle": "ContentFlix AI Analysis",
+    "aiAnalysisTitle": "Utraya AI Analysis",
     "analysisPendingDetail": "The result will be available shortly.",
     "analysisNotAvailableDetail": "Analysis is not yet available for this video. Configure your API keys in",
     "context": "Context",
@@ -300,8 +300,8 @@
     "system": "System",
     "backToApp": "Back to app",
     "users": {
-      "subtitle": "Manage access to ContentFlix through the allowlist.",
-      "allowlistDescription": "Enter the email address to authorize access to ContentFlix.",
+      "subtitle": "Manage access to Utraya through the allowlist.",
+      "allowlistDescription": "Enter the email address to authorize access to Utraya.",
       "emailPlaceholder": "email@example.com",
       "authorizeAccess": "Authorize access",
       "authorized": "Access authorized successfully.",
@@ -328,7 +328,7 @@
       "title": "User management"
     },
     "channels": {
-      "subtitle": "All channels in the ContentFlix archive ({count} channels).",
+      "subtitle": "All channels in the Utraya archive ({count} channels).",
       "subscribers": "Subscribers",
       "lastSync": "Last sync",
       "videos": "Videos",
@@ -338,6 +338,17 @@
       "scanError": "Failed to start scan"
     },
     "jobs": {
+      "scheduledTitle": "Upcoming scheduled jobs",
+      "scheduledSubtitle": "Preview of upcoming planned runs (based on channel next sync).",
+      "scheduledEmpty": "No scheduled runs available.",
+      "channel": "Channel",
+      "nextRun": "Next run",
+      "lastSyncStatus": "Last sync status",
+      "syncStatus": {
+        "success": "Success",
+        "failed": "Failed",
+        "partial": "Partial"
+      },
       "subtitle": "Monitor and manage background processing jobs.",
       "type": "Type",
       "priority": "Priority",
