@@ -166,6 +166,7 @@
     "removed": "Channel removed",
     "scanError": "Error during scan",
     "scanQueued": "Scan queued",
+    "scanPausedMissingYoutubeKey": "Channel added. Scan is paused: add a YouTube API key or wait for another user with a key to add/follow the same channel.",
     "adding": "Adding...",
     "supportedFormats": "Supported formats",
     "statusLabel": "Status",

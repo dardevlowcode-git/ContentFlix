@@ -23,6 +23,24 @@ export interface UserChannelListItem {
   syncState: CanonicalSyncStateRow | null
 }
 
+export type ScanBlockedReason = 'missing_youtube_api_key'
+
+/**
+ * Riconosce il caso business in cui la scansione non puo partire
+ * per mancanza credenziale YouTube dell'utente corrente.
+ */
+export function detectScanBlockedReasonFromError(error: unknown): ScanBlockedReason | null {
+  if (!(error instanceof AppError)) return null
+  if (error.type !== 'validation') return null
+
+  const message = error.message.toLowerCase()
+  if (message.includes('chiave youtube api')) {
+    return 'missing_youtube_api_key'
+  }
+
+  return null
+}
+
 function chunkArray<T>(values: T[], size: number): T[][] {
   if (values.length === 0) return []
 
@@ -294,6 +312,7 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
   const normalized = normalizeChannelUrl(parsed)
 
   let initialScanError: string | null = null
+  let scanBlockedReason: ScanBlockedReason | null = null
   const shouldMarkExistingVideosAsSeen = params.markExistingVideosAsSeen ?? true
   let markedSeenCount = 0
 
@@ -305,11 +324,16 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
       channelId,
     })
   } catch (error) {
-    initialScanError = error instanceof AppError
-      ? error.message
-      : error instanceof Error
+    const blockedReason = detectScanBlockedReasonFromError(error)
+    if (blockedReason) {
+      scanBlockedReason = blockedReason
+    } else {
+      initialScanError = error instanceof AppError
         ? error.message
-        : 'scan_failed'
+        : error instanceof Error
+          ? error.message
+          : 'scan_failed'
+    }
 
     await supabase.from('app_logs').insert({
       level: 'warn',
@@ -317,6 +341,7 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
       context: {
         userId: params.userId,
         channelId,
+        scanBlockedReason,
         error: initialScanError,
       },
     })
@@ -334,6 +359,7 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
     channelId,
     normalizedChannelUrl: normalized,
     initialScanError,
+    scanBlockedReason,
     markedSeenCount,
   }
 }

@@ -149,6 +149,7 @@
     "removed": "Canale rimosso",
     "scanError": "Errore durante la scansione",
     "scanQueued": "Scansione accodata",
+    "scanPausedMissingYoutubeKey": "Canale aggiunto. Scansione in pausa: aggiungi una API key YouTube oppure attendi che un utente con key aggiunga lo stesso canale.",
     "adding": "Aggiunta...",
     "supportedFormats": "Formati supportati",
     "statusLabel": "Stato",

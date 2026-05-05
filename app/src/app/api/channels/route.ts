@@ -98,11 +98,18 @@ export async function POST(request: Request) {
       markExistingVideosAsSeen: body?.markExistingVideosAsSeen ?? true,
     })
 
+    const warningCode = result.scanBlockedReason === 'missing_youtube_api_key'
+      ? 'missing_youtube_api_key'
+      : null
+
     return Response.json({
       data: {
-        message: result.initialScanError
+        message: warningCode
+          ? 'Canale aggiunto. Scansione in pausa: aggiungi una API key YouTube oppure attendi che un utente con key aggiunga lo stesso canale.'
+          : result.initialScanError
           ? `Canale aggiunto. Scansione iniziale fallita: ${result.initialScanError}`
-          : 'Canale aggiunto correttamente',
+            : 'Canale aggiunto correttamente',
+        warningCode,
         ...result,
       },
       error: null,
