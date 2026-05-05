@@ -1,0 +1,63 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+
+# Secrets
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+
+
+### codex suggestions
+
+
+# Secrets/local env
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Local tool/runtime folders
+.vercel/
+.codex/
+.vscode/
+.idea/
+.venv/
+node_modules/
+.next/
+out/
+build/
+
+# Logs/build artifacts
+*.log
+*.tsbuildinfo
+next-env.d.ts
+
+# Sensitive key material
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt

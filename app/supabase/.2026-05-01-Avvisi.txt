@@ -1,0 +1,31 @@
+Summarize the issue and suggest fixes for the following lint item:
+Title: Auth RLS Initialization Plan
+Entity: public.users
+Schema: public
+Issue Details: Table `public.users` has a row level security policy `Users: read own` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing `auth.<function>()` with `(select auth.<function>())`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.
+Description: Detects if calls to `current_setting()` and `auth.<function>()` in RLS policies are being unnecessarily re-evaluated for each row
+
+Summarize the issue and suggest fixes for the following lint item:
+Title: Auth RLS Initialization Plan
+Entity: public.users
+Schema: public
+Issue Details: Table `public.users` has a row level security policy `Users: update own` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing `auth.<function>()` with `(select auth.<function>())`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.
+Description: Detects if calls to `current_setting()` and `auth.<function>()` in RLS policies are being unnecessarily re-evaluated for each row
+
+Issue
+Table public.user_identities has a row level security policy User identities: read own that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing auth.<function>() with (select auth.<function>()). See docs for more info.
+
+Description
+Detects if calls to current_setting() and auth.<function>() in RLS policies are being unnecessarily re-evaluated for each row
+
+
+Table public.user_roles has a row level security policy User roles: read own that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing auth.<function>() with (select auth.<function>()). See docs for more info.
+
+Description
+Detects if calls to current_setting() and auth.<function>() in RLS policies are being unnecessarily re-evaluated for each row
+
+
+Table public.user_provider_credentials has a row level security policy Credentials: read own that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing auth.<function>() with (select auth.<function>()). See docs for more info.
+
+Description
+Detects if calls to current_setting() and auth.<function>() in RLS policies are being unnecessarily re-evaluated for each row
