@@ -6,6 +6,7 @@
 
 import type { Metadata } from 'next'
 import { createAdminClient } from '@/lib/supabase/admin'
+import type { Database } from '@/lib/types/database'
 import { getLocale, getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = {
@@ -16,6 +17,8 @@ export default async function AdminHomePage() {
   const supabase = createAdminClient()
   const t = await getTranslations()
   const locale = await getLocale()
+  type AppLogRow = Database['public']['Tables']['app_logs']['Row']
+  type IncidentRow = Database['public']['Tables']['incidents']['Row']
 
   const [
     { count: totalUsers },
@@ -23,17 +26,28 @@ export default async function AdminHomePage() {
     { count: totalVideos },
     { count: pendingJobs },
     { count: failedJobs },
-    { data: recentLogs },
-    { data: recentIncidents },
+    { data: recentLogsData },
+    { data: recentIncidentsData },
   ] = await Promise.all([
     supabase.from('users').select('*', { count: 'exact', head: true }).eq('status', 'active'),
     supabase.from('channels').select('*', { count: 'exact', head: true }).eq('status', 'active'),
     supabase.from('videos').select('*', { count: 'exact', head: true }),
     supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('status', 'failed'),
-    supabase.from('app_logs').select('*').order('created_at', { ascending: false }).limit(10),
-    supabase.from('incidents').select('*').eq('status', 'open').order('created_at', { ascending: false }).limit(5),
+    supabase
+      .from('app_logs')
+      .select('id, level, message, created_at')
+      .order('created_at', { ascending: false })
+      .limit(10),
+    supabase
+      .from('incidents')
+      .select('id, severity, title, status, created_at')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(5),
   ])
+  const recentLogs: AppLogRow[] = (recentLogsData ?? []) as AppLogRow[]
+  const recentIncidents: IncidentRow[] = (recentIncidentsData ?? []) as IncidentRow[]
 
   const statCards = [
     { label: t('admin.metrics.activeUsers'), value: totalUsers ?? 0, icon: '👤', color: 'bg-primary-fixed' },
