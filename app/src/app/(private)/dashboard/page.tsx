@@ -7,6 +7,7 @@
 import type { Metadata } from 'next'
 import { getCurrentSession } from '@/lib/auth/provider'
 import { createClient } from '@/lib/supabase/server'
+import type { Database } from '@/lib/types/database'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 
@@ -23,14 +24,16 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const t = await getTranslations()
   const locale = await getLocale()
+  type UserChannelRow = Database['public']['Tables']['user_channels']['Row']
 
-  const { data: userChannels } = await supabase
+  const { data: userChannelsData } = await supabase
     .from('user_channels')
-    .select('*, channels(*)')
+    .select('channel_id')
     .eq('user_id', session.userId)
     .eq('is_active', true)
     .order('added_at', { ascending: false })
     .limit(10)
+  const userChannels = (userChannelsData ?? []) as Pick<UserChannelRow, 'channel_id'>[]
 
   const channelIds = userChannels?.map((uc) => uc.channel_id) ?? []
 
