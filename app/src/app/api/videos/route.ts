@@ -12,6 +12,7 @@ import {
   setVideoWatchlistForUser,
 } from '@/lib/services/videos'
 import { AppError, errorResponse } from '@/lib/utils/errors'
+import { ensureJsonRequest, ensureSameOrigin, getRequestId } from '@/lib/security/http'
 
 interface VideosPostBody {
   action?: 'import_channel' | 'set_seen_status' | 'set_watchlist'
@@ -96,7 +97,11 @@ export async function GET(request: Request) {
  * Avvia import video da canale per l'utente autenticato.
  */
 export async function POST(request: Request) {
+  const requestId = getRequestId(request)
   try {
+    ensureSameOrigin(request)
+    ensureJsonRequest(request)
+
     const session = await getCurrentSession()
     const userId = requireUserId(session?.userId)
 
@@ -106,7 +111,7 @@ export async function POST(request: Request) {
     if (action === 'import_channel') {
       const channelId = body?.channelId?.trim()
       if (!channelId) {
-        return errorResponse('channelId mancante', 'validation', 400)
+        return errorResponse('channelId mancante', 'validation', 400, requestId)
       }
 
       const maxResults = typeof body?.maxResults === 'number' ? body.maxResults : undefined
@@ -125,6 +130,8 @@ export async function POST(request: Request) {
         },
         error: null,
         errorType: null,
+        errorCode: null,
+        requestId,
       })
     }
 
@@ -133,7 +140,7 @@ export async function POST(request: Request) {
       const seenStatus = body?.seenStatus
 
       if (!videoId || (seenStatus !== 'seen' && seenStatus !== 'unseen' && seenStatus !== 'hidden')) {
-        return errorResponse('Parametri aggiornamento stato visto non validi', 'validation', 400)
+        return errorResponse('Parametri aggiornamento stato visto non validi', 'validation', 400, requestId)
       }
 
       const result = await setVideoSeenStatusForUser({ userId, videoId, seenStatus })
@@ -142,6 +149,8 @@ export async function POST(request: Request) {
         data: result,
         error: null,
         errorType: null,
+        errorCode: null,
+        requestId,
       })
     }
 
@@ -150,7 +159,7 @@ export async function POST(request: Request) {
       const inWatchlist = body?.inWatchlist
 
       if (!videoId || typeof inWatchlist !== 'boolean') {
-        return errorResponse('Parametri watchlist non validi', 'validation', 400)
+        return errorResponse('Parametri watchlist non validi', 'validation', 400, requestId)
       }
 
       const result = await setVideoWatchlistForUser({ userId, videoId, inWatchlist })
@@ -159,14 +168,16 @@ export async function POST(request: Request) {
         data: result,
         error: null,
         errorType: null,
+        errorCode: null,
+        requestId,
       })
     }
 
-    return errorResponse('Azione non supportata', 'validation', 400)
+    return errorResponse('Azione non supportata', 'validation', 400, requestId)
   } catch (error) {
     if (error instanceof AppError) {
-      return errorResponse(error.message, error.type, error.statusCode ?? 500)
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
     }
-    return errorResponse('Errore interno', 'unknown', 500)
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
   }
 }

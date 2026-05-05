@@ -24,7 +24,11 @@ export default function TopNav({ variant, session }: TopNavProps) {
 
   async function handleSignOut() {
     if (variant === 'admin') {
-      await fetch('/api/admin/auth/logout', { method: 'POST' })
+      await fetch('/api/admin/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
       router.push('/admin/login')
       router.refresh()
       return

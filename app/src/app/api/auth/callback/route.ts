@@ -19,16 +19,31 @@ import type { NextRequest } from 'next/server'
  * 4. Redirige alla destinazione richiesta o a `/login` con errore.
  */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url)
-  const forwardedHost = request.headers.get('x-forwarded-host') ?? request.headers.get('host')
-  const forwardedProto = request.headers.get('x-forwarded-proto') ?? 'https'
-  // Usa gli header del reverse proxy per evitare redirect errati verso localhost.
-  const appOrigin = forwardedHost ? `${forwardedProto}://${forwardedHost}` : origin
+  const { searchParams } = new URL(request.url)
+  const appOrigin = process.env.APP_ORIGIN?.trim()
+  if (!appOrigin) {
+    return NextResponse.json(
+      { data: null, error: 'APP_ORIGIN non configurato', errorType: 'structural', errorCode: 'misconfigured_app' },
+      { status: 500 }
+    )
+  }
+
+  let appUrl: URL
+  try {
+    appUrl = new URL(appOrigin)
+  } catch {
+    return NextResponse.json(
+      { data: null, error: 'APP_ORIGIN non valido', errorType: 'structural', errorCode: 'misconfigured_app' },
+      { status: 500 }
+    )
+  }
+
   const code = searchParams.get('code')
   const redirectTo = searchParams.get('redirectTo') ?? '/dashboard'
+  const safeRedirect = resolveSafeRedirectPath(redirectTo)
 
   if (!code) {
-    return NextResponse.redirect(`${appOrigin}/login?error=no_code`)
+    return NextResponse.redirect(new URL('/login?error=no_code', appUrl))
   }
 
   const supabase = await createClient()
@@ -36,14 +51,14 @@ export async function GET(request: NextRequest) {
 
   if (exchangeError) {
     console.error('[Auth Callback] Exchange error:', exchangeError.message)
-    return NextResponse.redirect(`${appOrigin}/login?error=exchange_failed`)
+    return NextResponse.redirect(new URL('/login?error=exchange_failed', appUrl))
   }
 
   // Legge utente autenticato appena creato/aggiornato dallo scambio codice.
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user || !user.email) {
-    return NextResponse.redirect(`${appOrigin}/login?error=no_user`)
+    return NextResponse.redirect(new URL('/login?error=no_user', appUrl))
   }
 
   // Controllo autorizzazione applicativa (oltre all'autenticazione OAuth).
@@ -51,7 +66,7 @@ export async function GET(request: NextRequest) {
   if (!allowed) {
     // Logout immediato: autenticato ma non autorizzato all'uso del prodotto.
     await supabase.auth.signOut()
-    return NextResponse.redirect(`${appOrigin}/login?error=access_denied`)
+    return NextResponse.redirect(new URL('/login?error=access_denied', appUrl))
   }
 
   // Provisioning idempotente: crea/aggiorna record applicativi necessari.
@@ -65,7 +80,27 @@ export async function GET(request: NextRequest) {
     providerUserId: identity?.id ?? user.id,
   })
 
-  // Difesa open-redirect: si accettano solo path interni che iniziano con `/`.
-  const safeRedirect = redirectTo.startsWith('/') ? redirectTo : '/dashboard'
-  return NextResponse.redirect(`${appOrigin}${safeRedirect}`)
+  return NextResponse.redirect(new URL(safeRedirect, appUrl))
+}
+
+function resolveSafeRedirectPath(value: string): string {
+  let decoded = value.trim()
+  try {
+    decoded = decodeURIComponent(value).trim()
+  } catch {
+    return '/dashboard'
+  }
+  if (!decoded.startsWith('/')) return '/dashboard'
+  if (decoded.startsWith('//')) return '/dashboard'
+  if (decoded.includes('\\')) return '/dashboard'
+  if (decoded.includes('://')) return '/dashboard'
+
+  try {
+    const parsed = new URL(decoded, 'https://app.local')
+    if (parsed.origin !== 'https://app.local') return '/dashboard'
+    if (!parsed.pathname.startsWith('/')) return '/dashboard'
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`
+  } catch {
+    return '/dashboard'
+  }
 }

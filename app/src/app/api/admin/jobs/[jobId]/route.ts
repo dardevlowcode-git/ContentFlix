@@ -8,6 +8,8 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getAdminSession } from '@/lib/auth/admin'
 import { buildJobLabel, collectJobChannelIds, collectJobUserIds } from '@/lib/utils/job-label'
+import { AppError, errorResponse } from '@/lib/utils/errors'
+import { ensureJsonRequest, ensureSameOrigin, getClientIp, getRequestId } from '@/lib/security/http'
 
 interface RouteContext {
   params: {
@@ -20,15 +22,26 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}
 /**
  * Retry di un job fallito: crea una nuova riga job `pending` con payload ereditato.
  */
-export async function POST(_request: Request, context: RouteContext) {
+export async function POST(request: Request, context: RouteContext) {
+  const requestId = getRequestId(request)
+  try {
+    ensureSameOrigin(request)
+    ensureJsonRequest(request)
+  } catch (error) {
+    if (error instanceof AppError) {
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
+    }
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
+  }
+
   const adminSession = await getAdminSession()
   if (!adminSession) {
-    return NextResponse.json({ data: null, error: 'Unauthorized', errorType: 'unauthorized' }, { status: 401 })
+    return errorResponse('Unauthorized', 'unauthorized', 401, requestId)
   }
 
   const jobId = context.params.jobId?.trim()
   if (!jobId || !uuidPattern.test(jobId)) {
-    return NextResponse.json({ data: null, error: 'jobId non valido', errorType: 'validation' }, { status: 400 })
+    return errorResponse('jobId non valido', 'validation', 400, requestId)
   }
 
   const supabase = createAdminClient()
@@ -40,19 +53,16 @@ export async function POST(_request: Request, context: RouteContext) {
     .maybeSingle()
 
   if (jobError) {
-    return NextResponse.json({ data: null, error: jobError.message, errorType: 'unknown' }, { status: 500 })
+    return errorResponse('Errore lettura job', 'unknown', 500, requestId)
   }
 
   if (!job) {
-    return NextResponse.json({ data: null, error: 'Job non trovato', errorType: 'not_found' }, { status: 404 })
+    return errorResponse('Job non trovato', 'not_found', 404, requestId)
   }
 
   // Il retry e consentito solo da stato failed per evitare duplicazioni non volute.
   if (job.status !== 'failed') {
-    return NextResponse.json(
-      { data: null, error: 'Si possono riprovare solo job in stato failed', errorType: 'validation' },
-      { status: 409 }
-    )
+    return errorResponse('Si possono riprovare solo job in stato failed', 'validation', 409, requestId)
   }
 
   const retryDedupKey = `${job.deduplication_key ?? `admin-retry-${job.id}`}:retry:${Date.now()}`
@@ -76,7 +86,7 @@ export async function POST(_request: Request, context: RouteContext) {
     .single()
 
   if (insertError) {
-    return NextResponse.json({ data: null, error: insertError.message, errorType: 'unknown' }, { status: 500 })
+    return errorResponse('Errore creazione retry job', 'unknown', 500, requestId)
   }
 
   const labelSource = [{
@@ -103,9 +113,11 @@ export async function POST(_request: Request, context: RouteContext) {
     action: 'admin_retry_failed_job',
     resource_type: 'job',
     resource_id: jobId,
+    ip_address: getClientIp(request),
     details: {
       admin_username: adminSession.username,
       retried_job_id: retriedJob.id,
+      request_id: requestId,
     },
   })
 
@@ -120,21 +132,34 @@ export async function POST(_request: Request, context: RouteContext) {
     },
     error: null,
     errorType: null,
+    errorCode: null,
+    requestId,
   })
 }
 
 /**
  * Elimina un job solo se ancora `pending`.
  */
-export async function DELETE(_request: Request, context: RouteContext) {
+export async function DELETE(request: Request, context: RouteContext) {
+  const requestId = getRequestId(request)
+  try {
+    ensureSameOrigin(request)
+    ensureJsonRequest(request)
+  } catch (error) {
+    if (error instanceof AppError) {
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
+    }
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
+  }
+
   const adminSession = await getAdminSession()
   if (!adminSession) {
-    return NextResponse.json({ data: null, error: 'Unauthorized', errorType: 'unauthorized' }, { status: 401 })
+    return errorResponse('Unauthorized', 'unauthorized', 401, requestId)
   }
 
   const jobId = context.params.jobId?.trim()
   if (!jobId || !uuidPattern.test(jobId)) {
-    return NextResponse.json({ data: null, error: 'jobId non valido', errorType: 'validation' }, { status: 400 })
+    return errorResponse('jobId non valido', 'validation', 400, requestId)
   }
 
   const supabase = createAdminClient()
@@ -146,19 +171,16 @@ export async function DELETE(_request: Request, context: RouteContext) {
     .maybeSingle()
 
   if (jobError) {
-    return NextResponse.json({ data: null, error: jobError.message, errorType: 'unknown' }, { status: 500 })
+    return errorResponse('Errore lettura job', 'unknown', 500, requestId)
   }
 
   if (!job) {
-    return NextResponse.json({ data: null, error: 'Job non trovato', errorType: 'not_found' }, { status: 404 })
+    return errorResponse('Job non trovato', 'not_found', 404, requestId)
   }
 
   // Per sicurezza permettiamo la cancellazione solo dei job realmente in coda.
   if (job.status !== 'pending') {
-    return NextResponse.json(
-      { data: null, error: 'Si possono eliminare solo job in stato pending', errorType: 'validation' },
-      { status: 409 }
-    )
+    return errorResponse('Si possono eliminare solo job in stato pending', 'validation', 409, requestId)
   }
 
   const { error: deleteError } = await supabase
@@ -167,7 +189,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     .eq('id', jobId)
 
   if (deleteError) {
-    return NextResponse.json({ data: null, error: deleteError.message, errorType: 'unknown' }, { status: 500 })
+    return errorResponse('Errore eliminazione job', 'unknown', 500, requestId)
   }
 
   await supabase.from('audit_logs').insert({
@@ -175,12 +197,15 @@ export async function DELETE(_request: Request, context: RouteContext) {
     action: 'admin_delete_pending_job',
     resource_type: 'job',
     resource_id: jobId,
-    details: { admin_username: adminSession.username },
+    ip_address: getClientIp(request),
+    details: { admin_username: adminSession.username, request_id: requestId },
   })
 
   return NextResponse.json({
     data: { message: 'Job in coda eliminato correttamente', jobId },
     error: null,
     errorType: null,
+    errorCode: null,
+    requestId,
   })
 }

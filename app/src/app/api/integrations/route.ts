@@ -12,6 +12,7 @@ import {
   validateApiKey,
 } from '@/lib/services/integrations'
 import { AppError, errorResponse } from '@/lib/utils/errors'
+import { ensureJsonRequest, ensureSameOrigin, getRequestId } from '@/lib/security/http'
 
 interface IntegrationPostBody {
   provider?: 'youtube' | 'gemini'
@@ -62,7 +63,11 @@ export async function GET() {
  * Gestisce salvataggio o validazione di una chiave provider.
  */
 export async function POST(request: Request) {
+  const requestId = getRequestId(request)
   try {
+    ensureSameOrigin(request)
+    ensureJsonRequest(request)
+
     const session = await getCurrentSession()
     const userId = requireUserId(session?.userId)
 
@@ -70,18 +75,18 @@ export async function POST(request: Request) {
     const provider = body?.provider
 
     if (!provider) {
-      return errorResponse('provider mancante', 'validation', 400)
+      return errorResponse('provider mancante', 'validation', 400, requestId)
     }
 
     if (body?.action === 'validate') {
       // Validazione esplicita: utile quando la chiave e gia salvata e si vuole ricontrollare.
       const result = await validateApiKey({ userId, provider })
-      return Response.json({ data: result, error: null, errorType: null })
+      return Response.json({ data: result, error: null, errorType: null, errorCode: null, requestId })
     }
 
     const apiKey = body?.apiKey?.trim()
     if (!apiKey) {
-      return errorResponse('apiKey mancante', 'validation', 400)
+      return errorResponse('apiKey mancante', 'validation', 400, requestId)
     }
 
     // Salvataggio e validazione immediata per feedback UX piu chiaro.
@@ -92,12 +97,12 @@ export async function POST(request: Request) {
       validateNow: true,
     })
 
-    return Response.json({ data: result, error: null, errorType: null })
+    return Response.json({ data: result, error: null, errorType: null, errorCode: null, requestId })
   } catch (error) {
     if (error instanceof AppError) {
-      return errorResponse(error.message, error.type, error.statusCode ?? 500)
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
     }
-    return errorResponse('Errore interno', 'unknown', 500)
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
   }
 }
 
@@ -105,7 +110,11 @@ export async function POST(request: Request) {
  * Rimuove logicamente la chiave provider dell'utente.
  */
 export async function DELETE(request: Request) {
+  const requestId = getRequestId(request)
   try {
+    ensureSameOrigin(request)
+    ensureJsonRequest(request)
+
     const session = await getCurrentSession()
     const userId = requireUserId(session?.userId)
 
@@ -113,7 +122,7 @@ export async function DELETE(request: Request) {
     const provider = body?.provider
 
     if (!provider) {
-      return errorResponse('provider mancante', 'validation', 400)
+      return errorResponse('provider mancante', 'validation', 400, requestId)
     }
 
     await removeApiKey({ userId, provider })
@@ -122,11 +131,13 @@ export async function DELETE(request: Request) {
       data: { message: 'Chiave rimossa correttamente' },
       error: null,
       errorType: null,
+      errorCode: null,
+      requestId,
     })
   } catch (error) {
     if (error instanceof AppError) {
-      return errorResponse(error.message, error.type, error.statusCode ?? 500)
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
     }
-    return errorResponse('Errore interno', 'unknown', 500)
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
   }
 }

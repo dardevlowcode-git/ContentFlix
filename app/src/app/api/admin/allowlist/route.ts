@@ -7,6 +7,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getAdminSession } from '@/lib/auth/admin'
+import { AppError, errorResponse } from '@/lib/utils/errors'
+import { ensureJsonRequest, ensureSameOrigin, getClientIp, getRequestId } from '@/lib/security/http'
 
 interface AllowlistBody {
   email?: string
@@ -30,36 +32,35 @@ function isValidEmail(value: string): boolean {
 }
 
 /**
- * Mappa errori tecnici Supabase in messaggi piu` chiari per l'admin.
- */
-function mapSupabaseError(errorMessage: string): string {
-  // Traduce errori tecnici ricorrenti in messaggi comprensibili lato UI admin.
-  const lower = errorMessage.toLowerCase()
-  if (lower.includes('schema cache')) {
-    return 'Schema database non inizializzato: applicare migrazioni Supabase prima di usare la gestione utenti.'
-  }
-  return errorMessage
-}
-
-/**
  * Aggiunge o riattiva una email in allowlist.
  */
 export async function POST(request: Request) {
+  const requestId = getRequestId(request)
+  try {
+    ensureSameOrigin(request)
+    ensureJsonRequest(request)
+  } catch (error) {
+    if (error instanceof AppError) {
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
+    }
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
+  }
+
   // Protezione endpoint: solo super-admin con cookie valido puo autorizzare email.
   const adminSession = await getAdminSession()
   if (!adminSession) {
-    return NextResponse.json({ data: null, error: 'Unauthorized', errorType: 'unauthorized' }, { status: 401 })
+    return errorResponse('Unauthorized', 'unauthorized', 401, requestId)
   }
 
   const body = (await request.json().catch(() => null)) as AllowlistBody | null
   const email = normalizeEmail(body?.email ?? '')
 
   if (!email) {
-    return NextResponse.json({ data: null, error: 'Email richiesta', errorType: 'validation' }, { status: 400 })
+    return errorResponse('Email richiesta', 'validation', 400, requestId)
   }
 
   if (!isValidEmail(email)) {
-    return NextResponse.json({ data: null, error: 'Email non valida', errorType: 'validation' }, { status: 400 })
+    return errorResponse('Email non valida', 'validation', 400, requestId)
   }
 
   const supabase = createAdminClient()
@@ -69,16 +70,28 @@ export async function POST(request: Request) {
     .upsert({ email, is_active: true }, { onConflict: 'email' })
 
   if (error) {
-    return NextResponse.json(
-      { data: null, error: mapSupabaseError(error.message), errorType: 'unknown' },
-      { status: 500 }
-    )
+    return errorResponse('Errore salvataggio allowlist', 'unknown', 500, requestId)
   }
+
+  await supabase.from('audit_logs').insert({
+    user_id: null,
+    action: 'admin_allowlist_add',
+    resource_type: 'allowlist',
+    resource_id: email,
+    ip_address: getClientIp(request),
+    details: {
+      admin_username: adminSession.username,
+      request_id: requestId,
+      email,
+    },
+  })
 
   return NextResponse.json({
     data: { message: 'Accesso autorizzato', email },
     error: null,
     errorType: null,
+    errorCode: null,
+    requestId,
   })
 }
 
@@ -86,18 +99,29 @@ export async function POST(request: Request) {
  * Revoca una email dall'allowlist (soft revoke con `is_active=false`).
  */
 export async function DELETE(request: Request) {
+  const requestId = getRequestId(request)
+  try {
+    ensureSameOrigin(request)
+    ensureJsonRequest(request)
+  } catch (error) {
+    if (error instanceof AppError) {
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
+    }
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
+  }
+
   // Revoca soft: non cancelliamo il record, impostiamo `is_active = false`.
   // In questo modo rimane lo storico e si puo riattivare in seguito.
   const adminSession = await getAdminSession()
   if (!adminSession) {
-    return NextResponse.json({ data: null, error: 'Unauthorized', errorType: 'unauthorized' }, { status: 401 })
+    return errorResponse('Unauthorized', 'unauthorized', 401, requestId)
   }
 
   const body = (await request.json().catch(() => null)) as AllowlistBody | null
   const email = normalizeEmail(body?.email ?? '')
 
   if (!email) {
-    return NextResponse.json({ data: null, error: 'Email richiesta', errorType: 'validation' }, { status: 400 })
+    return errorResponse('Email richiesta', 'validation', 400, requestId)
   }
 
   const supabase = createAdminClient()
@@ -107,15 +131,27 @@ export async function DELETE(request: Request) {
     .eq('email', email)
 
   if (error) {
-    return NextResponse.json(
-      { data: null, error: mapSupabaseError(error.message), errorType: 'unknown' },
-      { status: 500 }
-    )
+    return errorResponse('Errore revoca allowlist', 'unknown', 500, requestId)
   }
+
+  await supabase.from('audit_logs').insert({
+    user_id: null,
+    action: 'admin_allowlist_revoke',
+    resource_type: 'allowlist',
+    resource_id: email,
+    ip_address: getClientIp(request),
+    details: {
+      admin_username: adminSession.username,
+      request_id: requestId,
+      email,
+    },
+  })
 
   return NextResponse.json({
     data: { message: 'Accesso revocato', email },
     error: null,
     errorType: null,
+    errorCode: null,
+    requestId,
   })
 }

@@ -10,7 +10,8 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "check-comments": "node scripts/check-comments.mjs",
-    "validate": "npm run check-comments && npm run lint && npm run type-check"
+    "validate": "npm run check-comments && npm run lint && npm run type-check",
+    "admin:hash": "node scripts/generate-admin-password-hash.mjs"
   },
   "dependencies": {
     "next": "14.2.35",

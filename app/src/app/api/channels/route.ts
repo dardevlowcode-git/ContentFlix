@@ -12,6 +12,7 @@ import {
   requestScanNowForUser,
 } from '@/lib/services/channels'
 import { AppError, errorResponse } from '@/lib/utils/errors'
+import { ensureJsonRequest, ensureSameOrigin, getRequestId } from '@/lib/security/http'
 
 interface ChannelPostBody {
   action?: 'add' | 'scan_now'
@@ -58,7 +59,11 @@ export async function GET() {
  * Gestisce azioni canale: `add` (default) e `scan_now`.
  */
 export async function POST(request: Request) {
+  const requestId = getRequestId(request)
   try {
+    ensureSameOrigin(request)
+    ensureJsonRequest(request)
+
     const session = await getCurrentSession()
     const userId = requireSessionUserId(session?.userId)
 
@@ -67,7 +72,7 @@ export async function POST(request: Request) {
 
     if (action === 'scan_now') {
       if (!body?.channelId) {
-        return errorResponse('channelId mancante', 'validation', 400)
+        return errorResponse('channelId mancante', 'validation', 400, requestId)
       }
 
       // Scansione manuale: crea un job asincrono senza bloccare la richiesta HTTP.
@@ -76,12 +81,14 @@ export async function POST(request: Request) {
         data: { message: 'Scansione avviata', ...scanResult },
         error: null,
         errorType: null,
+        errorCode: null,
+        requestId,
       })
     }
 
     const channelUrl = body?.channelUrl?.trim()
     if (!channelUrl) {
-      return errorResponse('channelUrl mancante', 'validation', 400)
+      return errorResponse('channelUrl mancante', 'validation', 400, requestId)
     }
 
     // Aggiunta canale: parsing URL + upsert + enqueue sync iniziale.
@@ -100,12 +107,14 @@ export async function POST(request: Request) {
       },
       error: null,
       errorType: null,
+      errorCode: null,
+      requestId,
     })
   } catch (error) {
     if (error instanceof AppError) {
-      return errorResponse(error.message, error.type, error.statusCode ?? 500)
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
     }
-    return errorResponse('Errore interno', 'unknown', 500)
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
   }
 }
 
@@ -113,7 +122,11 @@ export async function POST(request: Request) {
  * Rimuove il canale dal profilo utente e pulisce i riferimenti collegati.
  */
 export async function DELETE(request: Request) {
+  const requestId = getRequestId(request)
   try {
+    ensureSameOrigin(request)
+    ensureJsonRequest(request)
+
     const session = await getCurrentSession()
     const userId = requireSessionUserId(session?.userId)
 
@@ -121,7 +134,7 @@ export async function DELETE(request: Request) {
     const channelId = body?.channelId?.trim()
 
     if (!channelId) {
-      return errorResponse('channelId mancante', 'validation', 400)
+      return errorResponse('channelId mancante', 'validation', 400, requestId)
     }
 
     const result = await removeChannelForUser({ userId, channelId })
@@ -132,11 +145,13 @@ export async function DELETE(request: Request) {
       },
       error: null,
       errorType: null,
+      errorCode: null,
+      requestId,
     })
   } catch (error) {
     if (error instanceof AppError) {
-      return errorResponse(error.message, error.type, error.statusCode ?? 500)
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
     }
-    return errorResponse('Errore interno', 'unknown', 500)
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
   }
 }

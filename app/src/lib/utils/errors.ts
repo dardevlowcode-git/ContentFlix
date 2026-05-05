@@ -5,6 +5,7 @@
  */
 
 import type { AppErrorType } from '@/lib/types/domain'
+import { randomUUID } from 'node:crypto'
 
 /**
  * Classifies an error into an AppErrorType.
@@ -66,14 +67,48 @@ export class AppError extends Error {
   }
 }
 
+function toPublicErrorCode(type: AppErrorType): string {
+  switch (type) {
+    case 'validation':
+      return 'validation_failed'
+    case 'unauthorized':
+      return 'unauthorized'
+    case 'forbidden':
+      return 'forbidden'
+    case 'not_found':
+      return 'not_found'
+    case 'temporary':
+      return 'temporary_error'
+    case 'structural':
+      return 'service_unavailable'
+    case 'unknown':
+    default:
+      return 'internal_error'
+  }
+}
+
+function toPublicMessage(message: string, type: AppErrorType, statusCode: number): string {
+  if (statusCode >= 500 || type === 'unknown' || type === 'structural' || type === 'temporary') {
+    return 'Errore interno'
+  }
+  return message
+}
+
 /** Creates a structured error response for BFF route handlers */
 export function errorResponse(
   message: string,
   type: AppErrorType,
-  statusCode = 500
+  statusCode = 500,
+  requestId = randomUUID()
 ): Response {
   return Response.json(
-    { data: null, error: message, errorType: type },
+    {
+      data: null,
+      error: toPublicMessage(message, type, statusCode),
+      errorType: type,
+      errorCode: toPublicErrorCode(type),
+      requestId,
+    },
     { status: statusCode }
   )
 }

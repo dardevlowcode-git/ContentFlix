@@ -4,7 +4,7 @@
  * Flusso: Queste funzioni vengono usate da middleware, layout o API per decidere se un utente puo` accedere a una risorsa.
  */
 
-import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import { cookies } from 'next/headers'
 
 export const adminSessionCookieName = 'cf_admin_session'
@@ -26,7 +26,7 @@ export interface AdminSession {
  */
 function getAdminAuthConfig(): AdminAuthConfig | null {
   const username = process.env.SUPERADMIN_USERNAME?.trim()
-  const passwordHash = process.env.SUPERADMIN_PASSWORD_HASH?.trim().toLowerCase()
+  const passwordHash = process.env.SUPERADMIN_PASSWORD_HASH?.trim()
   const sessionSecret = process.env.SUPERADMIN_SESSION_SECRET?.trim()
 
   if (!username || !passwordHash || !sessionSecret) {
@@ -47,14 +47,6 @@ function requireAdminAuthConfig(): AdminAuthConfig {
     )
   }
   return config
-}
-
-/**
- * Calcola hash SHA-256 esadecimale della password ricevuta in login.
- */
-function sha256Hex(value: string): string {
-  // La password in env e salvata come hash SHA-256 (mai in chiaro).
-  return createHash('sha256').update(value).digest('hex')
 }
 
 /**
@@ -123,19 +115,44 @@ function parseAndVerifyToken(token: string, secret: string): AdminSession | null
   }
 }
 
-/**
- * Verifica credenziali admin confrontando username e hash password.
- */
 export function verifySuperAdminCredentials(username: string, password: string): boolean {
   const config = getAdminAuthConfig()
   if (!config) return false
   const normalizedUsername = username.trim()
-  const computedPasswordHash = sha256Hex(password) // Hash locale per confronto con env.
+  const isSupportedHash = config.passwordHash.startsWith('scrypt$')
+  if (!isSupportedHash) return false
+
+  const isPasswordValid = verifyScryptHash(password, config.passwordHash)
 
   return (
     safeStringEquals(normalizedUsername, config.username) &&
-    safeStringEquals(computedPasswordHash, config.passwordHash)
+    isPasswordValid
   )
+}
+
+function verifyScryptHash(plainText: string, encodedHash: string): boolean {
+  const parts = encodedHash.split('$')
+  if (parts.length !== 7) return false
+  const [scheme, nRaw, rRaw, pRaw, keyLenRaw, saltBase64, hashBase64] = parts
+  if (scheme !== 'scrypt') return false
+
+  const n = Number(nRaw)
+  const r = Number(rRaw)
+  const p = Number(pRaw)
+  const keyLen = Number(keyLenRaw)
+  if (!Number.isFinite(n) || !Number.isFinite(r) || !Number.isFinite(p) || !Number.isFinite(keyLen)) {
+    return false
+  }
+
+  try {
+    const salt = Buffer.from(saltBase64, 'base64')
+    const expectedHash = Buffer.from(hashBase64, 'base64')
+    const derived = scryptSync(plainText, salt, keyLen, { N: n, r, p })
+    if (derived.length !== expectedHash.length) return false
+    return timingSafeEqual(derived, expectedHash)
+  } catch {
+    return false
+  }
 }
 
 /**

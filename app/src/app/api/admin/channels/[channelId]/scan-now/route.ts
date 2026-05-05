@@ -8,7 +8,8 @@ import { NextResponse } from 'next/server'
 import { getAdminSession } from '@/lib/auth/admin'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requestScanNowForUser } from '@/lib/services/channels'
-import { AppError } from '@/lib/utils/errors'
+import { AppError, errorResponse } from '@/lib/utils/errors'
+import { ensureJsonRequest, ensureSameOrigin, getClientIp, getRequestId } from '@/lib/security/http'
 
 interface RouteContext {
   params: {
@@ -21,15 +22,26 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}
 /**
  * Avvia una scansione canale immediata come super-admin.
  */
-export async function POST(_request: Request, context: RouteContext) {
+export async function POST(request: Request, context: RouteContext) {
+  const requestId = getRequestId(request)
+  try {
+    ensureSameOrigin(request)
+    ensureJsonRequest(request)
+  } catch (error) {
+    if (error instanceof AppError) {
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
+    }
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
+  }
+
   const adminSession = await getAdminSession()
   if (!adminSession) {
-    return NextResponse.json({ data: null, error: 'Unauthorized', errorType: 'unauthorized' }, { status: 401 })
+    return errorResponse('Unauthorized', 'unauthorized', 401, requestId)
   }
 
   const channelId = context.params.channelId?.trim()
   if (!channelId || !uuidPattern.test(channelId)) {
-    return NextResponse.json({ data: null, error: 'channelId non valido', errorType: 'validation' }, { status: 400 })
+    return errorResponse('channelId non valido', 'validation', 400, requestId)
   }
 
   const supabase = createAdminClient()
@@ -43,27 +55,34 @@ export async function POST(_request: Request, context: RouteContext) {
     .maybeSingle()
 
   if (userChannelError) {
-    return NextResponse.json({ data: null, error: userChannelError.message, errorType: 'unknown' }, { status: 500 })
+    return errorResponse('Errore lookup canale', 'unknown', 500, requestId)
   }
 
   if (!userChannel?.user_id) {
-    return NextResponse.json(
-      { data: null, error: 'Nessun utente attivo associato al canale', errorType: 'not_found' },
-      { status: 404 }
-    )
+    return errorResponse('Nessun utente attivo associato al canale', 'not_found', 404, requestId)
   }
 
   try {
     await requestScanNowForUser({ userId: userChannel.user_id, channelId }, { asAdmin: true })
   } catch (error) {
     if (error instanceof AppError) {
-      return NextResponse.json(
-        { data: null, error: error.message, errorType: error.type },
-        { status: error.statusCode ?? 500 }
-      )
+      return errorResponse(error.message, error.type, error.statusCode ?? 500, requestId)
     }
-    return NextResponse.json({ data: null, error: 'Errore interno', errorType: 'unknown' }, { status: 500 })
+    return errorResponse('Errore interno', 'unknown', 500, requestId)
   }
+
+  await supabase.from('audit_logs').insert({
+    user_id: null,
+    action: 'admin_scan_now_channel',
+    resource_type: 'channel',
+    resource_id: channelId,
+    ip_address: getClientIp(request),
+    details: {
+      admin_username: adminSession.username,
+      user_id: userChannel.user_id,
+      request_id: requestId,
+    },
+  })
 
   return NextResponse.json({
     data: {
@@ -73,5 +92,7 @@ export async function POST(_request: Request, context: RouteContext) {
     },
     error: null,
     errorType: null,
+    errorCode: null,
+    requestId,
   })
 }

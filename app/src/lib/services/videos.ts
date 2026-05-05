@@ -359,15 +359,29 @@ function getBestThumbnail(item: YouTubePlaylistItem): string | null {
  * Helper fetch JSON con errore strutturato per risposte non-2xx.
  */
 async function fetchJson<T>(url: URL): Promise<T> {
-  const response = await fetch(url.toString(), {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-    cache: 'no-store',
-  })
+  let response: Response
+  try {
+    response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10_000),
+    })
+  } catch (error) {
+    if (error instanceof Error && error.name === 'TimeoutError') {
+      throw new AppError('Timeout upstream YouTube', 'temporary', 504)
+    }
+    throw new AppError('Errore connessione upstream YouTube', 'temporary', 502)
+  }
 
   if (!response.ok) {
-    const text = await response.text().catch(() => '')
-    throw new AppError(`YouTube API error (${response.status}) ${text.slice(0, 180)}`, 'structural', 422)
+    if (response.status === 401 || response.status === 403) {
+      throw new AppError('Errore autenticazione provider YouTube', 'structural', 422)
+    }
+    if (response.status === 404) {
+      throw new AppError('Risorsa YouTube non trovata', 'not_found', 404)
+    }
+    throw new AppError('Errore upstream YouTube', 'structural', 422)
   }
 
   return response.json() as Promise<T>

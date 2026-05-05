@@ -26,6 +26,8 @@ export default function AdminScanNowButton({ channelId }: AdminScanNowButtonProp
     try {
       const response = await fetch(`/api/admin/channels/${channelId}/scan-now`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
         cache: 'no-store',
       })
       const payload = (await response.json().catch(() => null)) as

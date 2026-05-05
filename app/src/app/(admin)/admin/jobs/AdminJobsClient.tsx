@@ -77,6 +77,8 @@ export default function AdminJobsClient({ initialJobs, upcomingSchedules }: Admi
     try {
       const response = await fetch(`/api/admin/jobs/${jobId}`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
         cache: 'no-store',
       })
 
@@ -109,6 +111,8 @@ export default function AdminJobsClient({ initialJobs, upcomingSchedules }: Admi
     try {
       const response = await fetch(`/api/admin/jobs/${jobId}`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
         cache: 'no-store',
       })
 
