@@ -37,7 +37,7 @@ export default async function DashboardPage() {
 
   const channelIds = userChannels?.map((uc) => uc.channel_id) ?? []
 
-  const { data: recentVideos } = channelIds.length > 0
+  const { data: recentVideosData } = channelIds.length > 0
     ? await supabase
         .from('videos')
         .select(`
@@ -53,8 +53,9 @@ export default async function DashboardPage() {
         .limit(12)
     : { data: [] }
 
-  const videoIds = (recentVideos ?? []).map((v) => v.id)
-  const { data: userVideoStates } = videoIds.length > 0
+  const recentVideos = (recentVideosData ?? []) as Array<Record<string, any>>
+  const videoIds = recentVideos.map((v) => v.id as string)
+  const { data: userVideoStatesData } = videoIds.length > 0
     ? await supabase
         .from('user_video_states')
         .select('video_id, seen_status')
@@ -62,8 +63,9 @@ export default async function DashboardPage() {
         .in('video_id', videoIds)
     : { data: [] }
 
-  const seenMap = new Map((userVideoStates ?? []).map((s) => [s.video_id, s.seen_status]))
-  const recentVideosWithState = (recentVideos ?? []).map((video) => ({
+  const userVideoStates = (userVideoStatesData ?? []) as Array<{ video_id: string; seen_status: string }>
+  const seenMap = new Map(userVideoStates.map((s) => [s.video_id, s.seen_status]))
+  const recentVideosWithState: any[] = recentVideos.map((video: any) => ({
     ...video,
     __seenStatus: seenMap.get(video.id) ?? 'unseen',
   }))

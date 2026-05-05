@@ -44,7 +44,6 @@ export async function getCurrentSession(): Promise<AuthSession | null> {
 
   // Calcolo ruolo applicativo semplificato per UI/API.
   // Se non c'e `super_admin`, l'utente viene trattato come `user`.
-  // @ts-expect-error — nested join type not inferred perfectly
   const userRoles = userProfile.user_roles as Array<{ roles: { name: string } }> | null
   const isSuperAdmin = userRoles?.some((ur) => ur.roles?.name === 'super_admin') ?? false
 

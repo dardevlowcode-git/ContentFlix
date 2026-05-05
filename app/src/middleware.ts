@@ -55,7 +55,12 @@ async function verifyAdminSessionCookie(cookieValue: string | undefined): Promis
     ['verify']
   )
 
-  const validSignature = await crypto.subtle.verify('HMAC', key, signatureBytes, payloadBytes)
+  const validSignature = await crypto.subtle.verify(
+    'HMAC',
+    key,
+    signatureBytes as unknown as BufferSource,
+    payloadBytes as unknown as BufferSource
+  )
   if (!validSignature) return false
 
   const payloadDecoded = decodeBase64Url(payload)
@@ -94,7 +99,7 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>) {
           // Copia i cookie sia nella request che nella response:
           // serve a mantenere allineato il refresh token durante la stessa richiesta.
           cookiesToSet.forEach(({ name, value }) =>

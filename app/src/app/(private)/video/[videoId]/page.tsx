@@ -22,6 +22,7 @@ interface Props {
 export default async function VideoDetailPage({ params }: Props) {
   const { videoId } = await params
   const session = await getCurrentSession()
+  if (!session) notFound()
   const supabase = await createClient()
   const t = await getTranslations()
   const locale = await getLocale()
@@ -232,7 +233,7 @@ export default async function VideoDetailPage({ params }: Props) {
                   <div>
                     <p className="text-label-caps text-on-surface-variant mb-3">{t('video.keyMoments')}</p>
                     <div className="space-y-2">
-                      {content.highlights_text.split('\n').slice(0, 5).map((line, i) => (
+                      {content.highlights_text.split('\n').slice(0, 5).map((line: string, i: number) => (
                         <p key={i} className="text-sm text-on-surface-variant">{line}</p>
                       ))}
                     </div>

@@ -46,7 +46,7 @@ export default async function AdminCanonicalVideosPage() {
     )
   }
 
-  const rows = (videos ?? []) as Array<{
+  const rows = ((videos ?? []) as unknown) as Array<{
     id: string
     title: string
     youtube_video_id: string

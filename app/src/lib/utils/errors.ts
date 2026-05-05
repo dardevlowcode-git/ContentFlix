@@ -99,7 +99,7 @@ export function errorResponse(
   message: string,
   type: AppErrorType,
   statusCode = 500,
-  requestId = randomUUID()
+  requestId: string = randomUUID()
 ): Response {
   return Response.json(
     {

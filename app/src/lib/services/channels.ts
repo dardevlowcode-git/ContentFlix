@@ -237,6 +237,10 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
 
     channel = upsertedChannel
   }
+  if (!channel) {
+    throw new AppError('Canale non disponibile dopo risoluzione', 'unknown', 500)
+  }
+  const channelId = channel.id
 
   // Upsert associazione utente<->canale: riattiva una riga esistente se era stata rimossa.
   const { data: userChannel, error: userChannelError } = await supabase
@@ -244,7 +248,7 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
     .upsert(
       {
         user_id: params.userId,
-        channel_id: channel.id,
+        channel_id: channelId,
         is_active: true,
         removed_at: null,
       },
@@ -282,7 +286,7 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
     .from('canonical_sync_state')
     .upsert(
       {
-        channel_id: channel.id,
+        channel_id: channelId,
       },
       { onConflict: 'channel_id' }
     )
@@ -298,7 +302,7 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
   try {
     await requestScanNowForUser({
       userId: params.userId,
-      channelId: channel.id,
+      channelId,
     })
   } catch (error) {
     initialScanError = error instanceof AppError
@@ -312,7 +316,7 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
       message: 'Canale aggiunto ma scansione iniziale fallita',
       context: {
         userId: params.userId,
-        channelId: channel.id,
+        channelId,
         error: initialScanError,
       },
     })
@@ -322,12 +326,12 @@ export async function addChannelForUser(params: { userId: string; channelUrl: st
     markedSeenCount = await markChannelVideosSeenForUser({
       admin: supabase,
       userId: params.userId,
-      channelId: channel.id,
+      channelId,
     })
   }
 
   return {
-    channelId: channel.id,
+    channelId,
     normalizedChannelUrl: normalized,
     initialScanError,
     markedSeenCount,

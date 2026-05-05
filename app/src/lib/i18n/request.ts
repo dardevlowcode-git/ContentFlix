@@ -54,5 +54,5 @@ export default getRequestConfig(async () => {
     messages: locale === defaultLocale
       ? defaultMessages
       : mergeMessages(defaultMessages, localeMessages),
-  }
+  } as never
 })
