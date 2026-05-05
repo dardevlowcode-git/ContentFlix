@@ -42,9 +42,8 @@ CREATE TABLE IF NOT EXISTS user_video_states (
   user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   video_id    UUID NOT NULL REFERENCES videos(id),
   seen_status TEXT NOT NULL DEFAULT 'unseen'
-                CHECK (seen_status IN ('unseen', 'seen', 'hidden')),
+                CHECK (seen_status IN ('unseen', 'seen')),
   seen_at     TIMESTAMPTZ,
-  hidden_at   TIMESTAMPTZ,
   UNIQUE(user_id, video_id)
 );
 

@@ -1,186 +1,282 @@
--- Commento didattico:
--- Scopo del file: migrazione database Supabase per creare/aggiornare tabelle, vincoli e policy di sicurezza.
--- Flusso: viene eseguito in ordine cronologico; gli oggetti creati qui vengono poi usati da servizi API e pagine dell'app.
-
--- ============================================================
--- Migration 005: Row Level Security Policies
--- Utraya V1
--- ============================================================
+-- Consolidated RLS baseline for a fresh environment.
+-- Includes the final behavior previously split across migrations 005..010.
 
 -- Enable RLS on all tables
-ALTER TABLE users                     ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_identities           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_roles                ENABLE ROW LEVEL SECURITY;
-ALTER TABLE allowlist_entries         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE admin_actions_audit       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_provider_credentials ENABLE ROW LEVEL SECURITY;
-ALTER TABLE credential_checks         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE channels                  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE videos                    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE video_analysis            ENABLE ROW LEVEL SECURITY;
-ALTER TABLE video_analysis_raw        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE video_localized_content   ENABLE ROW LEVEL SECURITY;
-ALTER TABLE canonical_sync_state      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_channels             ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_channel_preferences  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_video_states         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE watchlists                ENABLE ROW LEVEL SECURITY;
-ALTER TABLE watchlist_items           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE jobs                      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE job_attempts              ENABLE ROW LEVEL SECURITY;
-ALTER TABLE job_locks                 ENABLE ROW LEVEL SECURITY;
-ALTER TABLE app_logs                  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE audit_logs                ENABLE ROW LEVEL SECURITY;
-ALTER TABLE incidents                 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.roles                     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.users                     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_identities           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_roles                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.allowlist_entries         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_actions_audit       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_provider_credentials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.credential_checks         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.channels                  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.videos                    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.video_analysis            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.video_analysis_raw        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.video_localized_content   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.canonical_sync_state      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_channels             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_channel_preferences  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_video_states         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.watchlists                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.watchlist_items           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.jobs                      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.job_attempts              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.job_locks                 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_logs                  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_logs                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.incidents                 ENABLE ROW LEVEL SECURITY;
 
--- ============================================================
--- Helper: is the current user a super_admin?
--- ============================================================
-CREATE OR REPLACE FUNCTION is_super_admin()
+CREATE OR REPLACE FUNCTION public.is_super_admin()
 RETURNS boolean AS $$
 BEGIN
   RETURN EXISTS (
     SELECT 1
-    FROM user_roles ur
-    JOIN roles r ON r.id = ur.role_id
-    WHERE ur.user_id = auth.uid()
+    FROM public.user_roles ur
+    JOIN public.roles r ON r.id = ur.role_id
+    WHERE ur.user_id = (select auth.uid())
       AND r.name = 'super_admin'
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- ============================================================
--- USERS — own profile only; admin sees all
--- ============================================================
-CREATE POLICY "Users: read own" ON users
-  FOR SELECT USING (id = auth.uid() OR is_super_admin());
+-- USERS
+CREATE POLICY "Users: read own" ON public.users
+  FOR SELECT TO authenticated
+  USING (id = (select auth.uid()) OR public.is_super_admin());
 
-CREATE POLICY "Users: update own" ON users
-  FOR UPDATE USING (id = auth.uid());
+CREATE POLICY "Users: update own" ON public.users
+  FOR UPDATE TO authenticated
+  USING (id = (select auth.uid()))
+  WITH CHECK (id = (select auth.uid()));
 
--- ============================================================
 -- USER IDENTITIES
--- ============================================================
-CREATE POLICY "User identities: read own" ON user_identities
-  FOR SELECT USING (user_id = auth.uid() OR is_super_admin());
+CREATE POLICY "User identities: read own" ON public.user_identities
+  FOR SELECT TO authenticated
+  USING (user_id = (select auth.uid()) OR public.is_super_admin());
 
--- ============================================================
--- USER ROLES — read only for users; admin can manage
--- ============================================================
-CREATE POLICY "User roles: read own" ON user_roles
-  FOR SELECT USING (user_id = auth.uid() OR is_super_admin());
+-- USER ROLES
+CREATE POLICY "User roles: read own" ON public.user_roles
+  FOR SELECT TO authenticated
+  USING (user_id = (select auth.uid()) OR public.is_super_admin());
 
--- ============================================================
--- ALLOWLIST — admin only
--- ============================================================
-CREATE POLICY "Allowlist: admin only" ON allowlist_entries
-  FOR ALL USING (is_super_admin());
+-- ROLES
+CREATE POLICY "Roles: authenticated read" ON public.roles
+  FOR SELECT TO authenticated
+  USING ((select auth.uid()) IS NOT NULL);
 
--- ============================================================
--- ADMIN ACTIONS AUDIT — admin only
--- ============================================================
-CREATE POLICY "Admin audit: admin only" ON admin_actions_audit
-  FOR ALL USING (is_super_admin());
+-- ALLOWLIST / ADMIN AUDIT
+CREATE POLICY "Allowlist: admin only" ON public.allowlist_entries
+  FOR ALL TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
 
--- ============================================================
--- USER PROVIDER CREDENTIALS — own only
--- ============================================================
-CREATE POLICY "Credentials: read own" ON user_provider_credentials
-  FOR SELECT USING (user_id = auth.uid() OR is_super_admin());
+CREATE POLICY "Admin audit: admin only" ON public.admin_actions_audit
+  FOR ALL TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
 
-CREATE POLICY "Credentials: manage own" ON user_provider_credentials
-  FOR ALL USING (user_id = auth.uid());
+-- USER PROVIDER CREDENTIALS
+CREATE POLICY "Credentials: read own" ON public.user_provider_credentials
+  FOR SELECT TO authenticated
+  USING (user_id = (select auth.uid()) OR public.is_super_admin());
 
-CREATE POLICY "Credential checks: read own" ON credential_checks
-  FOR SELECT USING (
+CREATE POLICY "Credentials: insert own" ON public.user_provider_credentials
+  FOR INSERT TO authenticated
+  WITH CHECK (user_id = (select auth.uid()));
+
+CREATE POLICY "Credentials: update own" ON public.user_provider_credentials
+  FOR UPDATE TO authenticated
+  USING (user_id = (select auth.uid()))
+  WITH CHECK (user_id = (select auth.uid()));
+
+CREATE POLICY "Credentials: delete own" ON public.user_provider_credentials
+  FOR DELETE TO authenticated
+  USING (user_id = (select auth.uid()));
+
+CREATE POLICY "Credential checks: read own" ON public.credential_checks
+  FOR SELECT TO authenticated
+  USING (
     EXISTS (
-      SELECT 1 FROM user_provider_credentials c
-      WHERE c.id = credential_id AND (c.user_id = auth.uid() OR is_super_admin())
+      SELECT 1
+      FROM public.user_provider_credentials c
+      WHERE c.id = credential_id
+        AND (c.user_id = (select auth.uid()) OR public.is_super_admin())
     )
   );
 
--- ============================================================
--- CANONICAL CONTENT — all authenticated users can read
--- ============================================================
-CREATE POLICY "Channels: authenticated read" ON channels
-  FOR SELECT USING (auth.uid() IS NOT NULL);
+-- CANONICAL CONTENT
+CREATE POLICY "Channels: authenticated read" ON public.channels
+  FOR SELECT TO authenticated
+  USING ((select auth.uid()) IS NOT NULL);
 
-CREATE POLICY "Channels: admin write" ON channels
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "Channels: admin insert" ON public.channels
+  FOR INSERT TO authenticated
+  WITH CHECK (public.is_super_admin());
 
-CREATE POLICY "Videos: authenticated read" ON videos
-  FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "Channels: admin update" ON public.channels
+  FOR UPDATE TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
 
-CREATE POLICY "Videos: admin write" ON videos
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "Channels: admin delete" ON public.channels
+  FOR DELETE TO authenticated
+  USING (public.is_super_admin());
 
-CREATE POLICY "Video analysis: authenticated read" ON video_analysis
-  FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "Videos: authenticated read" ON public.videos
+  FOR SELECT TO authenticated
+  USING ((select auth.uid()) IS NOT NULL);
 
-CREATE POLICY "Video analysis: admin write" ON video_analysis
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "Videos: admin insert" ON public.videos
+  FOR INSERT TO authenticated
+  WITH CHECK (public.is_super_admin());
 
-CREATE POLICY "Video analysis raw: admin only" ON video_analysis_raw
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "Videos: admin update" ON public.videos
+  FOR UPDATE TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
 
-CREATE POLICY "Localized content: authenticated read" ON video_localized_content
-  FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "Videos: admin delete" ON public.videos
+  FOR DELETE TO authenticated
+  USING (public.is_super_admin());
 
-CREATE POLICY "Localized content: admin write" ON video_localized_content
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "Video analysis: authenticated read" ON public.video_analysis
+  FOR SELECT TO authenticated
+  USING ((select auth.uid()) IS NOT NULL);
 
-CREATE POLICY "Sync state: authenticated read" ON canonical_sync_state
-  FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "Video analysis: admin insert" ON public.video_analysis
+  FOR INSERT TO authenticated
+  WITH CHECK (public.is_super_admin());
 
--- ============================================================
--- USER LAYER — own data only
--- ============================================================
-CREATE POLICY "User channels: own" ON user_channels
-  FOR ALL USING (user_id = auth.uid() OR is_super_admin());
+CREATE POLICY "Video analysis: admin update" ON public.video_analysis
+  FOR UPDATE TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
 
-CREATE POLICY "User channel prefs: own" ON user_channel_preferences
-  FOR ALL USING (
+CREATE POLICY "Video analysis: admin delete" ON public.video_analysis
+  FOR DELETE TO authenticated
+  USING (public.is_super_admin());
+
+CREATE POLICY "Video analysis raw: admin only" ON public.video_analysis_raw
+  FOR ALL TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
+
+CREATE POLICY "Localized content: authenticated read" ON public.video_localized_content
+  FOR SELECT TO authenticated
+  USING ((select auth.uid()) IS NOT NULL);
+
+CREATE POLICY "Localized content: admin insert" ON public.video_localized_content
+  FOR INSERT TO authenticated
+  WITH CHECK (public.is_super_admin());
+
+CREATE POLICY "Localized content: admin update" ON public.video_localized_content
+  FOR UPDATE TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
+
+CREATE POLICY "Localized content: admin delete" ON public.video_localized_content
+  FOR DELETE TO authenticated
+  USING (public.is_super_admin());
+
+CREATE POLICY "Sync state: authenticated read" ON public.canonical_sync_state
+  FOR SELECT TO authenticated
+  USING ((select auth.uid()) IS NOT NULL);
+
+-- USER LAYER
+CREATE POLICY "User channels: own" ON public.user_channels
+  FOR ALL TO authenticated
+  USING (user_id = (select auth.uid()) OR public.is_super_admin())
+  WITH CHECK (user_id = (select auth.uid()) OR public.is_super_admin());
+
+CREATE POLICY "User channel prefs: own" ON public.user_channel_preferences
+  FOR ALL TO authenticated
+  USING (
     EXISTS (
-      SELECT 1 FROM user_channels uc
-      WHERE uc.id = user_channel_id AND (uc.user_id = auth.uid() OR is_super_admin())
+      SELECT 1
+      FROM public.user_channels uc
+      WHERE uc.id = user_channel_id
+        AND (uc.user_id = (select auth.uid()) OR public.is_super_admin())
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1
+      FROM public.user_channels uc
+      WHERE uc.id = user_channel_id
+        AND (uc.user_id = (select auth.uid()) OR public.is_super_admin())
     )
   );
 
-CREATE POLICY "User video states: own" ON user_video_states
-  FOR ALL USING (user_id = auth.uid() OR is_super_admin());
+CREATE POLICY "User video states: own" ON public.user_video_states
+  FOR ALL TO authenticated
+  USING (user_id = (select auth.uid()) OR public.is_super_admin())
+  WITH CHECK (user_id = (select auth.uid()) OR public.is_super_admin());
 
-CREATE POLICY "Watchlists: own" ON watchlists
-  FOR ALL USING (user_id = auth.uid() OR is_super_admin());
+CREATE POLICY "Watchlists: own" ON public.watchlists
+  FOR ALL TO authenticated
+  USING (user_id = (select auth.uid()) OR public.is_super_admin())
+  WITH CHECK (user_id = (select auth.uid()) OR public.is_super_admin());
 
-CREATE POLICY "Watchlist items: own" ON watchlist_items
-  FOR ALL USING (
+CREATE POLICY "Watchlist items: own" ON public.watchlist_items
+  FOR ALL TO authenticated
+  USING (
     EXISTS (
-      SELECT 1 FROM watchlists w
-      WHERE w.id = watchlist_id AND (w.user_id = auth.uid() OR is_super_admin())
+      SELECT 1
+      FROM public.watchlists w
+      WHERE w.id = watchlist_id
+        AND (w.user_id = (select auth.uid()) OR public.is_super_admin())
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1
+      FROM public.watchlists w
+      WHERE w.id = watchlist_id
+        AND (w.user_id = (select auth.uid()) OR public.is_super_admin())
     )
   );
 
--- ============================================================
--- JOBS & OPERATIONS — admin only for full access
--- Users can see their own created jobs
--- ============================================================
-CREATE POLICY "Jobs: read own or admin" ON jobs
-  FOR SELECT USING (created_by_user_id = auth.uid() OR is_super_admin());
+-- JOBS & OPERATIONS
+CREATE POLICY "Jobs: read own or admin" ON public.jobs
+  FOR SELECT TO authenticated
+  USING (created_by_user_id = (select auth.uid()) OR public.is_super_admin());
 
-CREATE POLICY "Jobs: admin manage" ON jobs
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "Jobs: admin insert" ON public.jobs
+  FOR INSERT TO authenticated
+  WITH CHECK (public.is_super_admin());
 
-CREATE POLICY "Job attempts: admin only" ON job_attempts
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "Jobs: admin update" ON public.jobs
+  FOR UPDATE TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
 
-CREATE POLICY "Job locks: admin only" ON job_locks
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "Jobs: admin delete" ON public.jobs
+  FOR DELETE TO authenticated
+  USING (public.is_super_admin());
 
-CREATE POLICY "App logs: admin only" ON app_logs
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "Job attempts: admin only" ON public.job_attempts
+  FOR ALL TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
 
-CREATE POLICY "Audit logs: admin only" ON audit_logs
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "Job locks: admin only" ON public.job_locks
+  FOR ALL TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
 
-CREATE POLICY "Incidents: admin only" ON incidents
-  FOR ALL USING (is_super_admin());
+CREATE POLICY "App logs: admin only" ON public.app_logs
+  FOR ALL TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
+
+CREATE POLICY "Audit logs: admin only" ON public.audit_logs
+  FOR ALL TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
+
+CREATE POLICY "Incidents: admin only" ON public.incidents
+  FOR ALL TO authenticated
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
