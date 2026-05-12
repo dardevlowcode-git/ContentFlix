@@ -1,0 +1,63 @@
+# =============================================================================
+# CI - Quality Gates (sostituisce security-gates.yml)
+# -----------------------------------------------------------------------------
+# Controlli di qualita del codice che girano ad ogni PR e push su main.
+# Allineati agli script presenti in app/package.json:
+#   - check-comments  -> verifica che ogni file abbia il commento didattico iniziale
+#   - lint            -> next lint (ESLint)
+#   - type-check      -> tsc --noEmit
+#   - test            -> vitest run
+#
+# Gli step sono separati (anziche usare lo script aggregato "validate") cosi che
+# nei log di GitHub Actions si veda subito QUALE check e fallito.
+#
+# NOTA: questo file NON sostituisce i workflow di sicurezza (security.yml,
+# secret-scan.yml). Quelli scansionano vulnerabilita e segreti.
+#
+# IMPORTANTE: dopo aver pushato questo file, ELIMINA il vecchio
+# .github/workflows/security-gates.yml per evitare duplicazioni.
+# =============================================================================
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    name: Validate (comments, lint, type-check, test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check comments (didactic headers)
+        # Verifica che ogni file in src/ e supabase/migrations/ inizi con il
+        # commento didattico richiesto. Definito in scripts/check-comments.mjs
+        run: npm run check-comments
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Test (Vitest)
+        # "vitest run" e gia il default dello script "test" -> nessun watch mode
+        run: npm test

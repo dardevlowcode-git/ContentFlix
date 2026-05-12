@@ -1,0 +1,92 @@
+# =============================================================================
+# Dependabot - aggiornamento automatico delle dipendenze
+# -----------------------------------------------------------------------------
+# Struttura repo: il progetto Next.js sta in /app, mentre i workflow GitHub
+# Actions sono in /.github/workflows/ alla root.
+#
+# Dependabot apre Pull Request settimanali per:
+# - Pacchetti npm in /app
+# - Azioni GitHub usate nei workflow (alla root)
+# - Immagine base del Dockerfile in /app
+#
+# Patch e minor vengono raggruppate per ridurre il rumore di PR.
+# Le major restano separate (richiedono review manuale).
+# =============================================================================
+
+version: 2
+
+updates:
+  # ---------------------------------------------------------------------------
+  # npm: dipendenze JavaScript/TypeScript (progetto in /app)
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "npm"
+    directory: "/app"          # package.json e' qui
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Rome"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+    groups:
+      production-minor-patch:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      development-minor-patch:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    # Esempio per bloccare aggiornamenti specifici:
+    # ignore:
+    #   - dependency-name: "next"
+    #     versions: ["15.x"]
+
+  # ---------------------------------------------------------------------------
+  # GitHub Actions: i workflow sono nella root del repo
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "github-actions"
+    directory: "/"             # i workflow sono in /.github/workflows/
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Rome"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+    groups:
+      actions-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # ---------------------------------------------------------------------------
+  # Docker: il Dockerfile e' dentro /app
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "docker"
+    directory: "/app"          # Dockerfile e' qui
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Rome"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
