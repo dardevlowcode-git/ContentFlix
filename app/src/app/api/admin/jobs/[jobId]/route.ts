@@ -11,18 +11,12 @@ import { buildJobLabel, collectJobChannelIds, collectJobUserIds } from '@/lib/ut
 import { AppError, errorResponse } from '@/lib/utils/errors'
 import { ensureJsonRequest, ensureSameOrigin, getClientIp, getRequestId } from '@/lib/security/http'
 
-interface RouteContext {
-  params: {
-    jobId: string
-  }
-}
-
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 /**
  * Retry di un job fallito: crea una nuova riga job `pending` con payload ereditato.
  */
-export async function POST(request: Request, context: RouteContext) {
+export async function POST(request: Request, context: { params: Promise<{ jobId: string }> }) {
   const requestId = getRequestId(request)
   try {
     ensureSameOrigin(request)
@@ -39,7 +33,8 @@ export async function POST(request: Request, context: RouteContext) {
     return errorResponse('Unauthorized', 'unauthorized', 401, requestId)
   }
 
-  const jobId = context.params.jobId?.trim()
+  const { jobId: rawJobId } = await context.params
+  const jobId = rawJobId?.trim()
   if (!jobId || !uuidPattern.test(jobId)) {
     return errorResponse('jobId non valido', 'validation', 400, requestId)
   }
@@ -140,7 +135,7 @@ export async function POST(request: Request, context: RouteContext) {
 /**
  * Elimina un job solo se ancora `pending`.
  */
-export async function DELETE(request: Request, context: RouteContext) {
+export async function DELETE(request: Request, context: { params: Promise<{ jobId: string }> }) {
   const requestId = getRequestId(request)
   try {
     ensureSameOrigin(request)
@@ -157,7 +152,8 @@ export async function DELETE(request: Request, context: RouteContext) {
     return errorResponse('Unauthorized', 'unauthorized', 401, requestId)
   }
 
-  const jobId = context.params.jobId?.trim()
+  const { jobId: rawJobId } = await context.params
+  const jobId = rawJobId?.trim()
   if (!jobId || !uuidPattern.test(jobId)) {
     return errorResponse('jobId non valido', 'validation', 400, requestId)
   }
