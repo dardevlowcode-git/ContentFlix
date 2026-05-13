@@ -9,6 +9,7 @@
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { Suspense } from 'react'
 
 function LoginForm() {
@@ -70,14 +71,14 @@ function LoginForm() {
             {t('auth.loginWithGoogle')}
           </button>
 
-          <a
+          <Link
             href="/admin/login"
             className="mt-3 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full
                        font-semibold text-sm border border-outline-variant/40 text-on-surface-variant
                        hover:bg-surface-container-low transition-all"
           >
             {t('auth.admin.loginLink')}
-          </a>
+          </Link>
 
           <div className="mt-6 p-4 bg-surface-container-low rounded-xl">
             <p className="text-xs text-on-surface-variant text-center leading-relaxed">
@@ -87,9 +88,9 @@ function LoginForm() {
           </div>
 
           <div className="text-center mt-6">
-            <a href="/" className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+            <Link href="/" className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">
               ← {t('auth.backToHome')}
-            </a>
+            </Link>
           </div>
         </div>
       </div>

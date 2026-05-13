@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: verifica i redirect e i controlli di sicurezza della callback OAuth.
+ * Moduli richiamati: `@/app/api/auth/callback/route`, `@/lib/supabase/server`, `@/lib/auth/allowlist`, `vitest`
+ * Flusso: I test isolano la route con mock espliciti e validano i casi di redirect consentiti/bloccati.
+ */
+
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const exchangeCodeForSessionMock = vi.fn()
@@ -33,7 +39,7 @@ describe('GET /api/auth/callback', () => {
   })
 
   beforeEach(() => {
-    vi.resetAllMocks()
+    vi.clearAllMocks()
     process.env.APP_ORIGIN = 'https://app.contentflix.test'
 
     exchangeCodeForSessionMock.mockResolvedValue({ error: null })

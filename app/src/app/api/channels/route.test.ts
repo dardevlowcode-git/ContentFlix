@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: testa il contratto della route canali per i warning non bloccanti.
+ * Moduli richiamati: `@/app/api/channels/route`, `@/lib/auth/provider`, `@/lib/services/channels`, `vitest`
+ * Flusso: Simula sessione e service layer per verificare payload HTTP della POST.
+ */
+
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const getCurrentSessionMock = vi.fn()

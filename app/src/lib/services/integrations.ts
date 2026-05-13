@@ -16,6 +16,8 @@ type Provider = 'youtube' | 'gemini'
 type CredentialRow = Database['public']['Tables']['user_provider_credentials']['Row']
 
 const PROVIDERS: Provider[] = ['youtube', 'gemini']
+const AES_GCM_IV_LENGTH = 12
+const AES_GCM_AUTH_TAG_LENGTH = 16
 
 /**
  * Legge la chiave applicativa usata per cifrare le API key utente.
@@ -47,8 +49,10 @@ function deriveKey(secret: string): Buffer {
  */
 function encryptSecret(plainText: string): string {
   const key = deriveKey(getEncryptionSecret())
-  const iv = randomBytes(12)
-  const cipher = createCipheriv('aes-256-gcm', key, iv)
+  const iv = randomBytes(AES_GCM_IV_LENGTH)
+  const cipher = createCipheriv('aes-256-gcm', key, iv, {
+    authTagLength: AES_GCM_AUTH_TAG_LENGTH,
+  })
 
   const encrypted = Buffer.concat([
     cipher.update(Buffer.from(plainText, 'utf8')),
@@ -74,7 +78,17 @@ function decryptSecret(cipherText: string): string {
   const authTag = Buffer.from(parts[2], 'base64')
   const payload = Buffer.from(parts[3], 'base64')
 
-  const decipher = createDecipheriv('aes-256-gcm', key, iv)
+  if (iv.length !== AES_GCM_IV_LENGTH) {
+    throw new AppError('Formato vettore inizializzazione non valido', 'structural', 500)
+  }
+
+  if (authTag.length !== AES_GCM_AUTH_TAG_LENGTH) {
+    throw new AppError('Formato auth tag non valido', 'structural', 500)
+  }
+
+  const decipher = createDecipheriv('aes-256-gcm', key, iv, {
+    authTagLength: AES_GCM_AUTH_TAG_LENGTH,
+  })
   decipher.setAuthTag(authTag)
 
   const decrypted = Buffer.concat([decipher.update(payload), decipher.final()])
