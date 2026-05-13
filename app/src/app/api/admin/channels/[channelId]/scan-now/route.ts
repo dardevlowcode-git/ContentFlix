@@ -11,18 +11,12 @@ import { requestScanNowForUser } from '@/lib/services/channels'
 import { AppError, errorResponse } from '@/lib/utils/errors'
 import { ensureJsonRequest, ensureSameOrigin, getClientIp, getRequestId } from '@/lib/security/http'
 
-interface RouteContext {
-  params: {
-    channelId: string
-  }
-}
-
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 /**
  * Avvia una scansione canale immediata come super-admin.
  */
-export async function POST(request: Request, context: RouteContext) {
+export async function POST(request: Request, context: { params: Promise<{ channelId: string }> }) {
   const requestId = getRequestId(request)
   try {
     ensureSameOrigin(request)
@@ -39,7 +33,8 @@ export async function POST(request: Request, context: RouteContext) {
     return errorResponse('Unauthorized', 'unauthorized', 401, requestId)
   }
 
-  const channelId = context.params.channelId?.trim()
+  const { channelId: rawChannelId } = await context.params
+  const channelId = rawChannelId?.trim()
   if (!channelId || !uuidPattern.test(channelId)) {
     return errorResponse('channelId non valido', 'validation', 400, requestId)
   }
