@@ -26,6 +26,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     name: Validate (comments, lint, type-check, test)

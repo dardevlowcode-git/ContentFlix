@@ -1,3 +1,9 @@
+/* Commento didattico:
+ * Scopo del file: verifica i detector di business usati nel flusso aggiunta canale.
+ * Moduli richiamati: `@/lib/services/channels`, `@/lib/utils/errors`, `vitest`
+ * Flusso: Esegue unit test su classificazione errori senza dipendenze esterne.
+ */
+
 import { describe, expect, it } from 'vitest'
 import { AppError } from '@/lib/utils/errors'
 import { detectScanBlockedReasonFromError } from '@/lib/services/channels'

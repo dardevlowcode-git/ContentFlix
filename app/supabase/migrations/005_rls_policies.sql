@@ -1,3 +1,8 @@
+-- Commento didattico:
+-- Scopo del file: definisce baseline RLS consolidata per tutte le tabelle applicative.
+-- Moduli richiamati: schema `public` Supabase/Postgres, funzione helper `is_super_admin()`.
+-- Flusso: abilita RLS e crea policy granulari per utenti autenticati e ruoli admin.
+
 -- Consolidated RLS baseline for a fresh environment.
 -- Includes the final behavior previously split across migrations 005..010.
 
