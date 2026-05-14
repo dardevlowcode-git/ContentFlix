@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
 
   // Provisioning idempotente: crea/aggiorna record applicativi necessari.
   const identity = user.identities?.[0]
-  await provisionNewUser({
+  const provisionResult = await provisionNewUser({
     supabaseUserId: user.id,
     email: user.email,
     displayName: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
@@ -79,6 +79,12 @@ export async function GET(request: NextRequest) {
     provider: identity?.provider ?? 'google',
     providerUserId: identity?.id ?? user.id,
   })
+
+  if (!provisionResult.success) {
+    console.error('[Auth Callback] Provisioning error:', provisionResult.error)
+    await supabase.auth.signOut()
+    return NextResponse.redirect(new URL('/login?error=exchange_failed', appUrl))
+  }
 
   return NextResponse.redirect(new URL(safeRedirect, appUrl))
 }

@@ -16,7 +16,8 @@ function LoginForm() {
   const t = useTranslations()
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
-  const redirectTo = searchParams.get('redirectTo') ?? '/dashboard'
+  const redirectToParam = searchParams.get('redirectTo')
+  const redirectTo = redirectToParam && redirectToParam !== '/' ? redirectToParam : '/dashboard'
 
   async function handleGoogleLogin() {
     const supabase = createClient()

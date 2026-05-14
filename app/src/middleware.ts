@@ -132,8 +132,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon')
   ) {
-    // Se l'utente e gia autenticato e autorizzato, non ha senso restare su /login.
-    if (pathname === '/login' && user?.email) {
+    // Se l'utente e gia autenticato e autorizzato, non ha senso restare su home/login.
+    if ((pathname === '/login' || pathname === '/') && user?.email) {
       const allowlisted = await isEmailAllowlisted(user.email)
       if (allowlisted) {
         // Evita loop login/dashboard:
