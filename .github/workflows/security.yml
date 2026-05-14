@@ -25,9 +25,13 @@ name: Security Scan
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - preprod
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - preprod
   schedule:
     - cron: '0 6 * * 1'  # ogni lunedi alle 06:00 UTC (08:00 ora italiana)
   workflow_dispatch:

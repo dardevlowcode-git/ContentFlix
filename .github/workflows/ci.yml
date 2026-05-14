@@ -1,30 +1,29 @@
 # =============================================================================
-# CI - Quality Gates (sostituisce security-gates.yml)
+# CI - Quality Gates
 # -----------------------------------------------------------------------------
-# Controlli di qualita del codice che girano ad ogni PR e push su main.
+# Controlli di qualita del codice che girano ad ogni PR e push.
 # Allineati agli script presenti in app/package.json:
 #   - check-comments  -> verifica che ogni file abbia il commento didattico iniziale
 #   - lint            -> next lint (ESLint)
 #   - type-check      -> tsc --noEmit
 #   - test            -> vitest run
 #
-# Gli step sono separati (anziche usare lo script aggregato "validate") cosi che
-# nei log di GitHub Actions si veda subito QUALE check e fallito.
-#
-# NOTA: questo file NON sostituisce i workflow di sicurezza (security.yml,
-# secret-scan.yml). Quelli scansionano vulnerabilita e segreti.
-#
-# IMPORTANTE: dopo aver pushato questo file, ELIMINA il vecchio
-# .github/workflows/security-gates.yml per evitare duplicazioni.
+# Branch coperti:
+#   - main     -> produzione
+#   - preprod  -> staging / preview / preproduzione
 # =============================================================================
 
 name: CI
 
 on:
   pull_request:
+    branches:
+      - main
+      - preprod
   push:
     branches:
       - main
+      - preprod
 
 permissions:
   contents: read

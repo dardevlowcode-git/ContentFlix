@@ -54,7 +54,10 @@ describe('GET /api/auth/callback', () => {
       },
     })
     isEmailAllowlistedMock.mockResolvedValue(true)
-    provisionNewUserMock.mockResolvedValue(undefined)
+    provisionNewUserMock.mockResolvedValue({
+      success: true,
+      user: { id: 'user-1' },
+    })
   })
 
   it('ignora Host/X-Forwarded-Host e usa APP_ORIGIN nel redirect', async () => {
