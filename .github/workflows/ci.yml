@@ -9,8 +9,8 @@
 #   - test            -> vitest run
 #
 # Branch coperti:
-#   - main             -> produzione
-#   - officialpreview  -> staging / preview / preproduzione
+#   - main     -> produzione
+#   - preprod  -> staging / preview / preproduzione
 # =============================================================================
 
 name: CI
@@ -19,11 +19,11 @@ on:
   pull_request:
     branches:
       - main
-      - officialpreview
+      - preprod
   push:
     branches:
       - main
-      - officialpreview
+      - preprod
 
 permissions:
   contents: read
