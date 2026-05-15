@@ -5,6 +5,8 @@
 
 import type { Config } from 'tailwindcss'
 
+const withOpacity = (cssVariable: string) => `rgb(var(${cssVariable}) / <alpha-value>)`
+
 const config: Config = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -25,15 +27,15 @@ const config: Config = {
         'white': '#FFFFFF',
 
         // Semantic aliases used by existing components.
-        'primary': '#141413',
-        'primary-container': '#2A2928',
-        'on-primary': '#FCFBFA',
-        'on-primary-container': '#FCFBFA',
-        'primary-fixed': '#FCFBFA',
-        'primary-fixed-dim': '#E7DFDA',
-        'on-primary-fixed': '#141413',
-        'on-primary-fixed-variant': '#2A2928',
-        'inverse-primary': '#F37338',
+        'primary': withOpacity('--color-primary'),
+        'primary-container': withOpacity('--color-primary-container'),
+        'on-primary': withOpacity('--color-on-primary'),
+        'on-primary-container': withOpacity('--color-on-primary-container'),
+        'primary-fixed': withOpacity('--color-primary-fixed'),
+        'primary-fixed-dim': withOpacity('--color-primary-fixed-dim'),
+        'on-primary-fixed': withOpacity('--color-on-primary-fixed'),
+        'on-primary-fixed-variant': withOpacity('--color-on-primary-fixed-variant'),
+        'inverse-primary': withOpacity('--color-inverse-primary'),
 
         'secondary': '#F37338',
         'secondary-container': '#CF4500',
@@ -54,27 +56,27 @@ const config: Config = {
         'on-tertiary-fixed': '#5E1D00',
         'on-tertiary-fixed-variant': '#8F2E00',
 
-        'surface': '#F3F0EE',
-        'surface-dim': '#E7DFDA',
-        'surface-bright': '#FCFBFA',
-        'surface-container-lowest': '#FFFFFF',
-        'surface-container-low': '#FCFBFA',
-        'surface-container': '#F7F3F1',
-        'surface-container-high': '#EFE9E5',
-        'surface-container-highest': '#E7DFDA',
-        'surface-variant': '#E7DFDA',
+        'surface': withOpacity('--color-surface'),
+        'surface-dim': withOpacity('--color-surface-dim'),
+        'surface-bright': withOpacity('--color-surface-bright'),
+        'surface-container-lowest': withOpacity('--color-surface-container-lowest'),
+        'surface-container-low': withOpacity('--color-surface-container-low'),
+        'surface-container': withOpacity('--color-surface-container'),
+        'surface-container-high': withOpacity('--color-surface-container-high'),
+        'surface-container-highest': withOpacity('--color-surface-container-highest'),
+        'surface-variant': withOpacity('--color-surface-variant'),
         'surface-tint': '#F37338',
 
-        'on-surface': '#141413',
-        'on-surface-variant': '#696969',
-        'inverse-surface': '#141413',
-        'inverse-on-surface': '#FCFBFA',
+        'on-surface': withOpacity('--color-on-surface'),
+        'on-surface-variant': withOpacity('--color-on-surface-variant'),
+        'inverse-surface': withOpacity('--color-inverse-surface'),
+        'inverse-on-surface': withOpacity('--color-inverse-on-surface'),
 
-        'background': '#F3F0EE',
-        'on-background': '#141413',
+        'background': withOpacity('--color-background'),
+        'on-background': withOpacity('--color-on-background'),
 
-        'outline': '#B7ADA6',
-        'outline-variant': '#D8D0CA',
+        'outline': withOpacity('--color-outline'),
+        'outline-variant': withOpacity('--color-outline-variant'),
 
         // Error
         'error': '#ba1a1a',

@@ -7,6 +7,7 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import MarketingLanguageSwitcher from './LanguageSwitcher'
+import ThemeToggle from '@/components/theme/ThemeToggle'
 
 export default async function MarketingHeader() {
   const t = await getTranslations()
@@ -40,12 +41,13 @@ export default async function MarketingHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <div className="hidden md:block">
+          <div className="flex items-center gap-2">
             <MarketingLanguageSwitcher />
+            <ThemeToggle />
           </div>
           <Link
             href="/login"
-            className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-container"
+            className="hidden rounded-full bg-primary px-5 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-container sm:inline-flex"
           >
             {t('marketing.cta.createWatchlist')}
           </Link>

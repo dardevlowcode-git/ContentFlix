@@ -18,16 +18,82 @@
     --slate-gray: #696969;
     --light-signal-orange: #f37338;
     --signal-orange: #cf4500;
-    --theme-surface: var(--canvas-cream);
-    --theme-surface-lowest: #ffffff;
-    --theme-surface-low: var(--lifted-cream);
-    --theme-surface-container: #f7f3f1;
-    --theme-surface-high: #efe9e5;
-    --theme-surface-highest: #e7dfda;
-    --theme-on-surface: var(--ink-black);
-    --theme-on-surface-variant: var(--slate-gray);
-    --theme-outline-variant: #d8d0ca;
-    --theme-header: rgba(243, 240, 238, 0.96);
+    --color-primary: 20 20 19;
+    --color-primary-container: 42 41 40;
+    --color-on-primary: 252 251 250;
+    --color-on-primary-container: 252 251 250;
+    --color-primary-fixed: 252 251 250;
+    --color-primary-fixed-dim: 231 223 218;
+    --color-on-primary-fixed: 20 20 19;
+    --color-on-primary-fixed-variant: 42 41 40;
+    --color-inverse-primary: 243 115 56;
+    --color-surface: 243 240 238;
+    --color-surface-dim: 231 223 218;
+    --color-surface-bright: 252 251 250;
+    --color-surface-container-lowest: 255 255 255;
+    --color-surface-container-low: 252 251 250;
+    --color-surface-container: 247 243 241;
+    --color-surface-container-high: 239 233 229;
+    --color-surface-container-highest: 231 223 218;
+    --color-surface-variant: 231 223 218;
+    --color-on-surface: 20 20 19;
+    --color-on-surface-variant: 105 105 105;
+    --color-inverse-surface: 20 20 19;
+    --color-inverse-on-surface: 252 251 250;
+    --color-background: 243 240 238;
+    --color-on-background: 20 20 19;
+    --color-outline: 183 173 166;
+    --color-outline-variant: 216 208 202;
+    --theme-surface: rgb(var(--color-surface));
+    --theme-surface-lowest: rgb(var(--color-surface-container-lowest));
+    --theme-surface-low: rgb(var(--color-surface-container-low));
+    --theme-surface-container: rgb(var(--color-surface-container));
+    --theme-surface-high: rgb(var(--color-surface-container-high));
+    --theme-surface-highest: rgb(var(--color-surface-container-highest));
+    --theme-on-surface: rgb(var(--color-on-surface));
+    --theme-on-surface-variant: rgb(var(--color-on-surface-variant));
+    --theme-outline-variant: rgb(var(--color-outline-variant));
+    --theme-header: rgb(var(--color-surface) / 0.96);
+  }
+
+  html[data-theme='dark'] {
+    --color-primary: 252 251 250;
+    --color-primary-container: 216 208 202;
+    --color-on-primary: 20 20 19;
+    --color-on-primary-container: 20 20 19;
+    --color-primary-fixed: 252 251 250;
+    --color-primary-fixed-dim: 216 208 202;
+    --color-on-primary-fixed: 20 20 19;
+    --color-on-primary-fixed-variant: 20 20 19;
+    --color-inverse-primary: 243 115 56;
+    --color-surface: 20 20 19;
+    --color-surface-dim: 18 18 17;
+    --color-surface-bright: 39 38 37;
+    --color-surface-container-lowest: 17 17 16;
+    --color-surface-container-low: 28 27 26;
+    --color-surface-container: 35 34 33;
+    --color-surface-container-high: 46 45 43;
+    --color-surface-container-highest: 60 58 56;
+    --color-surface-variant: 46 45 43;
+    --color-on-surface: 243 240 238;
+    --color-on-surface-variant: 216 208 202;
+    --color-inverse-surface: 243 240 238;
+    --color-inverse-on-surface: 20 20 19;
+    --color-background: 20 20 19;
+    --color-on-background: 243 240 238;
+    --color-outline: 140 132 126;
+    --color-outline-variant: 99 94 89;
+    --theme-surface: rgb(var(--color-surface));
+    --theme-surface-lowest: rgb(var(--color-surface-container-lowest));
+    --theme-surface-low: rgb(var(--color-surface-container-low));
+    --theme-surface-container: rgb(var(--color-surface-container));
+    --theme-surface-high: rgb(var(--color-surface-container-high));
+    --theme-surface-highest: rgb(var(--color-surface-container-highest));
+    --theme-on-surface: rgb(var(--color-on-surface));
+    --theme-on-surface-variant: rgb(var(--color-on-surface-variant));
+    --theme-outline-variant: rgb(var(--color-outline-variant));
+    --theme-header: rgb(var(--color-surface) / 0.94);
+    color-scheme: dark;
   }
 
   html {
@@ -81,7 +147,7 @@
 
 @layer components {
   .glass {
-    background: rgba(252, 251, 250, 0.94);
+    background: rgb(var(--color-surface-container-lowest) / 0.9);
   }
 
   .glass-dark {
@@ -118,7 +184,7 @@
   }
 
   .ghost-border {
-    border: 1px solid rgba(216, 208, 202, 0.75);
+    border: 1px solid rgb(var(--color-outline-variant) / 0.75);
   }
 
   .status-active {

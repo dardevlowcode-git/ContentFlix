@@ -7,6 +7,7 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import MarketingLanguageSwitcher from './LanguageSwitcher'
+import ThemeToggle from '@/components/theme/ThemeToggle'
 
 export default async function MarketingFooter() {
   const t = await getTranslations()
@@ -62,7 +63,10 @@ export default async function MarketingFooter() {
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white/90">
             {t('marketing.footer.language')}
           </h2>
-          <MarketingLanguageSwitcher />
+          <div className="flex flex-wrap items-center gap-2">
+            <MarketingLanguageSwitcher />
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 
