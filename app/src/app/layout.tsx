@@ -5,15 +5,15 @@
  */
 
 import type { Metadata } from 'next'
-import { Inter, Manrope } from 'next/font/google'
+import { Inter, Sofia_Sans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { cookies } from 'next/headers'
 import './globals.css'
 
-const manrope = Manrope({
+const sofiaSans = Sofia_Sans({
   subsets: ['latin'],
-  variable: '--font-manrope',
+  variable: '--font-sofia-sans',
   display: 'swap',
 })
 
@@ -55,7 +55,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} data-theme={initialTheme} suppressHydrationWarning>
-      <body className={`${manrope.variable} ${inter.variable} min-h-screen bg-surface text-on-surface antialiased`}>
+      <body className={`${sofiaSans.variable} ${inter.variable} min-h-screen bg-surface text-on-surface antialiased`}>
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

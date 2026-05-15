@@ -85,6 +85,269 @@
       "contact": "Contatto"
     }
   },
+  "marketing": {
+    "badgeComingSoon": "In arrivo a breve",
+    "a11y": {
+      "skipToContent": "Vai al contenuto principale"
+    },
+    "cookies": {
+      "title": "Preferenze cookie",
+      "description": "Usiamo cookie tecnici sempre attivi. Analytics e strumenti di misurazione vengono caricati solo dopo il tuo consenso.",
+      "acceptAll": "Accetta tutto",
+      "rejectNonEssential": "Rifiuta non necessari",
+      "customize": "Personalizza"
+    },
+    "hero": {
+      "ariaLabel": "Schema orbitale Utraya con nodi contenuto e AI",
+      "center": "Utraya",
+      "mobileFallbackTitle": "Hub contenuti Utraya",
+      "mobileFallbackDescription": "Video, podcast, riassunti testuali e audio convergono in un unico flusso.",
+      "nodes": {
+        "video": "Video",
+        "podcast": "Podcast",
+        "audio": "Audio",
+        "text": "Testo",
+        "playlist": "Playlist",
+        "categories": "Categorie",
+        "language": "Lingua",
+        "apiAi": "API AI"
+      }
+    },
+    "nav": {
+      "label": "Navigazione principale",
+      "features": "Funzionalità",
+      "pricing": "Prezzi",
+      "faq": "FAQ",
+      "mission": "Mission",
+      "about": "Chi siamo",
+      "comparisons": "Comparazioni",
+      "roadmap": "Roadmap",
+      "terms": "Termini di servizio",
+      "privacy": "Privacy Policy",
+      "cookies": "Cookie Policy"
+    },
+    "cta": {
+      "createWatchlist": "Crea la tua watchlist gratuita",
+      "exploreFeatures": "Esplora le funzionalità"
+    },
+    "footer": {
+      "product": "Prodotto",
+      "project": "Progetto",
+      "legal": "Legale",
+      "language": "Lingua",
+      "rights": "Tutti i diritti riservati."
+    },
+    "landing": {
+      "metaTitle": "I tuoi contenuti. Il tuo tempo. La tua scelta. | Utraya",
+      "metaDescription": "Utraya ti aiuta a seguire canali YouTube e podcast senza dover guardare o ascoltare tutto.",
+      "hero": {
+        "headline1": "I tuoi contenuti.",
+        "headline2": "Il tuo tempo.",
+        "headline3": "La tua scelta.",
+        "subtitle": "Utraya ti aiuta a seguire canali YouTube e podcast senza dover guardare o ascoltare tutto. Ricevi riassunti AI in testo e audio, salva ciò che ti interessa e organizza i contenuti in playlist tematiche."
+      },
+      "howItWorks": {
+        "title": "Come funziona",
+        "subtitle": "Utraya trasforma il modo in cui segui contenuti lunghi: meno accumulo, più scelta.",
+        "step1": {
+          "title": "Segui ciò che ami",
+          "description": "Aggiungi le fonti che vuoi monitorare e centralizza i contenuti."
+        },
+        "step2": {
+          "title": "Capisci cosa conta",
+          "description": "Leggi in pochi secondi i punti chiave generati dall'AI."
+        },
+        "step3": {
+          "title": "Ascolta in meno tempo",
+          "description": "Quando disponibile, converti i contenuti in formato ascoltabile."
+        },
+        "step4": {
+          "title": "Scegli cosa approfondire",
+          "description": "Decidi dove investire il tuo tempo e organizza per tema."
+        }
+      },
+      "problem": {
+        "title": "Troppi contenuti, troppo poco tempo.",
+        "description": "Video salvati per dopo, podcast lasciati a metà, canali che pubblicano ogni giorno. Utraya ti aiuta a capire rapidamente cosa vale davvero il tuo tempo.",
+        "tag1": "Video lunghi",
+        "tag2": "Podcast arretrati",
+        "tag3": "Playlist infinite",
+        "tag4": "Contenuti persi"
+      },
+      "features": {
+        "title": "Funzionalità principali",
+        "note": "Supporto multilingua · Uso delle tue API AI",
+        "items": {
+          "youtube": { "title": "Tracking canali YouTube" },
+          "podcast": { "title": "Tracking podcast" },
+          "text": { "title": "Riassunti AI testuali" },
+          "audio": { "title": "Riassunti audio" },
+          "tts": { "title": "Video trasformati in contenuti ascoltabili" },
+          "playlists": { "title": "Categorie e playlist tematiche" }
+        }
+      },
+      "reuse": {
+        "title": "Un contenuto elaborato una volta può essere utile più volte.",
+        "description": "Se un contenuto è già stato elaborato, Utraya può riutilizzare il risultato esistente invece di generarlo di nuovo. Questo riduce duplicazioni, evita sprechi e rende il servizio più sostenibile.",
+        "privacyNote": "La tua watchlist resta privata. Il sistema può riutilizzare l'elaborazione di un contenuto, ma non mostra agli altri cosa segui o cosa hai salvato."
+      },
+      "pricing": {
+        "title": "Gratis come piattaforma. Trasparente quando serve elaborare.",
+        "description": "Utraya è gratuito da usare. Puoi beneficiare dei contenuti già elaborati e, quando vuoi generare nuove elaborazioni AI non ancora disponibili, puoi collegare le tue API AI personali.",
+        "bullet1": "Nessun pacchetto crediti imposto.",
+        "bullet2": "Nessuna promessa di AI illimitata.",
+        "bullet3": "Controllo sui costi API.",
+        "bullet4": "Riutilizzo delle elaborazioni già disponibili."
+      },
+      "useCases": {
+        "title": "Casi d'uso",
+        "item1": "Segui molti canali ma non riesci a guardarli tutti.",
+        "item2": "Vuoi ascoltare il senso di un video mentre cammini o guidi.",
+        "item3": "Vuoi capire se un contenuto merita un approfondimento.",
+        "item4": "Vuoi organizzare video e podcast in playlist tematiche.",
+        "item5": "Vuoi leggere o ascoltare riassunti nella tua lingua."
+      },
+      "faq": {
+        "title": "FAQ breve",
+        "q1": "Utraya è gratuito?",
+        "a1": "Sì. L'accesso alla piattaforma è gratuito e puoi usare i contenuti già elaborati.",
+        "q2": "Devo inserire le mie API AI?",
+        "a2": "No. Servono solo quando vuoi generare una nuova elaborazione non disponibile.",
+        "q3": "La mia watchlist è privata?",
+        "a3": "Sì. Le tue scelte restano private anche quando il sistema riusa elaborazioni già presenti.",
+        "q4": "Posso ascoltare i riassunti?",
+        "a4": "La funzionalità audio è in arrivo a breve e viene mostrata come tale nel sito.",
+        "q5": "Posso usare Utraya in più lingue?",
+        "a5": "Sì, Utraya è progettato per un'esperienza multilingua.",
+        "q6": "Cosa succede se un contenuto è già stato elaborato?",
+        "a6": "Utraya riutilizza il risultato disponibile per ridurre duplicazioni e sprechi."
+      },
+      "finalCta": {
+        "title": "Riprendi il controllo dei contenuti che segui."
+      }
+    },
+    "pages": {
+      "features": {
+        "title": "Funzionalità",
+        "subtitle": "Una vista completa di come Utraya ti aiuta a seguire i contenuti senza sovraccarico.",
+        "support": {
+          "languageTitle": "Supporto multilingua",
+          "languageDescription": "Leggi o ascolta i riassunti nella lingua che preferisci, quando supportato dal flusso API.",
+          "apiTitle": "Uso API AI personali",
+          "apiDescription": "Quando serve una nuova elaborazione, puoi collegare le tue API mantenendo controllo su costi e uso.",
+          "reuseTitle": "Riutilizzo invisibile",
+          "reuseDescription": "Se un contenuto è già stato elaborato, Utraya riutilizza il risultato senza duplicare il lavoro."
+        },
+        "finalCtaTitle": "Inizia dalla tua watchlist e costruisci il tuo flusso."
+      },
+      "pricing": {
+        "title": "Prezzi",
+        "freePlanTitle": "Utraya Free",
+        "freePlanPrice": "0 €",
+        "freePlanDescription": "Accesso gratuito alla piattaforma, watchlist privata, organizzazione dei contenuti e utilizzo delle elaborazioni già disponibili.",
+        "apiBlockTitle": "Quando servono le tue API",
+        "apiBlockDescription": "Quando vuoi generare una nuova elaborazione AI per un contenuto non ancora disponibile, puoi collegare le tue API AI personali.",
+        "keyMessageTitle": "Niente pacchetti crediti",
+        "keyMessageDescription": "Utraya non vende pacchetti di crediti AI. Ti permette di usare ciò che è già disponibile e di mantenere il controllo sulle elaborazioni generate con le tue API.",
+        "faq": {
+          "title": "FAQ",
+          "q1": "Utraya è davvero gratuito?",
+          "a1": "Sì. La piattaforma è gratuita.",
+          "q2": "Devo inserire le mie API per usare Utraya?",
+          "a2": "No. Senza API puoi usare i contenuti già elaborati.",
+          "q3": "Quando servono le mie API AI?",
+          "a3": "Servono quando chiedi una nuova elaborazione non ancora presente.",
+          "q4": "Utraya paga i costi delle API?",
+          "a4": "No, i costi delle API personali restano sotto il tuo controllo.",
+          "q5": "Cosa posso fare senza configurare API personali?",
+          "a5": "Puoi seguire contenuti e usare le elaborazioni già disponibili."
+        }
+      },
+      "faq": {
+        "subtitle": "Risposte rapide su accesso, API, privacy e limiti d'uso."
+      },
+      "mission": {
+        "intro1": "Utraya nasce da un'esigenza semplice: seguire meglio i contenuti che contano, senza perdere il controllo del proprio tempo.",
+        "intro2": "Ogni giorno vengono pubblicati video, podcast e contenuti interessanti, ma il tempo per seguirli tutti non cresce allo stesso ritmo.",
+        "pillar1": "Restituire controllo sul tempo dell'utente.",
+        "pillar2": "Ridurre accumulo e sovraccarico informativo.",
+        "pillar3": "Riutilizzare elaborazioni già disponibili in modo sostenibile.",
+        "pillar4": "Mantenere privacy e scelta personale al centro."
+      },
+      "about": {
+        "intro": "Utraya è un progetto personale e indipendente, nato per aiutare chi segue molti canali YouTube e podcast a trasformare contenuti lunghi in riassunti leggibili, ascoltabili e facili da organizzare.",
+        "youtubeTitle": "Segui lo sviluppo del progetto",
+        "youtubeDescription": "Utraya è in evoluzione continua. Sul canale YouTube verranno condivisi aggiornamenti, funzionalità e scelte progettuali.",
+        "youtubeNamePlaceholder": "[PLACEHOLDER_NOME_CANALE_YOUTUBE]",
+        "youtubeUrlPlaceholder": "[PLACEHOLDER_URL_CANALE_YOUTUBE]",
+        "youtubeCta": "Iscriviti al canale YouTube"
+      },
+      "comparisons": {
+        "description": "Stiamo preparando confronti chiari e onesti per aiutarti a capire quando Utraya è la scelta giusta per te.",
+        "card1": "Utraya vs app podcast tradizionali",
+        "card2": "Utraya vs playlist YouTube",
+        "card3": "Utraya vs strumenti di riassunto video",
+        "card4": "Utraya vs tool AI manuali"
+      },
+      "roadmap": {
+        "description": "Stiamo preparando una roadmap pubblica per raccontare in modo trasparente l'evoluzione di Utraya.",
+        "card1": "Disponibile",
+        "card2": "In sviluppo",
+        "card3": "In valutazione",
+        "card4": "Feedback utenti"
+      },
+      "legal": {
+        "warning": "Contenuto placeholder: il testo finale richiede validazione legale prima della pubblicazione.",
+        "placeholdersTitle": "Placeholder da completare",
+        "sectionsTitle": "Sezioni richieste",
+        "terms": {
+          "placeholder1": "[TITOLARE_DEL_SERVIZIO]",
+          "placeholder2": "[FORMA_GIURIDICA]",
+          "placeholder3": "[INDIRIZZO_O_SEDE]",
+          "placeholder4": "[PAESE]",
+          "placeholder5": "[EMAIL_CONTATTO]",
+          "placeholder6": "[EMAIL_PRIVACY]",
+          "placeholder7": "[EVENTUALE_PIVA_O_IDENTIFICATIVO_FISCALE]",
+          "placeholder8": "[DATA_ULTIMO_AGGIORNAMENTO]",
+          "section1": "Descrizione del servizio",
+          "section2": "Account Google",
+          "section3": "Uso gratuito della piattaforma",
+          "section4": "Uso API personali",
+          "section5": "Fair use",
+          "section6": "Contenuti di terze parti",
+          "section7": "Riassunti AI e possibili imprecisioni",
+          "section8": "Uso consentito e vietato",
+          "section9": "Limitazioni del servizio",
+          "section10": "Modifiche future",
+          "section11": "Responsabilità",
+          "section12": "Contatti"
+        },
+        "privacy": {
+          "section1": "Titolare del trattamento",
+          "section2": "Dati raccolti tramite login Google",
+          "section3": "Dati tecnici",
+          "section4": "Dati di navigazione",
+          "section5": "Watchlist e preferenze",
+          "section6": "API key o token configurati dall'utente",
+          "section7": "Finalità del trattamento",
+          "section8": "Base giuridica",
+          "section9": "Conservazione dei dati",
+          "section10": "Condivisione con fornitori tecnici",
+          "section11": "Analytics e marketing tracking",
+          "section12": "Diritti dell'utente"
+        },
+        "cookie": {
+          "section1": "Cookie tecnici",
+          "section2": "Cookie analytics",
+          "section3": "Cookie marketing/misurazione campagne",
+          "section4": "Cookie di terze parti",
+          "section5": "Gestione consenso",
+          "section6": "Modifica preferenze",
+          "section7": "Durata cookie"
+        }
+      }
+    }
+  },
   "dashboard": {
     "title": "Intelligenza curata",
     "subtitle": "Bentornato. {count} nuove analisi sono pronte per la tua revisione.",

@@ -15,63 +15,66 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // --- Design System "Intelligent Curator" ---
-        // Primary (Action)
-        'primary': '#005bbf',
-        'primary-container': '#1a73e8',
-        'on-primary': '#ffffff',
-        'on-primary-container': '#ffffff',
-        'primary-fixed': '#d8e2ff',
-        'primary-fixed-dim': '#adc7ff',
-        'on-primary-fixed': '#001a41',
-        'on-primary-fixed-variant': '#004493',
-        'inverse-primary': '#adc7ff',
+        // Warm Editorial tokens (CONVENTIONS.md §5)
+        'canvas-cream': '#F3F0EE',
+        'lifted-cream': '#FCFBFA',
+        'ink-black': '#141413',
+        'slate-gray': '#696969',
+        'light-signal-orange': '#F37338',
+        'signal-orange': '#CF4500',
+        'white': '#FFFFFF',
 
-        // Secondary (Operational)
-        'secondary': '#2d4add',
-        'secondary-container': '#4b65f7',
-        'on-secondary': '#ffffff',
-        'on-secondary-container': '#fffbff',
-        'secondary-fixed': '#dee0ff',
-        'secondary-fixed-dim': '#bac3ff',
-        'on-secondary-fixed': '#000f5c',
-        'on-secondary-fixed-variant': '#052fc8',
+        // Semantic aliases used by existing components.
+        'primary': '#141413',
+        'primary-container': '#2A2928',
+        'on-primary': '#FCFBFA',
+        'on-primary-container': '#FCFBFA',
+        'primary-fixed': '#FCFBFA',
+        'primary-fixed-dim': '#E7DFDA',
+        'on-primary-fixed': '#141413',
+        'on-primary-fixed-variant': '#2A2928',
+        'inverse-primary': '#F37338',
 
-        // Tertiary = AI Intelligence (indigo/violet)
-        'tertiary': '#6e24f5',
-        'tertiary-container': '#8652ff',
-        'on-tertiary': '#ffffff',
-        'on-tertiary-container': '#ffffff',
-        'tertiary-fixed': '#e9ddff',
-        'tertiary-fixed-dim': '#cfbcff',
-        'on-tertiary-fixed': '#22005d',
-        'on-tertiary-fixed-variant': '#5400cc',
+        'secondary': '#F37338',
+        'secondary-container': '#CF4500',
+        'on-secondary': '#FFFFFF',
+        'on-secondary-container': '#FFFFFF',
+        'secondary-fixed': '#FCE1D5',
+        'secondary-fixed-dim': '#F9BF9F',
+        'on-secondary-fixed': '#5E1D00',
+        'on-secondary-fixed-variant': '#8F2E00',
 
-        // Surface Layers (tonal hierarchy - NO borders rule)
-        'surface': '#f7f9ff',
-        'surface-dim': '#d7dae0',
-        'surface-bright': '#f7f9ff',
-        'surface-container-lowest': '#ffffff',
-        'surface-container-low': '#f1f4fa',
-        'surface-container': '#ebeef4',
-        'surface-container-high': '#e5e8ee',
-        'surface-container-highest': '#dfe3e8',
-        'surface-variant': '#dfe3e8',
-        'surface-tint': '#005bc0',
+        // "Tertiary" alias preserved for backward-compatibility; mapped to orange family.
+        'tertiary': '#F37338',
+        'tertiary-container': '#CF4500',
+        'on-tertiary': '#FFFFFF',
+        'on-tertiary-container': '#FFFFFF',
+        'tertiary-fixed': '#FCE1D5',
+        'tertiary-fixed-dim': '#F9BF9F',
+        'on-tertiary-fixed': '#5E1D00',
+        'on-tertiary-fixed-variant': '#8F2E00',
 
-        // On-Surface (text)
-        'on-surface': '#181c20',        // Never use #000000
-        'on-surface-variant': '#414754',
-        'inverse-surface': '#2d3135',
-        'inverse-on-surface': '#eef1f7',
+        'surface': '#F3F0EE',
+        'surface-dim': '#E7DFDA',
+        'surface-bright': '#FCFBFA',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#FCFBFA',
+        'surface-container': '#F7F3F1',
+        'surface-container-high': '#EFE9E5',
+        'surface-container-highest': '#E7DFDA',
+        'surface-variant': '#E7DFDA',
+        'surface-tint': '#F37338',
 
-        // Background
-        'background': '#f7f9ff',
-        'on-background': '#181c20',
+        'on-surface': '#141413',
+        'on-surface-variant': '#696969',
+        'inverse-surface': '#141413',
+        'inverse-on-surface': '#FCFBFA',
 
-        // Outline
-        'outline': '#727785',
-        'outline-variant': '#c1c6d6',
+        'background': '#F3F0EE',
+        'on-background': '#141413',
+
+        'outline': '#B7ADA6',
+        'outline-variant': '#D8D0CA',
 
         // Error
         'error': '#ba1a1a',
@@ -81,28 +84,27 @@ const config: Config = {
       },
 
       fontFamily: {
-        headline: ['Manrope', 'sans-serif'],
-        body: ['Inter', 'sans-serif'],
-        label: ['Inter', 'sans-serif'],
-        sans: ['Inter', 'sans-serif'],
+        headline: ['var(--font-sofia-sans)', 'Inter', 'Arial', 'sans-serif'],
+        body: ['var(--font-sofia-sans)', 'Inter', 'Arial', 'sans-serif'],
+        label: ['var(--font-sofia-sans)', 'Inter', 'Arial', 'sans-serif'],
+        sans: ['var(--font-sofia-sans)', 'Inter', 'Arial', 'sans-serif'],
       },
 
       borderRadius: {
-        DEFAULT: '0.125rem',
-        sm: '0.25rem',
-        md: '0.5rem',
-        lg: '0.75rem',
-        xl: '1rem',
-        '2xl': '1.5rem',
-        full: '9999px',
+        DEFAULT: '1.25rem',
+        sm: '0.75rem',
+        md: '1.25rem',
+        lg: '2.5rem',
+        xl: '2.5rem',
+        '2xl': '2.5rem',
+        full: '999px',
       },
 
       boxShadow: {
-        // Ambient shadows only — ultra-diffused, max 6% opacity (no heavy shadows rule)
-        'ambient': '0px 8px 32px rgba(24, 28, 32, 0.06)',
-        'ambient-md': '0px 4px 16px rgba(24, 28, 32, 0.08)',
-        'primary-glow': '0px 4px 24px rgba(0, 91, 191, 0.20)',
-        'tertiary-glow': '0px 4px 24px rgba(110, 36, 245, 0.25)',
+        'ambient': '0 8px 24px rgba(20, 20, 19, 0.06)',
+        'ambient-md': '0 4px 16px rgba(20, 20, 19, 0.08)',
+        'primary-glow': '0 6px 20px rgba(20, 20, 19, 0.18)',
+        'tertiary-glow': '0 6px 20px rgba(243, 115, 56, 0.22)',
       },
 
       animation: {

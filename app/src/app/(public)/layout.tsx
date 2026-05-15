@@ -1,22 +1,40 @@
 /* Commento didattico:
  * Scopo del file: definisce una pagina o layout pubblico, visibile prima dell'accesso o senza permessi riservati.
- * Moduli richiamati: `@/components/layout/TopNav`, `@/components/layout/Footer`
+ * Moduli richiamati: `@/components/marketing/MarketingHeader`, `@/components/marketing/MarketingFooter`
  * Flusso: Questa pagina/layout richiama componenti e servizi: i dati arrivano da API o funzioni server, poi vengono passati alla UI per il rendering.
  */
 
-import TopNav from '@/components/layout/TopNav'
-import Footer from '@/components/layout/Footer'
+import MarketingHeader from '@/components/marketing/MarketingHeader'
+import MarketingFooter from '@/components/marketing/MarketingFooter'
+import { CookieConsentProvider } from '@/components/marketing/CookieConsentProvider'
+import CookieBanner from '@/components/marketing/CookieBanner'
+import MarketingAnalyticsScripts from '@/components/marketing/MarketingAnalyticsScripts'
+import { getTranslations } from 'next-intl/server'
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const t = await getTranslations()
+
   return (
-    <div className="flex flex-col min-h-screen">
-      <TopNav variant="public" />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </div>
+    <CookieConsentProvider>
+      <div className="flex min-h-screen flex-col bg-surface">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-on-primary"
+        >
+          {t('marketing.a11y.skipToContent')}
+        </a>
+        <MarketingHeader />
+        <main id="main-content" className="flex-1">
+          {children}
+        </main>
+        <MarketingFooter />
+        <CookieBanner />
+        <MarketingAnalyticsScripts />
+      </div>
+    </CookieConsentProvider>
   )
 }
