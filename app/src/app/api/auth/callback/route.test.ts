@@ -1,7 +1,7 @@
 /* Commento didattico:
- * Scopo del file: verifica i redirect e i controlli di sicurezza della callback OAuth.
- * Moduli richiamati: `@/app/api/auth/callback/route`, `@/lib/supabase/server`, `@/lib/auth/allowlist`, `vitest`
- * Flusso: I test isolano la route con mock espliciti e validano i casi di redirect consentiti/bloccati.
+ * Scopo del file: verifica callback OAuth su redirect safe, uso NEXT_PUBLIC_SITE_URL, gating TOS e blocco account in cancellazione.
+ * Moduli richiamati: route callback, mock supabase/allowlist/legal/deletion.
+ * Flusso: isola la route con mock e valida i redirect risultanti in scenari sicurezza e business critici.
  */
 
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -11,6 +11,8 @@ const getUserMock = vi.fn()
 const signOutMock = vi.fn()
 const isEmailAllowlistedMock = vi.fn()
 const provisionNewUserMock = vi.fn()
+const getLegalAcceptanceStatusMock = vi.fn()
+const isDeletionPendingMock = vi.fn()
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({
@@ -25,6 +27,14 @@ vi.mock('@/lib/supabase/server', () => ({
 vi.mock('@/lib/auth/allowlist', () => ({
   isEmailAllowlisted: isEmailAllowlistedMock,
   provisionNewUser: provisionNewUserMock,
+}))
+
+vi.mock('@/lib/services/legal-acceptance', () => ({
+  getLegalAcceptanceStatus: getLegalAcceptanceStatusMock,
+}))
+
+vi.mock('@/lib/services/account-deletion', () => ({
+  isDeletionPending: isDeletionPendingMock,
 }))
 
 let GET: typeof import('@/app/api/auth/callback/route').GET
@@ -54,10 +64,9 @@ describe('GET /api/auth/callback', () => {
       },
     })
     isEmailAllowlistedMock.mockResolvedValue(true)
-    provisionNewUserMock.mockResolvedValue({
-      success: true,
-      user: { id: 'user-1' },
-    })
+    isDeletionPendingMock.mockResolvedValue(false)
+    provisionNewUserMock.mockResolvedValue({ success: true, user: { id: 'user-1' } })
+    getLegalAcceptanceStatusMock.mockResolvedValue({ needsAcceptance: false })
   })
 
   it('ignora Host/X-Forwarded-Host e usa NEXT_PUBLIC_SITE_URL nel redirect', async () => {
@@ -84,5 +93,17 @@ describe('GET /api/auth/callback', () => {
       callbackRequest('https://app.contentflix.test/api/auth/callback?code=abc&redirectTo=%2Fdashboard%3Ftab%3Dchannels') as never
     )
     expect(response.headers.get('location')).toBe('https://app.contentflix.test/dashboard?tab=channels')
+  })
+
+  it('reindirizza a /legal/accept quando manca accettazione TOS', async () => {
+    getLegalAcceptanceStatusMock.mockResolvedValue({ needsAcceptance: true })
+    const response = await GET(callbackRequest('https://app.contentflix.test/api/auth/callback?code=abc') as never)
+    expect(response.headers.get('location')).toBe('https://app.contentflix.test/legal/accept')
+  })
+
+  it('blocca login se account in pending deletion', async () => {
+    isDeletionPendingMock.mockResolvedValue(true)
+    const response = await GET(callbackRequest('https://app.contentflix.test/api/auth/callback?code=abc') as never)
+    expect(response.headers.get('location')).toBe('https://app.contentflix.test/login?error=deletion_pending')
   })
 })

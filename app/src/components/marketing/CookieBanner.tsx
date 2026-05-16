@@ -1,48 +1,119 @@
 /* Commento didattico:
- * Scopo del file: banner consenso cookie per superficie marketing.
- * Moduli richiamati: `next-intl`, `./CookieConsentProvider`
- * Flusso: mostra il banner finché il consenso non è espresso e salva la scelta nel cookie.
+ * Scopo del file: banner consenso cookie con azioni rapide e modal personalizzazione categorie.
+ * Moduli richiamati: `next-intl`, `@/lib/consent/ConsentProvider`.
+ * Flusso: mostra banner su primo accesso/version mismatch e salva stato consenso nel cookie versionato.
  */
 
 'use client'
 
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { useCookieConsent } from './CookieConsentProvider'
+import { useConsent } from '@/lib/consent/ConsentProvider'
 
 export default function CookieBanner() {
   const t = useTranslations()
-  const { consent, setConsent } = useCookieConsent()
+  const { isBannerOpen, closeBanner, saveConsent, state } = useConsent()
+  const [showCustomize, setShowCustomize] = useState(false)
+  const [analytics, setAnalytics] = useState(false)
+  const [marketing, setMarketing] = useState(false)
 
-  if (consent !== 'unset') {
+  useEffect(() => {
+    setAnalytics(state?.analytics ?? false)
+    setMarketing(state?.marketing ?? false)
+  }, [state])
+
+  useEffect(() => {
+    function onEsc(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        if (showCustomize) {
+          setShowCustomize(false)
+          return
+        }
+        saveConsent({ analytics: false, marketing: false })
+      }
+    }
+
+    if (isBannerOpen) {
+      window.addEventListener('keydown', onEsc)
+      return () => window.removeEventListener('keydown', onEsc)
+    }
+
+    return undefined
+  }, [isBannerOpen, showCustomize, saveConsent])
+
+  if (!isBannerOpen) {
     return null
   }
 
   return (
-    <aside className="fixed bottom-4 left-4 right-4 z-[60] mx-auto max-w-5xl rounded-[20px] bg-lifted-cream p-5 shadow-ambient">
-      <p className="text-sm font-semibold text-on-surface">{t('marketing.cookies.title')}</p>
-      <p className="mt-2 text-sm text-on-surface-variant">{t('marketing.cookies.description')}</p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setConsent('accepted')}
-          className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-on-primary"
-        >
-          {t('marketing.cookies.acceptAll')}
-        </button>
-        <button
-          type="button"
-          onClick={() => setConsent('rejected')}
-          className="rounded-full bg-surface-container-low px-4 py-2 text-xs font-semibold text-on-surface"
-        >
-          {t('marketing.cookies.rejectNonEssential')}
-        </button>
-        <button
-          type="button"
-          onClick={() => setConsent('accepted')}
-          className="rounded-full bg-surface-container-low px-4 py-2 text-xs font-semibold text-on-surface"
-        >
-          {t('marketing.cookies.customize')}
-        </button>
+    <aside role="dialog" aria-modal="true" aria-labelledby="cookie-banner-title" className="fixed bottom-0 left-0 right-0 z-[70] border-t border-[#E8E5E2] bg-lifted-cream p-4 md:p-5">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-3">
+        <h2 id="cookie-banner-title" className="text-sm font-semibold text-[#141413]">{t('marketing.cookies.title')}</h2>
+        <p className="text-sm text-[#141413]">{t('marketing.cookies.description')}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => saveConsent({ analytics: true, marketing: true })}
+            className="rounded-full bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F3F0EE]"
+          >
+            {t('marketing.cookies.acceptAll')}
+          </button>
+          <button
+            type="button"
+            onClick={() => saveConsent({ analytics: false, marketing: false })}
+            className="rounded-full border border-[#141413] bg-transparent px-4 py-2 text-xs font-semibold text-[#141413]"
+          >
+            {t('marketing.cookies.rejectNonEssential')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowCustomize((previous) => !previous)}
+            className="text-xs font-semibold text-[#141413] underline underline-offset-4"
+          >
+            {t('marketing.cookies.customize')}
+          </button>
+          <Link href="/legal/cookie" className="text-xs text-[#141413] underline underline-offset-4 hover:text-light-signal-orange">{t('marketing.cookies.policyLink')}</Link>
+        </div>
+
+        {showCustomize && (
+          <div role="dialog" aria-modal="true" aria-labelledby="cookie-customize-title" className="mt-2 rounded-2xl border border-outline-variant/50 bg-surface-container-low p-4">
+            <h3 id="cookie-customize-title" className="text-sm font-semibold text-on-surface">{t('marketing.cookies.customizeTitle')}</h3>
+            <div className="mt-3 space-y-3 text-sm text-on-surface">
+              <label className="flex items-center justify-between gap-3">
+                <span>{t('marketing.cookies.necessary')}</span>
+                <input type="checkbox" checked disabled aria-label={t('marketing.cookies.necessary')} />
+              </label>
+              <label className="flex items-center justify-between gap-3">
+                <span>{t('marketing.cookies.analytics')}</span>
+                <input type="checkbox" checked={analytics} onChange={(event) => setAnalytics(event.target.checked)} aria-label={t('marketing.cookies.analytics')} />
+              </label>
+              <label className="flex items-center justify-between gap-3">
+                <span>{t('marketing.cookies.marketing')}</span>
+                <input type="checkbox" checked={marketing} onChange={(event) => setMarketing(event.target.checked)} aria-label={t('marketing.cookies.marketing')} />
+              </label>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => saveConsent({ analytics, marketing })}
+                className="rounded-full bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F3F0EE]"
+              >
+                {t('marketing.cookies.savePreferences')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCustomize(false)
+                  closeBanner()
+                }}
+                className="rounded-full border border-outline-variant px-4 py-2 text-xs font-semibold text-on-surface-variant"
+              >
+                {t('common.close')}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   )

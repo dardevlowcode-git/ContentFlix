@@ -11,7 +11,8 @@
     "type-check": "tsc --noEmit",
     "check-comments": "node scripts/check-comments.mjs",
     "validate": "npm run check-comments && npm run lint && npm run type-check",
-    "admin:hash": "node scripts/generate-admin-password-hash.mjs"
+    "admin:hash": "node scripts/generate-admin-password-hash.mjs",
+    "legal:hash": "node --import tsx scripts/hashLegal.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.19.0",
@@ -21,6 +22,8 @@
     "next-intl": "4.9.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -35,6 +38,7 @@
     "eslint-config-next": "15.5.18",
     "postcss": "8.5.14",
     "tailwindcss": "^3.4.14",
+    "tsx": "^4.22.0",
     "typescript": "^5.6.3",
     "vitest": "^1.6.1"
   },

@@ -41,7 +41,8 @@
       "loginButton": "Sign in as super admin",
       "invalidCredentials": "Invalid credentials",
       "loginLink": "Super Admin Login (username/password)"
-    }
+    },
+    "deletionPending": "Account pending deletion. Use the email link to cancel within 30 days."
   },
   "landing": {
     "hero": {
@@ -95,7 +96,14 @@
       "description": "We always use technical cookies. Analytics and measurement scripts are loaded only after your consent.",
       "acceptAll": "Accept all",
       "rejectNonEssential": "Reject non-essential",
-      "customize": "Customize"
+      "customize": "Customize",
+      "managePreferences": "Cookie preferences",
+      "policyLink": "Cookie policy →",
+      "customizeTitle": "Customize cookie preferences",
+      "necessary": "Necessary (always active)",
+      "analytics": "Analytics",
+      "marketing": "Marketing",
+      "savePreferences": "Save preferences"
     },
     "hero": {
       "ariaLabel": "Utraya orbital diagram with content and AI nodes",
@@ -124,7 +132,8 @@
       "roadmap": "Roadmap",
       "terms": "Terms of service",
       "privacy": "Privacy policy",
-      "cookies": "Cookie policy"
+      "cookies": "Cookie policy",
+      "subProcessors": "Sub-processors"
     },
     "cta": {
       "createWatchlist": "Create your free watchlist",
@@ -178,12 +187,24 @@
         "title": "Core features",
         "note": "Multilingual support · Bring your own AI APIs",
         "items": {
-          "youtube": { "title": "YouTube channel tracking" },
-          "podcast": { "title": "Podcast tracking" },
-          "text": { "title": "Text AI summaries" },
-          "audio": { "title": "Audio summaries" },
-          "tts": { "title": "Video to listenable content" },
-          "playlists": { "title": "Categories and thematic playlists" }
+          "youtube": {
+            "title": "YouTube channel tracking"
+          },
+          "podcast": {
+            "title": "Podcast tracking"
+          },
+          "text": {
+            "title": "Text AI summaries"
+          },
+          "audio": {
+            "title": "Audio summaries"
+          },
+          "tts": {
+            "title": "Video to listenable content"
+          },
+          "playlists": {
+            "title": "Categories and thematic playlists"
+          }
         }
       },
       "reuse": {
