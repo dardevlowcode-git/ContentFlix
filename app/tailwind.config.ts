@@ -5,6 +5,8 @@
 
 import type { Config } from 'tailwindcss'
 
+const withOpacity = (cssVariable: string) => `rgb(var(${cssVariable}) / <alpha-value>)`
+
 const config: Config = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -15,63 +17,66 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // --- Design System "Intelligent Curator" ---
-        // Primary (Action)
-        'primary': '#005bbf',
-        'primary-container': '#1a73e8',
-        'on-primary': '#ffffff',
-        'on-primary-container': '#ffffff',
-        'primary-fixed': '#d8e2ff',
-        'primary-fixed-dim': '#adc7ff',
-        'on-primary-fixed': '#001a41',
-        'on-primary-fixed-variant': '#004493',
-        'inverse-primary': '#adc7ff',
+        // Warm Editorial tokens (CONVENTIONS.md §5)
+        'canvas-cream': '#F3F0EE',
+        'lifted-cream': '#FCFBFA',
+        'ink-black': '#141413',
+        'slate-gray': '#696969',
+        'light-signal-orange': '#F37338',
+        'signal-orange': '#CF4500',
+        'white': '#FFFFFF',
 
-        // Secondary (Operational)
-        'secondary': '#2d4add',
-        'secondary-container': '#4b65f7',
-        'on-secondary': '#ffffff',
-        'on-secondary-container': '#fffbff',
-        'secondary-fixed': '#dee0ff',
-        'secondary-fixed-dim': '#bac3ff',
-        'on-secondary-fixed': '#000f5c',
-        'on-secondary-fixed-variant': '#052fc8',
+        // Semantic aliases used by existing components.
+        'primary': withOpacity('--color-primary'),
+        'primary-container': withOpacity('--color-primary-container'),
+        'on-primary': withOpacity('--color-on-primary'),
+        'on-primary-container': withOpacity('--color-on-primary-container'),
+        'primary-fixed': withOpacity('--color-primary-fixed'),
+        'primary-fixed-dim': withOpacity('--color-primary-fixed-dim'),
+        'on-primary-fixed': withOpacity('--color-on-primary-fixed'),
+        'on-primary-fixed-variant': withOpacity('--color-on-primary-fixed-variant'),
+        'inverse-primary': withOpacity('--color-inverse-primary'),
 
-        // Tertiary = AI Intelligence (indigo/violet)
-        'tertiary': '#6e24f5',
-        'tertiary-container': '#8652ff',
-        'on-tertiary': '#ffffff',
-        'on-tertiary-container': '#ffffff',
-        'tertiary-fixed': '#e9ddff',
-        'tertiary-fixed-dim': '#cfbcff',
-        'on-tertiary-fixed': '#22005d',
-        'on-tertiary-fixed-variant': '#5400cc',
+        'secondary': '#F37338',
+        'secondary-container': '#CF4500',
+        'on-secondary': '#FFFFFF',
+        'on-secondary-container': '#FFFFFF',
+        'secondary-fixed': '#FCE1D5',
+        'secondary-fixed-dim': '#F9BF9F',
+        'on-secondary-fixed': '#5E1D00',
+        'on-secondary-fixed-variant': '#8F2E00',
 
-        // Surface Layers (tonal hierarchy - NO borders rule)
-        'surface': '#f7f9ff',
-        'surface-dim': '#d7dae0',
-        'surface-bright': '#f7f9ff',
-        'surface-container-lowest': '#ffffff',
-        'surface-container-low': '#f1f4fa',
-        'surface-container': '#ebeef4',
-        'surface-container-high': '#e5e8ee',
-        'surface-container-highest': '#dfe3e8',
-        'surface-variant': '#dfe3e8',
-        'surface-tint': '#005bc0',
+        // "Tertiary" alias preserved for backward-compatibility; mapped to orange family.
+        'tertiary': '#F37338',
+        'tertiary-container': '#CF4500',
+        'on-tertiary': '#FFFFFF',
+        'on-tertiary-container': '#FFFFFF',
+        'tertiary-fixed': '#FCE1D5',
+        'tertiary-fixed-dim': '#F9BF9F',
+        'on-tertiary-fixed': '#5E1D00',
+        'on-tertiary-fixed-variant': '#8F2E00',
 
-        // On-Surface (text)
-        'on-surface': '#181c20',        // Never use #000000
-        'on-surface-variant': '#414754',
-        'inverse-surface': '#2d3135',
-        'inverse-on-surface': '#eef1f7',
+        'surface': withOpacity('--color-surface'),
+        'surface-dim': withOpacity('--color-surface-dim'),
+        'surface-bright': withOpacity('--color-surface-bright'),
+        'surface-container-lowest': withOpacity('--color-surface-container-lowest'),
+        'surface-container-low': withOpacity('--color-surface-container-low'),
+        'surface-container': withOpacity('--color-surface-container'),
+        'surface-container-high': withOpacity('--color-surface-container-high'),
+        'surface-container-highest': withOpacity('--color-surface-container-highest'),
+        'surface-variant': withOpacity('--color-surface-variant'),
+        'surface-tint': '#F37338',
 
-        // Background
-        'background': '#f7f9ff',
-        'on-background': '#181c20',
+        'on-surface': withOpacity('--color-on-surface'),
+        'on-surface-variant': withOpacity('--color-on-surface-variant'),
+        'inverse-surface': withOpacity('--color-inverse-surface'),
+        'inverse-on-surface': withOpacity('--color-inverse-on-surface'),
 
-        // Outline
-        'outline': '#727785',
-        'outline-variant': '#c1c6d6',
+        'background': withOpacity('--color-background'),
+        'on-background': withOpacity('--color-on-background'),
+
+        'outline': withOpacity('--color-outline'),
+        'outline-variant': withOpacity('--color-outline-variant'),
 
         // Error
         'error': '#ba1a1a',
@@ -81,28 +86,27 @@ const config: Config = {
       },
 
       fontFamily: {
-        headline: ['Manrope', 'sans-serif'],
-        body: ['Inter', 'sans-serif'],
-        label: ['Inter', 'sans-serif'],
-        sans: ['Inter', 'sans-serif'],
+        headline: ['var(--font-sofia-sans)', 'Inter', 'Arial', 'sans-serif'],
+        body: ['var(--font-sofia-sans)', 'Inter', 'Arial', 'sans-serif'],
+        label: ['var(--font-sofia-sans)', 'Inter', 'Arial', 'sans-serif'],
+        sans: ['var(--font-sofia-sans)', 'Inter', 'Arial', 'sans-serif'],
       },
 
       borderRadius: {
-        DEFAULT: '0.125rem',
-        sm: '0.25rem',
-        md: '0.5rem',
-        lg: '0.75rem',
-        xl: '1rem',
-        '2xl': '1.5rem',
-        full: '9999px',
+        DEFAULT: '1.25rem',
+        sm: '0.75rem',
+        md: '1.25rem',
+        lg: '2.5rem',
+        xl: '2.5rem',
+        '2xl': '2.5rem',
+        full: '999px',
       },
 
       boxShadow: {
-        // Ambient shadows only — ultra-diffused, max 6% opacity (no heavy shadows rule)
-        'ambient': '0px 8px 32px rgba(24, 28, 32, 0.06)',
-        'ambient-md': '0px 4px 16px rgba(24, 28, 32, 0.08)',
-        'primary-glow': '0px 4px 24px rgba(0, 91, 191, 0.20)',
-        'tertiary-glow': '0px 4px 24px rgba(110, 36, 245, 0.25)',
+        'ambient': '0 8px 24px rgba(20, 20, 19, 0.06)',
+        'ambient-md': '0 4px 16px rgba(20, 20, 19, 0.08)',
+        'primary-glow': '0 6px 20px rgba(20, 20, 19, 0.18)',
+        'tertiary-glow': '0 6px 20px rgba(243, 115, 56, 0.22)',
       },
 
       animation: {

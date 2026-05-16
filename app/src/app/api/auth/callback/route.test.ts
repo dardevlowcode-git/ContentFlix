@@ -40,7 +40,7 @@ describe('GET /api/auth/callback', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    process.env.APP_ORIGIN = 'https://app.contentflix.test'
+    vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://app.contentflix.test')
 
     exchangeCodeForSessionMock.mockResolvedValue({ error: null })
     getUserMock.mockResolvedValue({
@@ -60,7 +60,7 @@ describe('GET /api/auth/callback', () => {
     })
   })
 
-  it('ignora Host/X-Forwarded-Host e usa APP_ORIGIN nel redirect', async () => {
+  it('ignora Host/X-Forwarded-Host e usa NEXT_PUBLIC_SITE_URL nel redirect', async () => {
     const response = await GET(callbackRequest('https://evil.test/api/auth/callback?code=abc') as never)
     expect(response.headers.get('location')).toBe('https://app.contentflix.test/dashboard')
   })

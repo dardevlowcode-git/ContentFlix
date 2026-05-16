@@ -4,55 +4,96 @@
  * Flusso: Gli stili globali influenzano direttamente i componenti renderizzati nei layout e nelle pagine.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* =========================================================
-   Utraya — Design System "Intelligent Curator"
-   Rules:
-   - NO 1px solid borders for sectioning (use tonal layering)
-   - NO #000000 (use on-surface: #181c20)
-   - NO heavy drop shadows (max 6% opacity)
-   - Glassmorphism for floating elements (80% opacity + 12px blur)
-   - Gradient on primary CTAs and AI cards
-   - Manrope = headlines, Inter = body
-   - Indigo/tertiary = AI intelligence (always)
-   ========================================================= */
-
 @layer base {
   :root {
-    --font-headline: 'Manrope', sans-serif;
-    --font-body: 'Inter', sans-serif;
-
-    /* Tema light predefinito: usato quando html[data-theme] non e` valorizzato. */
-    --theme-surface: #f7f9ff;
-    --theme-surface-lowest: #ffffff;
-    --theme-surface-low: #f1f4fa;
-    --theme-surface-container: #ebeef4;
-    --theme-surface-high: #e5e8ee;
-    --theme-surface-highest: #dfe3e8;
-    --theme-on-surface: #181c20;
-    --theme-on-surface-variant: #414754;
-    --theme-outline-variant: #c1c6d6;
-    --theme-header: rgba(247, 249, 255, 0.95);
+    --font-headline: var(--font-sofia-sans), Inter, Arial, sans-serif;
+    --font-body: var(--font-sofia-sans), Inter, Arial, sans-serif;
+    --canvas-cream: #f3f0ee;
+    --lifted-cream: #fcfbfa;
+    --ink-black: #141413;
+    --slate-gray: #696969;
+    --light-signal-orange: #f37338;
+    --signal-orange: #cf4500;
+    --color-primary: 20 20 19;
+    --color-primary-container: 42 41 40;
+    --color-on-primary: 252 251 250;
+    --color-on-primary-container: 252 251 250;
+    --color-primary-fixed: 252 251 250;
+    --color-primary-fixed-dim: 231 223 218;
+    --color-on-primary-fixed: 20 20 19;
+    --color-on-primary-fixed-variant: 42 41 40;
+    --color-inverse-primary: 243 115 56;
+    --color-surface: 243 240 238;
+    --color-surface-dim: 231 223 218;
+    --color-surface-bright: 252 251 250;
+    --color-surface-container-lowest: 255 255 255;
+    --color-surface-container-low: 252 251 250;
+    --color-surface-container: 247 243 241;
+    --color-surface-container-high: 239 233 229;
+    --color-surface-container-highest: 231 223 218;
+    --color-surface-variant: 231 223 218;
+    --color-on-surface: 20 20 19;
+    --color-on-surface-variant: 105 105 105;
+    --color-inverse-surface: 20 20 19;
+    --color-inverse-on-surface: 252 251 250;
+    --color-background: 243 240 238;
+    --color-on-background: 20 20 19;
+    --color-outline: 183 173 166;
+    --color-outline-variant: 216 208 202;
+    --theme-surface: rgb(var(--color-surface));
+    --theme-surface-lowest: rgb(var(--color-surface-container-lowest));
+    --theme-surface-low: rgb(var(--color-surface-container-low));
+    --theme-surface-container: rgb(var(--color-surface-container));
+    --theme-surface-high: rgb(var(--color-surface-container-high));
+    --theme-surface-highest: rgb(var(--color-surface-container-highest));
+    --theme-on-surface: rgb(var(--color-on-surface));
+    --theme-on-surface-variant: rgb(var(--color-on-surface-variant));
+    --theme-outline-variant: rgb(var(--color-outline-variant));
+    --theme-header: rgb(var(--color-surface) / 0.96);
   }
 
-  /* Tema dark globale:
-     la chiave e` html[data-theme="dark"], impostata da layout.tsx (cookie) e ThemeToggle (runtime). */
   html[data-theme='dark'] {
+    --color-primary: 252 251 250;
+    --color-primary-container: 216 208 202;
+    --color-on-primary: 20 20 19;
+    --color-on-primary-container: 20 20 19;
+    --color-primary-fixed: 252 251 250;
+    --color-primary-fixed-dim: 216 208 202;
+    --color-on-primary-fixed: 20 20 19;
+    --color-on-primary-fixed-variant: 20 20 19;
+    --color-inverse-primary: 243 115 56;
+    --color-surface: 20 20 19;
+    --color-surface-dim: 18 18 17;
+    --color-surface-bright: 39 38 37;
+    --color-surface-container-lowest: 17 17 16;
+    --color-surface-container-low: 28 27 26;
+    --color-surface-container: 35 34 33;
+    --color-surface-container-high: 46 45 43;
+    --color-surface-container-highest: 60 58 56;
+    --color-surface-variant: 46 45 43;
+    --color-on-surface: 243 240 238;
+    --color-on-surface-variant: 216 208 202;
+    --color-inverse-surface: 243 240 238;
+    --color-inverse-on-surface: 20 20 19;
+    --color-background: 20 20 19;
+    --color-on-background: 243 240 238;
+    --color-outline: 140 132 126;
+    --color-outline-variant: 99 94 89;
+    --theme-surface: rgb(var(--color-surface));
+    --theme-surface-lowest: rgb(var(--color-surface-container-lowest));
+    --theme-surface-low: rgb(var(--color-surface-container-low));
+    --theme-surface-container: rgb(var(--color-surface-container));
+    --theme-surface-high: rgb(var(--color-surface-container-high));
+    --theme-surface-highest: rgb(var(--color-surface-container-highest));
+    --theme-on-surface: rgb(var(--color-on-surface));
+    --theme-on-surface-variant: rgb(var(--color-on-surface-variant));
+    --theme-outline-variant: rgb(var(--color-outline-variant));
+    --theme-header: rgb(var(--color-surface) / 0.94);
     color-scheme: dark;
-    --theme-surface: #101418;
-    --theme-surface-lowest: #171c21;
-    --theme-surface-low: #1d2329;
-    --theme-surface-container: #242b32;
-    --theme-surface-high: #2c343c;
-    --theme-surface-highest: #36404a;
-    --theme-on-surface: #eef1f7;
-    --theme-on-surface-variant: #c4cad5;
-    --theme-outline-variant: #4a5666;
-    --theme-header: rgba(16, 20, 24, 0.92);
   }
 
   html {
@@ -68,48 +109,30 @@
     transition: background-color 180ms ease, color 180ms ease;
   }
 
-  /* Override tema per le utility Tailwind usate in tutto il progetto:
-     in questo modo non serve cambiare ogni singolo componente/pagina. */
-  html[data-theme='dark'] .bg-surface { background-color: var(--theme-surface) !important; }
-  html[data-theme='dark'] .bg-surface-container-lowest { background-color: var(--theme-surface-lowest) !important; }
-  html[data-theme='dark'] .bg-surface-container-low { background-color: var(--theme-surface-low) !important; }
-  html[data-theme='dark'] .bg-surface-container { background-color: var(--theme-surface-container) !important; }
-  html[data-theme='dark'] .bg-surface-container-high { background-color: var(--theme-surface-high) !important; }
-  html[data-theme='dark'] .bg-surface-container-highest { background-color: var(--theme-surface-highest) !important; }
-  html[data-theme='dark'] .text-on-surface { color: var(--theme-on-surface) !important; }
-  html[data-theme='dark'] .text-on-surface-variant { color: var(--theme-on-surface-variant) !important; }
-  html[data-theme='dark'] .border-surface-container-high { border-color: var(--theme-surface-high) !important; }
-  html[data-theme='dark'] .border-outline-variant\/20 { border-color: rgba(116, 130, 148, 0.35) !important; }
-  html[data-theme='dark'] .border-outline-variant\/10 { border-color: rgba(116, 130, 148, 0.22) !important; }
-
-  /* Componenti globali usati in molte pagine */
-  html[data-theme='dark'] .topnav-surface { background-color: var(--theme-header) !important; }
+  .bg-surface { background-color: var(--theme-surface); }
+  .bg-surface-container-lowest { background-color: var(--theme-surface-lowest); }
+  .bg-surface-container-low { background-color: var(--theme-surface-low); }
+  .bg-surface-container { background-color: var(--theme-surface-container); }
+  .bg-surface-container-high { background-color: var(--theme-surface-high); }
+  .bg-surface-container-highest { background-color: var(--theme-surface-highest); }
+  .text-on-surface { color: var(--theme-on-surface); }
+  .text-on-surface-variant { color: var(--theme-on-surface-variant); }
   .topnav-surface { background-color: var(--theme-header); }
-  html[data-theme='dark'] .glass {
-    background: rgba(24, 28, 32, 0.76);
-  }
-  html[data-theme='dark'] .ghost-border {
-    border-color: rgba(116, 130, 148, 0.42);
-  }
 
-  /* Typography scale */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-headline);
     font-weight: 700;
     letter-spacing: -0.025em;
   }
 
-  /* Selection */
   ::selection {
-    @apply bg-tertiary-fixed text-on-tertiary-fixed;
+    @apply bg-secondary-fixed text-on-secondary-fixed;
   }
 
-  /* Focus ring — accessible */
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-primary rounded-sm;
+    @apply outline-2 outline-offset-2 outline-secondary rounded-sm;
   }
 
-  /* Scrollbar minimal */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -123,40 +146,31 @@
 }
 
 @layer components {
-  /* ---- Glassmorphism (for floating elements, modals, tooltips) ---- */
   .glass {
-    background: rgba(255, 255, 255, 0.80);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgb(var(--color-surface-container-lowest) / 0.9);
   }
 
   .glass-dark {
-    background: rgba(24, 28, 32, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(20, 20, 19, 0.88);
   }
 
-  /* ---- Gradient utilities ---- */
   .gradient-primary {
-    background: linear-gradient(135deg, #005bbf, #1a73e8);
+    background: linear-gradient(135deg, #141413, #2a2928);
   }
 
   .gradient-ai {
-    /* Indigo/tertiary gradient — always used for AI-generated elements */
-    background: linear-gradient(135deg, #6e24f5, #8652ff);
+    background: linear-gradient(135deg, #f37338, #cf4500);
   }
 
   .gradient-ai-subtle {
-    background: linear-gradient(135deg, #e9ddff, #cfbcff);
+    background: linear-gradient(135deg, #fce1d5, #f9bf9f);
   }
 
-  /* ---- AI-generated content text treatment ---- */
   .ai-content {
-    @apply text-on-tertiary-fixed-variant tracking-tight;
+    @apply text-secondary tracking-tight;
     font-family: var(--font-body);
   }
 
-  /* ---- Shimmer skeleton loading ---- */
   .skeleton {
     @apply bg-surface-container-high rounded animate-pulse;
     background-image: linear-gradient(
@@ -169,12 +183,10 @@
     animation: shimmer 1.5s ease-in-out infinite;
   }
 
-  /* ---- Ghost border (for accessibility without heavy borders) ---- */
   .ghost-border {
-    border: 1px solid rgba(193, 198, 214, 0.3); /* outline-variant at 30% */
+    border: 1px solid rgb(var(--color-outline-variant) / 0.75);
   }
 
-  /* ---- Status pulse indicators ---- */
   .status-active {
     @apply bg-green-500;
     box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
@@ -197,19 +209,16 @@
     @apply bg-surface-container-high;
   }
 
-  /* ---- UNSEEN badge ---- */
   .badge-unseen {
-    @apply bg-tertiary text-on-tertiary text-xs font-bold px-3 py-1 rounded-full;
+    @apply bg-secondary text-on-secondary text-xs font-bold px-3 py-1 rounded-full;
   }
 
-  /* ---- AI analysis badge ---- */
   .badge-ai {
     @apply text-xs font-bold px-3 py-1 rounded-full;
-    background: linear-gradient(135deg, #6e24f5, #8652ff);
+    background: linear-gradient(135deg, #f37338, #cf4500);
     color: #ffffff;
   }
 
-  /* ---- Data table rows (alternating tint, no dividers) ---- */
   .table-row-even {
     @apply bg-surface-container-lowest;
   }
@@ -218,32 +227,39 @@
     @apply bg-surface-container-low;
   }
 
-  /* ---- Surface card ---- */
   .card {
     @apply bg-surface-container-lowest rounded-2xl;
-    /* No border — tonal layering only */
   }
 
   .card-hover {
     @apply card transition-all duration-300 hover:bg-surface-container-low;
   }
 
-  /* ---- Input fields ---- */
   .input-field {
     @apply w-full bg-surface-container-low border-0 rounded-xl px-4 py-3
            text-on-surface placeholder-on-surface-variant
-           focus:ring-2 focus:ring-primary focus:outline-none
+           focus:ring-2 focus:ring-secondary focus:outline-none
            transition-all duration-200;
   }
 
-  /* ---- Section transition (tonal shift instead of border) ---- */
   .section-shift {
     @apply bg-surface-container-low;
   }
 }
 
 @layer utilities {
-  /* ---- Typography utilities ---- */
+  .orbital-spin-slow {
+    animation: orbital-spin 42s linear infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbital-spin-slow {
+      animation: none;
+    }
+  }
+
   .text-headline-xl {
     font-family: var(--font-headline);
     @apply text-5xl font-extrabold tracking-tighter leading-tight;
@@ -276,14 +292,22 @@
     @apply text-xs font-black uppercase tracking-[0.05em];
   }
 
-  /* ---- Gradient text ---- */
   .text-gradient-primary {
     @apply text-transparent bg-clip-text;
-    background-image: linear-gradient(135deg, #005bbf, #1a73e8);
+    background-image: linear-gradient(135deg, #141413, #2a2928);
   }
 
   .text-gradient-ai {
     @apply text-transparent bg-clip-text;
-    background-image: linear-gradient(135deg, #6e24f5, #8652ff);
+    background-image: linear-gradient(135deg, #f37338, #cf4500);
+  }
+}
+
+@keyframes orbital-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

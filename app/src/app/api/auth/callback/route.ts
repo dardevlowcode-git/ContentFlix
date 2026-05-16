@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { provisionNewUser, isEmailAllowlisted } from '@/lib/auth/allowlist'
+import { getSiteUrl } from '@/lib/env/getSiteUrl'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -20,20 +21,12 @@ import type { NextRequest } from 'next/server'
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const appOrigin = process.env.APP_ORIGIN?.trim()
-  if (!appOrigin) {
-    return NextResponse.json(
-      { data: null, error: 'APP_ORIGIN non configurato', errorType: 'structural', errorCode: 'misconfigured_app' },
-      { status: 500 }
-    )
-  }
-
   let appUrl: URL
   try {
-    appUrl = new URL(appOrigin)
+    appUrl = new URL(getSiteUrl())
   } catch {
     return NextResponse.json(
-      { data: null, error: 'APP_ORIGIN non valido', errorType: 'structural', errorCode: 'misconfigured_app' },
+      { data: null, error: 'NEXT_PUBLIC_SITE_URL non valido', errorType: 'structural', errorCode: 'misconfigured_app' },
       { status: 500 }
     )
   }

@@ -10,6 +10,30 @@ import { isEmailAllowlisted } from '@/lib/auth/allowlist'
 
 const adminSessionCookieName = 'cf_admin_session'
 const textEncoder = new TextEncoder()
+const publicMarketingRoutes = new Set([
+  '/',
+  '/funzionalita',
+  '/prezzi',
+  '/faq',
+  '/comparazioni',
+  '/roadmap',
+  '/mission',
+  '/chi-siamo',
+  '/prodotto',
+  '/progetto',
+  '/legale',
+  '/termini-di-servizio',
+  '/privacy-policy',
+  '/cookie-policy',
+  '/legal',
+  '/legal/termini',
+  '/legal/privacy',
+  '/legal/cookie',
+])
+
+function isPublicMarketingRoute(pathname: string): boolean {
+  return publicMarketingRoutes.has(pathname) || pathname.startsWith('/legal/')
+}
 
 function applySecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set('X-Content-Type-Options', 'nosniff')
@@ -124,7 +148,7 @@ export async function middleware(request: NextRequest) {
 
   // --- Route pubbliche (non richiedono login) ---
   if (
-    pathname === '/' ||
+    isPublicMarketingRoute(pathname) ||
     pathname === '/login' ||
     pathname === '/admin/login' ||
     pathname.startsWith('/api/auth/') ||
