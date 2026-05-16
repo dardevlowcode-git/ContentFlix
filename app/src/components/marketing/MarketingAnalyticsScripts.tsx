@@ -1,20 +1,20 @@
 /* Commento didattico:
- * Scopo del file: caricare script analytics solo dopo consenso esplicito.
- * Moduli richiamati: `next/script`, `./CookieConsentProvider`
- * Flusso: legge lo stato consenso dal context e inietta GA soltanto se consenso=accepted.
+ * Scopo del file: carica script analytics solo con consenso esplicito categoria analytics.
+ * Moduli richiamati: `next/script`, `@/lib/consent/ConsentProvider`.
+ * Flusso: controlla stato consenso corrente e monta GA solo se analytics=true e measurement id presente.
  */
 
 'use client'
 
 import Script from 'next/script'
-import { useCookieConsent } from './CookieConsentProvider'
+import { useConsent } from '@/lib/consent/ConsentProvider'
 
 const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 export default function MarketingAnalyticsScripts() {
-  const { consent } = useCookieConsent()
+  const { state } = useConsent()
 
-  if (consent !== 'accepted' || !measurementId) {
+  if (!state?.analytics || !measurementId) {
     return null
   }
 

@@ -1,12 +1,12 @@
 /* Commento didattico:
- * Scopo del file: definisce una pagina o layout pubblico, visibile prima dell'accesso o senza permessi riservati.
- * Moduli richiamati: `@/components/marketing/MarketingHeader`, `@/components/marketing/MarketingFooter`
- * Flusso: Questa pagina/layout richiama componenti e servizi: i dati arrivano da API o funzioni server, poi vengono passati alla UI per il rendering.
+ * Scopo del file: definisce il layout pubblico marketing e collega provider consenso cookie + analytics gating.
+ * Moduli richiamati: componenti marketing, `@/lib/consent/ConsentProvider`, `next-intl/server`.
+ * Flusso: avvolge tutte le pagine pubbliche con shell marketing e controlli cookie centralizzati.
  */
 
 import MarketingHeader from '@/components/marketing/MarketingHeader'
 import MarketingFooter from '@/components/marketing/MarketingFooter'
-import { CookieConsentProvider } from '@/components/marketing/CookieConsentProvider'
+import { ConsentProvider } from '@/lib/consent/ConsentProvider'
 import CookieBanner from '@/components/marketing/CookieBanner'
 import MarketingAnalyticsScripts from '@/components/marketing/MarketingAnalyticsScripts'
 import { getTranslations } from 'next-intl/server'
@@ -19,7 +19,7 @@ export default async function PublicLayout({
   const t = await getTranslations()
 
   return (
-    <CookieConsentProvider>
+    <ConsentProvider>
       <div className="flex min-h-screen flex-col bg-surface">
         <a
           href="#main-content"
@@ -35,6 +35,6 @@ export default async function PublicLayout({
         <CookieBanner />
         <MarketingAnalyticsScripts />
       </div>
-    </CookieConsentProvider>
+    </ConsentProvider>
   )
 }

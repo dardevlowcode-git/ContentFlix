@@ -41,7 +41,8 @@
       "loginButton": "Accedi come super admin",
       "invalidCredentials": "Credenziali non valide",
       "loginLink": "Accesso Super Admin (utente/password)"
-    }
+    },
+    "deletionPending": "Account in fase di cancellazione. Usa il link email per annullare entro 30 giorni."
   },
   "landing": {
     "hero": {
@@ -95,7 +96,14 @@
       "description": "Usiamo cookie tecnici sempre attivi. Analytics e strumenti di misurazione vengono caricati solo dopo il tuo consenso.",
       "acceptAll": "Accetta tutto",
       "rejectNonEssential": "Rifiuta non necessari",
-      "customize": "Personalizza"
+      "customize": "Personalizza",
+      "managePreferences": "Preferenze cookie",
+      "policyLink": "Cookie policy →",
+      "customizeTitle": "Personalizza preferenze cookie",
+      "necessary": "Necessari (sempre attivi)",
+      "analytics": "Analitici",
+      "marketing": "Marketing",
+      "savePreferences": "Salva preferenze"
     },
     "hero": {
       "ariaLabel": "Schema orbitale Utraya con nodi contenuto e AI",
@@ -124,7 +132,8 @@
       "roadmap": "Roadmap",
       "terms": "Termini di servizio",
       "privacy": "Privacy Policy",
-      "cookies": "Cookie Policy"
+      "cookies": "Cookie Policy",
+      "subProcessors": "Sub-processors"
     },
     "cta": {
       "createWatchlist": "Crea la tua watchlist gratuita",
@@ -178,12 +187,24 @@
         "title": "Funzionalità principali",
         "note": "Supporto multilingua · Uso delle tue API AI",
         "items": {
-          "youtube": { "title": "Tracking canali YouTube" },
-          "podcast": { "title": "Tracking podcast" },
-          "text": { "title": "Riassunti AI testuali" },
-          "audio": { "title": "Riassunti audio" },
-          "tts": { "title": "Video trasformati in contenuti ascoltabili" },
-          "playlists": { "title": "Categorie e playlist tematiche" }
+          "youtube": {
+            "title": "Tracking canali YouTube"
+          },
+          "podcast": {
+            "title": "Tracking podcast"
+          },
+          "text": {
+            "title": "Riassunti AI testuali"
+          },
+          "audio": {
+            "title": "Riassunti audio"
+          },
+          "tts": {
+            "title": "Video trasformati in contenuti ascoltabili"
+          },
+          "playlists": {
+            "title": "Categorie e playlist tematiche"
+          }
         }
       },
       "reuse": {

@@ -41,6 +41,9 @@ permissions:
   security-events: write
   actions: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   # ---------------------------------------------------------------------------
   # JOB 1: npm audit - vulnerabilita note nelle dipendenze
@@ -55,10 +58,10 @@ jobs:
       - name: Checkout codice
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: app/package-lock.json
 
@@ -111,7 +114,7 @@ jobs:
 
       - name: Upload SARIF su GitHub Code Scanning
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: semgrep-results.sarif
           category: semgrep
@@ -166,7 +169,7 @@ jobs:
 
       - name: Upload SARIF Trivy config
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-config.sarif
           category: trivy-config
@@ -193,7 +196,7 @@ jobs:
 
       - name: Upload SARIF Trivy fs
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-fs.sarif
           category: trivy-fs

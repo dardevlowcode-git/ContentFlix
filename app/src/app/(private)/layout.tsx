@@ -1,13 +1,14 @@
 /* Commento didattico:
- * Scopo del file: definisce una pagina o layout protetto: viene usato dopo l'autenticazione dell'utente.
- * Moduli richiamati: `@/components/layout/TopNav`, `@/components/layout/SideNav`, `@/components/layout/Footer`, `@/lib/auth/provider`, `next/navigation`
- * Flusso: Questa pagina/layout richiama componenti e servizi: i dati arrivano da API o funzioni server, poi vengono passati alla UI per il rendering.
+ * Scopo del file: layout autenticato principale con enforcement accettazione TOS prima dell'accesso alle pagine private.
+ * Moduli richiamati: componenti layout, auth provider e service legal acceptance.
+ * Flusso: verifica sessione utente, controlla accettazioni richieste e reindirizza su `/legal/accept` quando necessario.
  */
 
 import TopNav from '@/components/layout/TopNav'
 import SideNav from '@/components/layout/SideNav'
 import Footer from '@/components/layout/Footer'
 import { getCurrentSession } from '@/lib/auth/provider'
+import { getLegalAcceptanceStatus } from '@/lib/services/legal-acceptance'
 import { redirect } from 'next/navigation'
 
 export default async function PrivateLayout({
@@ -17,18 +18,21 @@ export default async function PrivateLayout({
 }) {
   const session = await getCurrentSession()
 
-  // Middleware handles this, but double-check for safety
   if (!session) {
     redirect('/login')
+  }
+
+  const locale = session.preferredLanguage === 'en' ? 'en' : 'it'
+  const acceptanceStatus = await getLegalAcceptanceStatus(session.userId, locale)
+  if (acceptanceStatus.needsAcceptance) {
+    redirect('/legal/accept')
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-surface">
       <TopNav variant="private" session={session} />
       <div className="flex flex-1 pt-16">
-        {/* Fixed sidebar */}
         <SideNav session={session} />
-        {/* Main content — offset for sidebar */}
         <main className="flex-1 ml-64 min-h-full">
           {children}
         </main>

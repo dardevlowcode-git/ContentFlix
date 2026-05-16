@@ -1,7 +1,7 @@
 /* Commento didattico:
- * Scopo del file: definisce una pagina o layout pubblico, visibile prima dell'accesso o senza permessi riservati.
- * Moduli richiamati: `next-intl`, `@/lib/supabase/client`, `next/navigation`, `react`
- * Flusso: Questa pagina/layout richiama componenti e servizi: i dati arrivano da API o funzioni server, poi vengono passati alla UI per il rendering.
+ * Scopo del file: pagina login pubblica con avvio OAuth Google e gestione errori callback inclusi stato cancellazione account.
+ * Moduli richiamati: next-intl, supabase client, site-url helper, next/navigation.
+ * Flusso: costruisce redirect OAuth sicuro verso callback e mostra eventuali errori rientrati da querystring.
  */
 
 'use client'
@@ -38,6 +38,7 @@ function LoginForm() {
     exchange_failed: t('auth.exchangeFailed'),
     no_user: t('auth.noUser'),
     no_code: t('auth.noCode'),
+    deletion_pending: t('auth.deletionPending'),
   }
 
   return (
@@ -53,9 +54,7 @@ function LoginForm() {
             <span className="font-headline text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">
               Utraya
             </span>
-            <p className="text-on-surface-variant mt-2 text-sm">
-              {t('auth.loginSubtitle')}
-            </p>
+            <p className="text-on-surface-variant mt-2 text-sm">{t('auth.loginSubtitle')}</p>
           </div>
 
           {error && errorMessages[error] && (
@@ -71,7 +70,7 @@ function LoginForm() {
                        hover:shadow-primary-glow transition-all active:scale-95"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+              <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
             </svg>
             {t('auth.loginWithGoogle')}
           </button>
@@ -87,8 +86,7 @@ function LoginForm() {
 
           <div className="mt-6 p-4 bg-surface-container-low rounded-xl">
             <p className="text-xs text-on-surface-variant text-center leading-relaxed">
-              <strong className="text-on-surface">{t('auth.inviteOnly')}</strong>
-              {' '}{t('auth.inviteOnlyDetail')}
+              <strong className="text-on-surface">{t('auth.inviteOnly')}</strong> {t('auth.inviteOnlyDetail')}
             </p>
           </div>
 

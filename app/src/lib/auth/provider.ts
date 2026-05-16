@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/auth/getCurrentUser'
 import type { AuthSession } from '@/lib/types/domain'
 
 /**
@@ -26,10 +27,9 @@ import type { AuthSession } from '@/lib/types/domain'
  * 3. Deriva il ruolo da `user_roles -> roles`.
  */
 export async function getCurrentSession(): Promise<AuthSession | null> {
-  const supabase = await createClient()
-
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user || !user.email) return null
+  const current = await getCurrentUser()
+  if (!current || !current.user.email) return null
+  const { supabase, user } = current
 
   // Query esplicita sulla FK `user_roles_user_id_fkey`:
   // evita ambiguita quando esistono piu relazioni verso `user_roles`.
@@ -62,10 +62,8 @@ export async function getCurrentSession(): Promise<AuthSession | null> {
  * Utile quando non servono ruolo/preferenze.
  */
 export async function getAuthUser() {
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) return null
-  return user
+  const current = await getCurrentUser()
+  return current?.user ?? null
 }
 
 /**

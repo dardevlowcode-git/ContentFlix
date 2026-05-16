@@ -1,13 +1,14 @@
 /* Commento didattico:
- * Scopo del file: footer marketing con colonne prodotto/progetto/legale e selettore lingua.
- * Moduli richiamati: `next/link`, `next-intl/server`, `./LanguageSwitcher`
- * Flusso: il componente server consolida i link pubblici e mantiene il footer coerente tra tutte le pagine marketing.
+ * Scopo del file: footer marketing con colonne navigazione e azione client per riaprire preferenze cookie.
+ * Moduli richiamati: `next/link`, `next-intl/server`, componenti lingua/tema/cookie.
+ * Flusso: compone link pubblici fissi e azioni UI condivise su tutte le pagine marketing.
  */
 
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import MarketingLanguageSwitcher from './LanguageSwitcher'
 import ThemeToggle from '@/components/theme/ThemeToggle'
+import CookiePreferencesButton from './CookiePreferencesButton'
 
 export default async function MarketingFooter() {
   const t = await getTranslations()
@@ -37,6 +38,7 @@ export default async function MarketingFooter() {
         { href: '/legal/termini', label: t('marketing.nav.terms') },
         { href: '/legal/privacy', label: t('marketing.nav.privacy') },
         { href: '/legal/cookie', label: t('marketing.nav.cookies') },
+        { href: '/legal/sub-processors', label: t('marketing.nav.subProcessors') },
       ],
     },
   ]
@@ -56,6 +58,11 @@ export default async function MarketingFooter() {
                 </li>
               ))}
             </ul>
+            {column.title === t('marketing.footer.legal') && (
+              <div className="mt-3">
+                <CookiePreferencesButton />
+              </div>
+            )}
           </div>
         ))}
 
