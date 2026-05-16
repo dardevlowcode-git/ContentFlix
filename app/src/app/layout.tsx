@@ -9,6 +9,7 @@ import { Inter, Sofia_Sans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { cookies } from 'next/headers'
+import { getSiteUrl } from '@/lib/env/getSiteUrl'
 import './globals.css'
 
 const sofiaSans = Sofia_Sans({
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
     default: 'Utraya',
     template: '%s | Utraya',
   },
+  metadataBase: new URL(getSiteUrl()),
   description:
     'Utraya analizza automaticamente i tuoi canali YouTube preferiti così rimani sempre informato in pochi minuti.',
   keywords: ['YouTube', 'AI', 'riepiloghi', 'canali', 'video', 'intelligenza artificiale'],

@@ -8,6 +8,7 @@
 
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { buildSiteUrl } from '@/lib/env/getSiteUrl'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -21,10 +22,13 @@ function LoginForm() {
 
   async function handleGoogleLogin() {
     const supabase = createClient()
+    const callbackUrl = new URL(buildSiteUrl('/api/auth/callback'))
+    callbackUrl.searchParams.set('redirectTo', redirectTo)
+
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/api/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+        redirectTo: callbackUrl.toString(),
       },
     })
   }
