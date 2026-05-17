@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { AuthSession } from '@/lib/types/domain'
 import ThemeToggle from '@/components/theme/ThemeToggle'
+import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
 
 interface TopNavProps {
   variant: 'public' | 'private' | 'admin'
@@ -69,6 +70,7 @@ export default function TopNav({ variant, session }: TopNavProps) {
         </div>
 
         <div className="flex items-center gap-3">
+          <LanguageSwitcher />
           <ThemeToggle />
 
           {variant === 'public' && (

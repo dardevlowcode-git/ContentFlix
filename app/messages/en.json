@@ -435,6 +435,9 @@
     "settings": "Settings",
     "notifications": "Notifications",
     "profile": "Profile",
+    "openSideMenu": "Open side menu",
+    "pinSideMenu": "Pin side menu",
+    "unpinSideMenu": "Unpin side menu",
     "theme": {
       "label": "Website theme selector",
       "normal": "Normal",

@@ -744,6 +744,9 @@
     "settings": "Impostazioni",
     "notifications": "Notifiche",
     "profile": "Profilo",
+    "openSideMenu": "Apri menu laterale",
+    "pinSideMenu": "Fissa menu laterale",
+    "unpinSideMenu": "Sblocca menu laterale",
     "theme": {
       "label": "Selettore tema sito",
       "normal": "Normale",
