@@ -15,11 +15,11 @@
     "legal:hash": "node --import tsx scripts/hashLegal.ts"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.19.0",
-    "@supabase/ssr": "^0.5.1",
+    "@google/generative-ai": "^0.24.1",
+    "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.45.6",
     "next": "15.5.18",
-    "next-intl": "4.9.2",
+    "next-intl": "4.12.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
