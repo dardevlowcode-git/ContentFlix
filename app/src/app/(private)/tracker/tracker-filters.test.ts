@@ -15,6 +15,7 @@ const allSeenFilters: SeenFilterState = {
 
 const allDurationFilters: DurationFilterState = {
   under2m: true,
+  under5m: true,
   between2m30m: true,
   over30m: true,
 }
@@ -34,14 +35,30 @@ describe('tracker filter logic', () => {
       seenStatus: 'unseen',
       durationSeconds: 90,
       seenFilters: allSeenFilters,
-      durationFilters: { under2m: true, between2m30m: false, over30m: false },
+      durationFilters: { under2m: true, under5m: false, between2m30m: false, over30m: false },
     })).toBe(true)
 
     expect(matchesTrackerFilters({
       seenStatus: 'unseen',
       durationSeconds: 600,
       seenFilters: allSeenFilters,
-      durationFilters: { under2m: true, between2m30m: false, over30m: false },
+      durationFilters: { under2m: true, under5m: false, between2m30m: false, over30m: false },
+    })).toBe(false)
+  })
+
+  it('applica filtro durata under5m', () => {
+    expect(matchesTrackerFilters({
+      seenStatus: 'seen',
+      durationSeconds: 240,
+      seenFilters: allSeenFilters,
+      durationFilters: { under2m: false, under5m: true, between2m30m: false, over30m: false },
+    })).toBe(true)
+
+    expect(matchesTrackerFilters({
+      seenStatus: 'seen',
+      durationSeconds: 360,
+      seenFilters: allSeenFilters,
+      durationFilters: { under2m: false, under5m: true, between2m30m: false, over30m: false },
     })).toBe(false)
   })
 
@@ -57,7 +74,7 @@ describe('tracker filter logic', () => {
       seenStatus: 'hidden',
       durationSeconds: null,
       seenFilters: allSeenFilters,
-      durationFilters: { under2m: true, between2m30m: false, over30m: false },
+      durationFilters: { under2m: true, under5m: false, between2m30m: false, over30m: false },
     })).toBe(false)
   })
 })

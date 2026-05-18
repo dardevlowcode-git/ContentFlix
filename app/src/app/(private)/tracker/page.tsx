@@ -129,6 +129,7 @@ export default async function TrackerPage({ searchParams }: TrackerPageProps) {
           hidden: t('tracker.filters.hidden'),
           duration: t('tracker.filters.duration'),
           durationUnder2m: t('tracker.filters.durationUnder2m'),
+          durationUnder5m: t('tracker.filters.durationUnder5m'),
           durationBetween2m30m: t('tracker.filters.durationBetween2m30m'),
           durationOver30m: t('tracker.filters.durationOver30m'),
         },

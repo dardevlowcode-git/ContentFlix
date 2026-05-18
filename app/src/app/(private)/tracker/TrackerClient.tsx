@@ -52,6 +52,7 @@ interface TrackerClientProps {
       hidden: string
       duration: string
       durationUnder2m: string
+      durationUnder5m: string
       durationBetween2m30m: string
       durationOver30m: string
     }
@@ -122,6 +123,7 @@ export default function TrackerClient({
   })
   const [durationFilters, setDurationFilters] = useState<DurationFilterState>({
     under2m: true,
+    under5m: true,
     between2m30m: true,
     over30m: true,
   })
@@ -162,6 +164,7 @@ export default function TrackerClient({
     if (seenFilters.seen) count += 1
     if (seenFilters.hidden) count += 1
     if (durationFilters.under2m) count += 1
+    if (durationFilters.under5m) count += 1
     if (durationFilters.between2m30m) count += 1
     if (durationFilters.over30m) count += 1
     return count
@@ -402,6 +405,11 @@ function FilterMenu({
               label={labels.durationUnder2m}
               checked={durationFilters.under2m}
               onToggle={() => onToggleDurationFilter('under2m')}
+            />
+            <FilterCheckbox
+              label={labels.durationUnder5m}
+              checked={durationFilters.under5m}
+              onToggle={() => onToggleDurationFilter('under5m')}
             />
             <FilterCheckbox
               label={labels.durationBetween2m30m}

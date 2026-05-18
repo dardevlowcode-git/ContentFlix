@@ -556,6 +556,7 @@
       "hidden": "Hidden",
       "duration": "Duration",
       "durationUnder2m": "< 2 min",
+      "durationUnder5m": "< 5 min",
       "durationBetween2m30m": "2-30 min",
       "durationOver30m": "> 30 min"
     },

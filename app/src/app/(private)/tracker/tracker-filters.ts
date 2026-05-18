@@ -16,6 +16,7 @@ export type SeenFilterState = {
 
 export type DurationFilterState = {
   under2m: boolean
+  under5m: boolean
   between2m30m: boolean
   over30m: boolean
 }
@@ -36,11 +37,21 @@ export function matchesTrackerFilters(params: {
     // Legacy-safe: visibili solo nella vista "tutte durate".
     // Se l'utente restringe un bucket specifico, i record senza durata non passano.
     return params.durationFilters.under2m
+      && params.durationFilters.under5m
       && params.durationFilters.between2m30m
       && params.durationFilters.over30m
   }
+  const seconds = params.durationSeconds
+  if (typeof seconds !== 'number') return false
 
-  if (bucket === 'under_2m') return params.durationFilters.under2m
-  if (bucket === 'between_2m_30m') return params.durationFilters.between2m30m
+  if (seconds < 120) {
+    return params.durationFilters.under2m || params.durationFilters.under5m
+  }
+  if (seconds < 300) {
+    return params.durationFilters.under5m || params.durationFilters.between2m30m
+  }
+  if (seconds <= 1800) {
+    return params.durationFilters.between2m30m
+  }
   return params.durationFilters.over30m
 }
