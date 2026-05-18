@@ -549,6 +549,8 @@
       "watchlist": "WATCHLIST"
     },
     "filters": {
+      "menu": "Filters",
+      "state": "Status",
       "seen": "Seen",
       "unseen": "To watch",
       "hidden": "Hidden",

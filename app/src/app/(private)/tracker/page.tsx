@@ -122,6 +122,8 @@ export default async function TrackerPage({ searchParams }: TrackerPageProps) {
           watchlist: t('tracker.badges.watchlist'),
         },
         filters: {
+          menu: t('tracker.filters.menu'),
+          state: t('tracker.filters.state'),
           seen: t('tracker.filters.seen'),
           unseen: t('tracker.filters.unseen'),
           hidden: t('tracker.filters.hidden'),
