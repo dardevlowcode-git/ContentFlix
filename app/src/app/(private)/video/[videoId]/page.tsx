@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { getLocale, getTranslations } from 'next-intl/server'
 import VideoActionsClient from './VideoActionsClient'
+import VideoEmbedPlayer from './VideoEmbedPlayer'
 import { extractYouTubeVideoId } from '@/lib/utils/youtube-video-id'
 
 export const metadata: Metadata = {
@@ -104,13 +105,9 @@ export default async function VideoDetailPage({ params }: Props) {
           {/* Thumbnail / video embed */}
           <div className="relative rounded-2xl overflow-hidden bg-surface-container aspect-video shadow-ambient">
             {embedUrl ? (
-              <iframe
-                src={embedUrl}
+              <VideoEmbedPlayer
+                youtubeVideoId={youtubeVideoId!}
                 title={video.title}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
               />
             ) : video.thumbnail_url ? (
               // eslint-disable-next-line @next/next/no-img-element
