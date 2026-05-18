@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { getLocale, getTranslations } from 'next-intl/server'
 import VideoActionsClient from './VideoActionsClient'
+import { extractYouTubeVideoId } from '@/lib/utils/youtube-video-id'
 
 export const metadata: Metadata = {
   title: 'Analisi Video',
@@ -68,8 +69,21 @@ export default async function VideoDetailPage({ params }: Props) {
   const channel = (video as any).channels
 
   const isAnalyzed = analysis?.analysis_status === 'completed'
-  const embedUrl = video.youtube_video_id
-    ? `https://www.youtube-nocookie.com/embed/${video.youtube_video_id}`
+  const fallbackMetadataVideoId = (() => {
+    const raw = video.youtube_metadata
+    if (!raw || typeof raw !== 'object' || !('contentDetails' in raw)) return null
+    const contentDetails = raw.contentDetails
+    if (!contentDetails || typeof contentDetails !== 'object' || !('videoId' in contentDetails)) return null
+    const value = contentDetails.videoId
+    return typeof value === 'string' ? value : null
+  })()
+
+  const youtubeVideoId = extractYouTubeVideoId(video.youtube_video_id)
+    ?? extractYouTubeVideoId(video.video_url)
+    ?? extractYouTubeVideoId(fallbackMetadataVideoId)
+
+  const embedUrl = youtubeVideoId
+    ? `https://www.youtube-nocookie.com/embed/${youtubeVideoId}`
     : null
 
   // Format duration
