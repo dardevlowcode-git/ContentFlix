@@ -35,6 +35,7 @@ const securityHeaders = [
       "default-src 'self'",
       "base-uri 'self'",
       "frame-ancestors 'none'",
+      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://youtube.com",
       "img-src 'self' data: https://i.ytimg.com https://yt3.ggpht.com https://lh3.googleusercontent.com",
       "style-src 'self' 'unsafe-inline'",
       "script-src 'self' 'unsafe-inline'",
