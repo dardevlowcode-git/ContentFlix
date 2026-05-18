@@ -21,7 +21,7 @@
     "next": "15.5.18",
     "next-intl": "4.9.2",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "^19.2.6",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "zod": "^3.23.8"
@@ -30,7 +30,7 @@
     "@types/node": "^22.7.5",
     "@types/prop-types": "^15.7.15",
     "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.1",
+    "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
     "autoprefixer": "^10.4.20",
