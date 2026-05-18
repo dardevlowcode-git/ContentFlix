@@ -45,12 +45,19 @@ describe('tracker filter logic', () => {
     })).toBe(false)
   })
 
-  it('mantiene visibili i video con durata sconosciuta', () => {
+  it('mantiene visibili i video con durata sconosciuta solo quando sono attive tutte le durate', () => {
     expect(matchesTrackerFilters({
       seenStatus: 'hidden',
       durationSeconds: null,
       seenFilters: allSeenFilters,
-      durationFilters: { under2m: false, between2m30m: false, over30m: false },
+      durationFilters: allDurationFilters,
     })).toBe(true)
+
+    expect(matchesTrackerFilters({
+      seenStatus: 'hidden',
+      durationSeconds: null,
+      seenFilters: allSeenFilters,
+      durationFilters: { under2m: true, between2m30m: false, over30m: false },
+    })).toBe(false)
   })
 })

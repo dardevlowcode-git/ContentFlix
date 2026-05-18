@@ -33,8 +33,11 @@ export function matchesTrackerFilters(params: {
 
   const bucket = getVideoDurationBucket(params.durationSeconds)
   if (bucket === 'unknown') {
-    // Manteniamo visibili i record legacy senza durata nota.
-    return true
+    // Legacy-safe: visibili solo nella vista "tutte durate".
+    // Se l'utente restringe un bucket specifico, i record senza durata non passano.
+    return params.durationFilters.under2m
+      && params.durationFilters.between2m30m
+      && params.durationFilters.over30m
   }
 
   if (bucket === 'under_2m') return params.durationFilters.under2m
