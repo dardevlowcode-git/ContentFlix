@@ -20,7 +20,7 @@
     "@supabase/supabase-js": "^2.45.6",
     "next": "15.5.18",
     "next-intl": "4.9.2",
-    "react": "^18.3.1",
+    "react": "^19.2.6",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@types/node": "^22.7.5",
     "@types/prop-types": "^15.7.15",
-    "@types/react": "^18.3.11",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^18.3.1",
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
