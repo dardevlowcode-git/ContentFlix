@@ -12,9 +12,11 @@ import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import SeenStatusButton from './SeenStatusButton'
 import type { VideoWithContext } from '@/lib/types/domain'
+import { formatVideoDuration, getVideoDurationBucket } from '@/lib/utils/video-duration'
+import { matchesTrackerFilters, type DurationFilterState, type SeenFilterState, type SeenStatus } from './tracker-filters'
 
 type TrackerViewMode = 'ribbon' | 'list' | 'latest'
-type SeenStatus = 'seen' | 'unseen' | 'hidden'
+type DurationFilterKey = keyof DurationFilterState
 
 interface TrackerClientProps {
   items: VideoWithContext[]
@@ -46,6 +48,10 @@ interface TrackerClientProps {
       seen: string
       unseen: string
       hidden: string
+      duration: string
+      durationUnder2m: string
+      durationBetween2m30m: string
+      durationOver30m: string
     }
     views: {
       ribbon: string
@@ -65,6 +71,12 @@ interface TrackerClientProps {
         shortSummary: string
       }
       noData: string
+    }
+    duration: {
+      unknown: string
+      under2m: string
+      between2m30m: string
+      over30m: string
     }
     statusInfo: {
       seenWithDate: string
@@ -101,10 +113,15 @@ export default function TrackerClient({
 }: TrackerClientProps) {
   const [videos, setVideos] = useState(items)
   const [view, setView] = useState<TrackerViewMode>(initialView)
-  const [filters, setFilters] = useState({
+  const [seenFilters, setSeenFilters] = useState<SeenFilterState>({
     seen: false,
     unseen: true,
     hidden: false,
+  })
+  const [durationFilters, setDurationFilters] = useState<DurationFilterState>({
+    under2m: true,
+    between2m30m: true,
+    over30m: true,
   })
   const pathname = usePathname()
   const router = useRouter()
@@ -119,8 +136,13 @@ export default function TrackerClient({
   }, [videos])
 
   const filteredItems = useMemo(() => {
-    return videos.filter((item) => filters[item.userState.seenStatus])
-  }, [videos, filters])
+    return videos.filter((item) => matchesTrackerFilters({
+      seenStatus: item.userState.seenStatus,
+      durationSeconds: item.video.duration_seconds,
+      seenFilters,
+      durationFilters,
+    }))
+  }, [durationFilters, seenFilters, videos])
 
   const channelScopeLabel = selectedChannelId
     ? `${labels.scope.selectedChannelPrefix}: ${labels.scope.selectedChannelFallback}`
@@ -128,8 +150,8 @@ export default function TrackerClient({
 
   const latestRows = useMemo(() => {
     if (view !== 'latest') return []
-    return buildLatestRows(videos, channels, selectedChannelId, locale)
-  }, [channels, locale, selectedChannelId, videos, view])
+    return buildLatestRows(filteredItems, channels, selectedChannelId, locale)
+  }, [channels, filteredItems, locale, selectedChannelId, view])
 
   function updateView(nextView: TrackerViewMode) {
     setView(nextView)
@@ -147,8 +169,12 @@ export default function TrackerClient({
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
   }
 
-  function toggleFilter(filterKey: SeenStatus) {
-    setFilters((current) => ({ ...current, [filterKey]: !current[filterKey] }))
+  function toggleSeenFilter(filterKey: SeenStatus) {
+    setSeenFilters((current) => ({ ...current, [filterKey]: !current[filterKey] }))
+  }
+
+  function toggleDurationFilter(filterKey: DurationFilterKey) {
+    setDurationFilters((current) => ({ ...current, [filterKey]: !current[filterKey] }))
   }
 
   function updateVideoStatus(videoId: string, nextState: { seenStatus: SeenStatus; seenAt: string | null; hiddenAt: string | null }) {
@@ -191,18 +217,36 @@ export default function TrackerClient({
           <div className="flex flex-wrap items-center gap-3">
             <FilterPill
               label={labels.filters.unseen}
-              checked={filters.unseen}
-              onToggle={() => toggleFilter('unseen')}
+              checked={seenFilters.unseen}
+              onToggle={() => toggleSeenFilter('unseen')}
             />
             <FilterPill
               label={labels.filters.seen}
-              checked={filters.seen}
-              onToggle={() => toggleFilter('seen')}
+              checked={seenFilters.seen}
+              onToggle={() => toggleSeenFilter('seen')}
             />
             <FilterPill
               label={labels.filters.hidden}
-              checked={filters.hidden}
-              onToggle={() => toggleFilter('hidden')}
+              checked={seenFilters.hidden}
+              onToggle={() => toggleSeenFilter('hidden')}
+            />
+            <span className="text-xs font-semibold uppercase tracking-[0.04em] text-on-surface-variant">
+              {labels.filters.duration}
+            </span>
+            <FilterPill
+              label={labels.filters.durationUnder2m}
+              checked={durationFilters.under2m}
+              onToggle={() => toggleDurationFilter('under2m')}
+            />
+            <FilterPill
+              label={labels.filters.durationBetween2m30m}
+              checked={durationFilters.between2m30m}
+              onToggle={() => toggleDurationFilter('between2m30m')}
+            />
+            <FilterPill
+              label={labels.filters.durationOver30m}
+              checked={durationFilters.over30m}
+              onToggle={() => toggleDurationFilter('over30m')}
             />
           </div>
           <ViewSelector view={view} labels={labels.views} onChange={updateView} />
@@ -359,7 +403,8 @@ function TrackerCard({
   const isSeen = item.userState.seenStatus === 'seen'
   const isHidden = item.userState.seenStatus === 'hidden'
   const publishedLabel = formatPublishedDate(item.video.published_at, locale)
-  const durationLabel = formatDuration(item.video.duration_seconds)
+  const durationLabel = formatVideoDuration(item.video.duration_seconds)
+  const durationBucketLabel = getDurationBucketLabel(item.video.duration_seconds, labels)
   const hasCompletedAnalysis = item.analysis?.analysis_status === 'completed'
   const statusTimestamp = getStatusTimestampLabel(item, locale, labels)
 
@@ -425,6 +470,9 @@ function TrackerCard({
               </span>
             ) : null}
             <span className="text-xs text-on-surface-variant">{publishedLabel}</span>
+            {durationBucketLabel ? (
+              <span className="text-xs text-on-surface-variant">{durationBucketLabel}</span>
+            ) : null}
           </div>
 
           <h3 className="font-headline text-xl font-bold text-on-surface leading-tight line-clamp-2">
@@ -432,6 +480,7 @@ function TrackerCard({
           </h3>
           <p className="text-sm text-secondary font-semibold mt-1">
             {item.channel.title}
+            {durationLabel ? ` · ${durationLabel}` : ''}
           </p>
           {statusTimestamp ? (
             <p className="text-xs text-on-surface-variant mt-1">{statusTimestamp}</p>
@@ -500,6 +549,7 @@ function DenseListView({
                   <div className="min-w-0">
                     <p className="font-semibold text-on-surface line-clamp-2">{item.video.title}</p>
                     <p className="text-xs text-on-surface-variant mt-1">{formatPublishedDate(item.video.published_at, locale)}</p>
+                    <p className="text-xs text-on-surface-variant mt-1">{getDurationMetaLabel(item.video.duration_seconds, labels)}</p>
                     {(() => {
                       const statusInfo = getStatusTimestampLabel(item, locale, labels)
                       if (!statusInfo) return null
@@ -579,6 +629,7 @@ function LatestView({
                     <div className="min-w-0">
                       <p className="font-semibold text-on-surface line-clamp-2">{row.item.video.title}</p>
                       <p className="text-xs text-on-surface-variant mt-1">{formatPublishedDate(row.item.video.published_at, locale)}</p>
+                      <p className="text-xs text-on-surface-variant mt-1">{getDurationMetaLabel(row.item.video.duration_seconds, labels)}</p>
                     </div>
                   </Link>
                 ) : (
@@ -632,7 +683,7 @@ function buildLatestRows(
   const sortedChannels = [...scopedChannels].sort((a, b) => a.title.localeCompare(b.title, locale))
 
   return sortedChannels.map((channel) => {
-    const latestVideo = videos.find((item) => item.channel.id === channel.id && item.userState.seenStatus === 'unseen')
+    const latestVideo = videos.find((item) => item.channel.id === channel.id)
     return {
       channelId: channel.id,
       channelTitle: channel.title,
@@ -655,6 +706,28 @@ function getStatusTimestampLabel(
   return null
 }
 
+function getDurationBucketLabel(
+  durationSeconds: number | null,
+  labels: TrackerClientProps['labels']
+): string {
+  const bucket = getVideoDurationBucket(durationSeconds)
+  if (bucket === 'under_2m') return labels.duration.under2m
+  if (bucket === 'between_2m_30m') return labels.duration.between2m30m
+  if (bucket === 'over_30m') return labels.duration.over30m
+  return ''
+}
+
+function getDurationMetaLabel(
+  durationSeconds: number | null,
+  labels: TrackerClientProps['labels']
+): string {
+  const durationLabel = formatVideoDuration(durationSeconds)
+  const bucketLabel = getDurationBucketLabel(durationSeconds, labels)
+  if (!durationLabel) return labels.duration.unknown
+  if (!bucketLabel) return durationLabel
+  return `${durationLabel} · ${bucketLabel}`
+}
+
 function formatDateWithRelative(date: string, locale: string): string {
   const now = new Date()
   const then = new Date(date)
@@ -673,13 +746,6 @@ function formatDateWithRelative(date: string, locale: string): string {
   }
 
   return `${relativeLabel} (${then.toLocaleString(locale)})`
-}
-
-function formatDuration(seconds: number | null): string {
-  if (!seconds || seconds <= 0) return ''
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 function formatPublishedDate(date: string, locale: string): string {

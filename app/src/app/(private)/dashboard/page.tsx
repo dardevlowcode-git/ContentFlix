@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/types/database'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
+import { formatVideoDuration, getVideoDurationBucket } from '@/lib/utils/video-duration'
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -108,6 +109,10 @@ export default async function DashboardPage() {
             unknownChannel: t('dashboard.unknownChannel'),
             viewSummary: t('dashboard.viewSummary'),
             noVideosYet: t('dashboard.noVideosYet'),
+            durationUnknown: t('dashboard.duration.unknown'),
+            durationUnder2m: t('dashboard.duration.under2m'),
+            durationBetween2m30m: t('dashboard.duration.between2m30m'),
+            durationOver30m: t('dashboard.duration.over30m'),
           }}
         />
       )}
@@ -160,6 +165,10 @@ function VideoBentoGrid({
     unknownChannel: string
     viewSummary: string
     noVideosYet: string
+    durationUnknown: string
+    durationUnder2m: string
+    durationBetween2m30m: string
+    durationOver30m: string
   }
 }) {
   if (videos.length === 0) {
@@ -235,6 +244,8 @@ function VideoBentoGrid({
                     {video.published_at && (
                       <> · <RelativeTime date={video.published_at} locale={locale} /></>
                     )}
+                    {' · '}
+                    {formatDashboardDuration(video.duration_seconds, labels)}
                   </p>
                   {content?.short_summary && (
                     <p className="mt-2 text-sm text-on-surface-variant line-clamp-2 ai-content">
@@ -258,6 +269,37 @@ function VideoBentoGrid({
       })}
     </div>
   )
+}
+
+function formatDashboardDuration(
+  durationSeconds: number | null,
+  labels: VideoBentoGridProps['labels']
+): string {
+  const duration = formatVideoDuration(durationSeconds)
+  const bucket = getVideoDurationBucket(durationSeconds)
+  if (!duration) return labels.durationUnknown
+  if (bucket === 'under_2m') return `${duration} · ${labels.durationUnder2m}`
+  if (bucket === 'between_2m_30m') return `${duration} · ${labels.durationBetween2m30m}`
+  if (bucket === 'over_30m') return `${duration} · ${labels.durationOver30m}`
+  return duration
+}
+
+type VideoBentoGridProps = {
+  videos: any[]
+  locale: string
+  labels: {
+    unseen: string
+    seen: string
+    analysisComplete: string
+    processing: string
+    unknownChannel: string
+    viewSummary: string
+    noVideosYet: string
+    durationUnknown: string
+    durationUnder2m: string
+    durationBetween2m30m: string
+    durationOver30m: string
+  }
 }
 
 function RelativeTime({ date, locale }: { date: string; locale: string }) {

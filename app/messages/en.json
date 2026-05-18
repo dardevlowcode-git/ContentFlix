@@ -392,7 +392,13 @@
     "addFirstChannel": "Add your first channel",
     "emptyFeed": "Add YouTube channels via URL and Utraya will automatically analyze new videos.",
     "unknownChannel": "Unknown channel",
-    "noVideosYet": "Videos from your channels will appear here as soon as they are imported."
+    "noVideosYet": "Videos from your channels will appear here as soon as they are imported.",
+    "duration": {
+      "unknown": "Duration unavailable",
+      "under2m": "< 2 min",
+      "between2m30m": "2-30 min",
+      "over30m": "> 30 min"
+    }
   },
   "video": {
     "bottomLine": "Bottom line",
@@ -520,7 +526,13 @@
     "emptyDetail": "Add videos from the dashboard or the analysis page.",
     "removeFromList": "Remove from watchlist",
     "subtitle": "Videos you saved for later.",
-    "title": "Watchlist"
+    "title": "Watchlist",
+    "duration": {
+      "unknown": "Duration unavailable",
+      "under2m": "< 2 min",
+      "between2m30m": "2-30 min",
+      "over30m": "> 30 min"
+    }
   },
   "tracker": {
     "title": "Video tracker",
@@ -539,7 +551,11 @@
     "filters": {
       "seen": "Seen",
       "unseen": "To watch",
-      "hidden": "Hidden"
+      "hidden": "Hidden",
+      "duration": "Duration",
+      "durationUnder2m": "< 2 min",
+      "durationBetween2m30m": "2-30 min",
+      "durationOver30m": "> 30 min"
     },
     "views": {
       "ribbon": "Ribbon",
@@ -555,7 +571,7 @@
       "hiddenWithDate": "Hidden · {date}"
     },
     "latest": {
-      "emptyChannel": "No unseen video available for this channel."
+      "emptyChannel": "No video available for this channel with the active filters."
     },
     "list": {
       "headers": {
@@ -567,6 +583,12 @@
         "shortSummary": "Short summary"
       },
       "noData": "-"
+    },
+    "duration": {
+      "unknown": "Duration unavailable",
+      "under2m": "< 2 min",
+      "between2m30m": "2-30 min",
+      "over30m": "> 30 min"
     },
     "actions": {
       "hide": "Hide",
