@@ -27,14 +27,14 @@ export default function HeroOrbital({ ariaLabel, centerLabel, nodes }: HeroOrbit
       <svg viewBox="0 0 560 560" className="h-auto w-full">
         <defs>
           <radialGradient id="orbitalBg" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#FCFBFA" />
-            <stop offset="100%" stopColor="#F3F0EE" />
+            <stop offset="0%" stopColor="rgb(var(--color-surface-container-lowest))" />
+            <stop offset="100%" stopColor="rgb(var(--color-surface))" />
           </radialGradient>
         </defs>
 
         <circle cx="280" cy="280" r="264" fill="url(#orbitalBg)" />
-        <circle cx="280" cy="280" r="220" fill="none" stroke="#F37338" strokeOpacity="0.25" strokeWidth="1.5" />
-        <circle cx="280" cy="280" r="156" fill="none" stroke="#F37338" strokeOpacity="0.18" strokeWidth="1.25" />
+        <circle cx="280" cy="280" r="220" fill="none" stroke="rgb(var(--color-inverse-primary))" strokeOpacity="0.25" strokeWidth="1.5" />
+        <circle cx="280" cy="280" r="156" fill="none" stroke="rgb(var(--color-inverse-primary))" strokeOpacity="0.18" strokeWidth="1.25" />
 
         <g className="orbital-spin-slow origin-center">
           {NODE_POSITIONS.map((position, index) => (
@@ -44,12 +44,12 @@ export default function HeroOrbital({ ariaLabel, centerLabel, nodes }: HeroOrbit
                 y1="280"
                 x2={position.x}
                 y2={position.y}
-                stroke="#F37338"
+                stroke="rgb(var(--color-inverse-primary))"
                 strokeOpacity="0.2"
                 strokeWidth="1"
               />
-              <circle cx={position.x} cy={position.y} r="24" fill="#FCFBFA" />
-              <circle cx={position.x} cy={position.y} r="23" fill="none" stroke="#E7DFDA" strokeWidth="1.5" />
+              <circle cx={position.x} cy={position.y} r="24" fill="rgb(var(--color-surface-container-lowest))" />
+              <circle cx={position.x} cy={position.y} r="23" fill="none" stroke="rgb(var(--color-outline-variant))" strokeWidth="1.5" />
               <text
                 x={position.x}
                 y={position.y + 36}
@@ -63,8 +63,8 @@ export default function HeroOrbital({ ariaLabel, centerLabel, nodes }: HeroOrbit
         </g>
 
         <g>
-          <circle cx="280" cy="280" r="56" fill="#141413" />
-          <circle cx="280" cy="280" r="54" fill="none" stroke="#F37338" strokeOpacity="0.5" strokeWidth="1.5" />
+          <circle cx="280" cy="280" r="56" fill="rgb(var(--color-primary))" />
+          <circle cx="280" cy="280" r="54" fill="none" stroke="rgb(var(--color-inverse-primary))" strokeOpacity="0.5" strokeWidth="1.5" />
           <text x="280" y="286" textAnchor="middle" className="fill-white text-[16px] font-bold tracking-wide">
             {centerLabel}
           </text>

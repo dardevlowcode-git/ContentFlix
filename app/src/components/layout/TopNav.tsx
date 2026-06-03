@@ -1,11 +1,12 @@
 /* Commento didattico:
- * Scopo del file: componente top navigation condiviso tra superfici pubblica, privata e admin.
+ * Scopo del file: top navigation condivisa per superfici pubblica, privata e admin con menu utente touch-safe.
  * Moduli richiamati: `next/link`, `next-intl`, supabase client, routing client.
  * Flusso: mostra nav contestuale, azioni utente e gestione logout in base al variant corrente.
  */
 
 'use client'
 
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
@@ -22,6 +23,29 @@ interface TopNavProps {
 export default function TopNav({ variant, session }: TopNavProps) {
   const t = useTranslations()
   const router = useRouter()
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!isUserMenuOpen) return
+
+    function onOutsideClick(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    function onEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setIsUserMenuOpen(false)
+    }
+
+    document.addEventListener('mousedown', onOutsideClick)
+    document.addEventListener('keydown', onEscape)
+    return () => {
+      document.removeEventListener('mousedown', onOutsideClick)
+      document.removeEventListener('keydown', onEscape)
+    }
+  }, [isUserMenuOpen])
 
   async function handleSignOut() {
     if (variant === 'admin') {
@@ -42,17 +66,15 @@ export default function TopNav({ variant, session }: TopNavProps) {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 topnav-surface backdrop-blur-glass border-b-0">
-      <div className="flex items-center justify-between w-full px-6 py-3 max-w-[1920px] mx-auto">
-        <div className="flex items-center gap-8">
-          <Link href={session ? '/dashboard' : '/'} className="flex items-center gap-2">
-            <span className="font-headline text-2xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">
-              Utraya
-            </span>
+    <header className="shell-header fixed left-0 right-0 top-0 z-50">
+      <div className="mx-auto flex w-full max-w-[1920px] items-center justify-between px-6 py-3">
+        <div className="flex items-center gap-6 lg:gap-8">
+          <Link href={session ? '/dashboard' : '/'} className="shell-logo">
+            UTRAYA
           </Link>
 
           {variant === 'private' && (
-            <nav className="hidden md:flex items-center gap-6">
+            <nav className="shell-nav-pill hidden items-center gap-2 lg:flex">
               <NavLink href="/dashboard">{t('nav.dashboard')}</NavLink>
               <NavLink href="/channels">{t('nav.channels')}</NavLink>
               <NavLink href="/traker">{t('nav.traker')}</NavLink>
@@ -62,23 +84,19 @@ export default function TopNav({ variant, session }: TopNavProps) {
           )}
 
           {variant === 'admin' && (
-            <div className="flex items-center gap-3">
-              <span className="font-headline font-bold text-on-surface-variant">{t('admin.superAdmin')}</span>
-              <span className="text-label-caps px-2 py-0.5 bg-tertiary text-on-tertiary rounded-full">Admin</span>
+            <div className="shell-nav-pill hidden items-center gap-3 md:flex">
+              <span className="font-headline text-sm font-bold text-on-surface-variant">{t('admin.superAdmin')}</span>
+              <span className="rounded-full bg-secondary-fixed px-2 py-0.5 text-label-caps text-on-secondary-fixed">Admin</span>
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <LanguageSwitcher />
           <ThemeToggle />
 
           {variant === 'public' && (
-            <Link
-              href="/login"
-              className="bg-primary text-on-primary px-5 py-2 rounded-full font-bold text-sm
-                         hover:bg-primary-container transition-all active:scale-95"
-            >
+            <Link href="/login" className="shell-cta-default">
               {t('nav.login')}
             </Link>
           )}
@@ -86,10 +104,10 @@ export default function TopNav({ variant, session }: TopNavProps) {
           {(variant === 'private' || variant === 'admin') && session && (
             <>
               <button
-                className="p-2 text-on-surface-variant hover:bg-surface-container rounded-xl transition-all"
+                className="rounded-xl border border-stroke-subtle p-2 text-on-surface-variant transition-colors hover:bg-surface-elevated"
                 aria-label={t('common.notifications')}
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -101,10 +119,10 @@ export default function TopNav({ variant, session }: TopNavProps) {
 
               <Link
                 href="/settings/account"
-                className="p-2 text-on-surface-variant hover:bg-surface-container rounded-xl transition-all"
+                className="rounded-xl border border-stroke-subtle p-2 text-on-surface-variant transition-colors hover:bg-surface-elevated"
                 aria-label={t('common.settings')}
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -115,40 +133,49 @@ export default function TopNav({ variant, session }: TopNavProps) {
                 </svg>
               </Link>
 
-              <div className="relative group">
-                <button className="flex items-center gap-2 rounded-full hover:ring-2 hover:ring-primary/30 transition-all">
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen((previous) => !previous)}
+                  aria-expanded={isUserMenuOpen}
+                  aria-haspopup="menu"
+                  className="flex items-center gap-2 rounded-full border border-stroke-subtle p-1 transition-shadow hover:shadow-soft"
+                >
                   {session.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={session.avatarUrl} alt={session.displayName ?? 'Profilo'} className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-ambient-md" />
+                    <img src={session.avatarUrl} alt={session.displayName ?? 'Profilo'} className="h-8 w-8 rounded-full object-cover" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-ai flex items-center justify-center text-white text-sm font-bold">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full gradient-ai text-sm font-bold text-white">
                       {(session.displayName ?? session.email)[0].toUpperCase()}
                     </div>
                   )}
                 </button>
 
-                <div className="absolute right-0 top-full mt-2 w-48 glass rounded-2xl shadow-ambient
-                                hidden group-hover:block animate-fade-in border border-outline-variant/20 py-1">
-                  <div className="px-4 py-2 border-b border-outline-variant/10">
-                    <p className="text-sm font-semibold text-on-surface truncate">{session.displayName ?? session.email}</p>
-                    <p className="text-xs text-on-surface-variant truncate">{session.email}</p>
-                  </div>
-                  {variant === 'private' && (
-                    <Link
-                      href="/admin"
-                      className="block px-4 py-2 text-sm text-on-surface-variant hover:bg-surface-container-low transition-colors"
-                      style={{ display: session.role === 'super_admin' ? 'block' : 'none' }}
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-stroke-subtle bg-surface-statement py-1 shadow-medium">
+                    <div className="border-b border-stroke-subtle px-4 py-2">
+                      <p className="truncate text-sm font-semibold text-on-surface">{session.displayName ?? session.email}</p>
+                      <p className="truncate text-xs text-on-surface-variant">{session.email}</p>
+                    </div>
+
+                    {variant === 'private' && session.role === 'super_admin' && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-elevated"
+                      >
+                        {t('nav.admin')}
+                      </Link>
+                    )}
+
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full px-4 py-2 text-left text-sm text-error transition-colors hover:bg-error-container/20"
                     >
-                      {t('nav.admin')}
-                    </Link>
-                  )}
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error-container/20 transition-colors"
-                  >
-                    {t('nav.logout')}
-                  </button>
-                </div>
+                      {t('nav.logout')}
+                    </button>
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -158,9 +185,9 @@ export default function TopNav({ variant, session }: TopNavProps) {
   )
 }
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+function NavLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className="text-on-surface-variant hover:text-primary font-medium transition-colors text-sm">
+    <Link href={href} className="shell-nav-link">
       {children}
     </Link>
   )

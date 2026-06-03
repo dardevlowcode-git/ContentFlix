@@ -185,39 +185,61 @@ export default function AdminUsersClient({
             {t('admin.users.allowlistEmpty')}
           </div>
         ) : (
-          <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient">
-            <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-surface-container-low">
-              <div className="col-span-6 text-label-caps text-on-surface-variant">{t('admin.users.email')}</div>
-              <div className="col-span-3 text-label-caps text-on-surface-variant">{t('admin.users.registeredAt')}</div>
-              <div className="col-span-3 text-label-caps text-on-surface-variant">{t('admin.users.actions')}</div>
+          <div className="space-y-3">
+            <div className="hidden overflow-hidden rounded-2xl bg-surface-container-lowest shadow-ambient md:block">
+              <div className="grid grid-cols-12 gap-4 bg-surface-container-low px-6 py-3">
+                <div className="col-span-6 text-label-caps text-on-surface-variant">{t('admin.users.email')}</div>
+                <div className="col-span-3 text-label-caps text-on-surface-variant">{t('admin.users.registeredAt')}</div>
+                <div className="col-span-3 text-label-caps text-on-surface-variant">{t('admin.users.actions')}</div>
+              </div>
+
+              {activeAllowlist.map((entry, index) => {
+                const revokeBusy = busy?.type === 'revoke' && busy.email === entry.email
+                return (
+                  <div
+                    key={entry.id}
+                    className={`grid grid-cols-12 items-center gap-4 px-6 py-4 ${
+                      index % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low'
+                    }`}
+                  >
+                    <div className="col-span-6 text-sm text-on-surface">{entry.email}</div>
+                    <div className="col-span-3 text-sm text-on-surface-variant">{new Date(entry.added_at).toLocaleDateString(locale)}</div>
+                    <div className="col-span-3">
+                      <button
+                        type="button"
+                        disabled={revokeBusy}
+                        onClick={() => handleRevoke(entry.email)}
+                        className="rounded-lg px-3 py-1.5 text-xs font-semibold text-error hover:bg-error-container/40 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {t('admin.users.revokeAccess')}
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
 
-            {activeAllowlist.map((entry, index) => {
-              const revokeBusy = busy?.type === 'revoke' && busy.email === entry.email
-              return (
-                <div
-                  key={entry.id}
-                  className={`grid grid-cols-12 gap-4 px-6 py-4 items-center
-                    ${index % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low'}`}
-                >
-                  <div className="col-span-6 text-sm text-on-surface">{entry.email}</div>
-                  <div className="col-span-3 text-sm text-on-surface-variant">
-                    {new Date(entry.added_at).toLocaleDateString(locale)}
-                  </div>
-                  <div className="col-span-3">
+            <div className="space-y-3 md:hidden">
+              {activeAllowlist.map((entry) => {
+                const revokeBusy = busy?.type === 'revoke' && busy.email === entry.email
+                return (
+                  <article key={entry.id} className="rounded-2xl border border-stroke-subtle bg-surface-statement p-4 shadow-soft">
+                    <p className="text-label-caps text-on-surface-variant">{t('admin.users.email')}</p>
+                    <p className="mt-1 text-sm font-medium text-on-surface">{entry.email}</p>
+                    <p className="mt-3 text-label-caps text-on-surface-variant">{t('admin.users.registeredAt')}</p>
+                    <p className="mt-1 text-sm text-on-surface-variant">{new Date(entry.added_at).toLocaleDateString(locale)}</p>
                     <button
                       type="button"
                       disabled={revokeBusy}
                       onClick={() => handleRevoke(entry.email)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-error
-                                 hover:bg-error-container/40 disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="mt-4 w-full rounded-full border border-error/40 px-3 py-2 text-xs font-semibold text-error disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {t('admin.users.revokeAccess')}
                     </button>
-                  </div>
-                </div>
-              )
-            })}
+                  </article>
+                )
+              })}
+            </div>
           </div>
         )}
       </section>
@@ -226,90 +248,130 @@ export default function AdminUsersClient({
         <h2 className="font-headline text-xl font-bold text-on-surface mb-4">
           {t('admin.users.title')} ({initialUsers.length})
         </h2>
-        <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient">
-          <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-surface-container-low">
-            <div className="col-span-4 text-label-caps text-on-surface-variant">{t('admin.users.user')}</div>
-            <div className="col-span-3 text-label-caps text-on-surface-variant">{t('admin.users.role')}</div>
-            <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.users.status')}</div>
-            <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.users.registeredAt')}</div>
-            <div className="col-span-1 text-label-caps text-on-surface-variant">{t('admin.users.actions')}</div>
+        <div className="space-y-3">
+          <div className="hidden overflow-hidden rounded-2xl bg-surface-container-lowest shadow-ambient lg:block">
+            <div className="grid grid-cols-12 gap-4 bg-surface-container-low px-6 py-3">
+              <div className="col-span-4 text-label-caps text-on-surface-variant">{t('admin.users.user')}</div>
+              <div className="col-span-3 text-label-caps text-on-surface-variant">{t('admin.users.role')}</div>
+              <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.users.status')}</div>
+              <div className="col-span-2 text-label-caps text-on-surface-variant">{t('admin.users.registeredAt')}</div>
+              <div className="col-span-1 text-label-caps text-on-surface-variant">{t('admin.users.actions')}</div>
+            </div>
+
+            {initialUsers.length === 0 ? (
+              <div className="p-12 text-center text-on-surface-variant">{t('admin.users.empty')}</div>
+            ) : (
+              initialUsers.map((user, i) => {
+                const role = user.user_roles?.[0]?.roles?.name ?? 'user'
+                const isSuperAdmin = role === 'super_admin'
+
+                return (
+                  <div
+                    key={user.id}
+                    className={`grid grid-cols-12 items-center gap-4 px-6 py-4 transition-colors hover:bg-surface-container ${
+                      i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low'
+                    }`}
+                  >
+                    <div className="col-span-4 flex items-center gap-3">
+                      {user.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={user.avatar_url} alt="" className="h-8 w-8 rounded-full" />
+                      ) : (
+                        <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white ${isSuperAdmin ? 'gradient-ai' : 'gradient-primary'}`}>
+                          {(user.display_name ?? user.email)[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm font-semibold text-on-surface">{user.display_name ?? t('common.unknown')}</p>
+                        <p className="text-xs text-on-surface-variant">{user.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="col-span-3">
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isSuperAdmin ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-surface-container text-on-surface-variant'}`}>
+                        {isSuperAdmin ? t('admin.superAdmin') : t('admin.users.standardUser')}
+                      </span>
+                    </div>
+
+                    <div className="col-span-2">
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${user.status === 'active' ? 'bg-green-100 text-green-700' : user.status === 'suspended' ? 'bg-amber-100 text-amber-700' : 'bg-error-container text-error'}`}>
+                        {user.status === 'active' ? t('admin.users.statusActive') : user.status === 'suspended' ? t('admin.users.statusSuspended') : t('admin.users.statusDeleted')}
+                      </span>
+                    </div>
+
+                    <div className="col-span-2 text-sm text-on-surface-variant">{new Date(user.created_at).toLocaleDateString(locale)}</div>
+
+                    <div className="col-span-1">
+                      {!isSuperAdmin && (
+                        <button
+                          type="button"
+                          title={t('admin.users.suspend')}
+                          className="rounded-lg p-1.5 text-xs text-on-surface-variant transition-all hover:bg-amber-50 hover:text-amber-600"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                            />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })
+            )}
           </div>
 
           {initialUsers.length === 0 ? (
-            <div className="p-12 text-center text-on-surface-variant">
+            <div className="rounded-2xl bg-surface-container-low p-8 text-center text-on-surface-variant lg:hidden">
               {t('admin.users.empty')}
             </div>
           ) : (
-            initialUsers.map((user, i) => {
-              const role = user.user_roles?.[0]?.roles?.name ?? 'user'
-              const isSuperAdmin = role === 'super_admin'
-
-              return (
-                <div
-                  key={user.id}
-                  className={`grid grid-cols-12 gap-4 px-6 py-4 items-center
-                               ${i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low'}
-                               hover:bg-surface-container transition-colors`}
-                >
-                  <div className="col-span-4 flex items-center gap-3">
-                    {user.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full" />
-                    ) : (
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold
-                                        ${isSuperAdmin ? 'gradient-ai' : 'gradient-primary'}`}>
-                        {(user.display_name ?? user.email)[0].toUpperCase()}
+            <div className="space-y-3 lg:hidden">
+              {initialUsers.map((user) => {
+                const role = user.user_roles?.[0]?.roles?.name ?? 'user'
+                const isSuperAdmin = role === 'super_admin'
+                return (
+                  <article key={user.id} className="rounded-2xl border border-stroke-subtle bg-surface-statement p-4 shadow-soft">
+                    <div className="flex items-center gap-3">
+                      {user.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={user.avatar_url} alt="" className="h-9 w-9 rounded-full" />
+                      ) : (
+                        <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white ${isSuperAdmin ? 'gradient-ai' : 'gradient-primary'}`}>
+                          {(user.display_name ?? user.email)[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm font-semibold text-on-surface">{user.display_name ?? t('common.unknown')}</p>
+                        <p className="text-xs text-on-surface-variant">{user.email}</p>
                       </div>
-                    )}
-                    <div>
-                      <p className="text-sm font-semibold text-on-surface">{user.display_name ?? t('common.unknown')}</p>
-                      <p className="text-xs text-on-surface-variant">{user.email}</p>
                     </div>
-                  </div>
 
-                  <div className="col-span-3">
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full
-                                      ${isSuperAdmin ? 'badge-ai' : 'bg-surface-container text-on-surface-variant'}`}>
-                      {isSuperAdmin ? t('admin.superAdmin') : t('admin.users.standardUser')}
-                    </span>
-                  </div>
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-label-caps text-on-surface-variant">{t('admin.users.role')}</p>
+                        <span className={`mt-1 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${isSuperAdmin ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-surface-elevated text-on-surface-variant'}`}>
+                          {isSuperAdmin ? t('admin.superAdmin') : t('admin.users.standardUser')}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-label-caps text-on-surface-variant">{t('admin.users.status')}</p>
+                        <span className={`mt-1 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${user.status === 'active' ? 'bg-green-100 text-green-700' : user.status === 'suspended' ? 'bg-amber-100 text-amber-700' : 'bg-error-container text-error'}`}>
+                          {user.status === 'active' ? t('admin.users.statusActive') : user.status === 'suspended' ? t('admin.users.statusSuspended') : t('admin.users.statusDeleted')}
+                        </span>
+                      </div>
+                    </div>
 
-                  <div className="col-span-2">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full
-                                      ${user.status === 'active' ? 'bg-green-100 text-green-700'
-                        : user.status === 'suspended' ? 'bg-amber-100 text-amber-700'
-                          : 'bg-error-container text-error'}`}>
-                      {user.status === 'active' ? t('admin.users.statusActive')
-                        : user.status === 'suspended' ? t('admin.users.statusSuspended')
-                          : t('admin.users.statusDeleted')}
-                    </span>
-                  </div>
-
-                  <div className="col-span-2 text-sm text-on-surface-variant">
-                    {new Date(user.created_at).toLocaleDateString(locale)}
-                  </div>
-
-                  <div className="col-span-1">
-                    {!isSuperAdmin && (
-                      <button
-                        type="button"
-                        title={t('admin.users.suspend')}
-                        className="p-1.5 text-on-surface-variant hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all text-xs"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-                          />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )
-            })
+                    <p className="mt-4 text-label-caps text-on-surface-variant">{t('admin.users.registeredAt')}</p>
+                    <p className="mt-1 text-sm text-on-surface-variant">{new Date(user.created_at).toLocaleDateString(locale)}</p>
+                  </article>
+                )
+              })}
+            </div>
           )}
         </div>
       </section>

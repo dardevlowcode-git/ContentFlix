@@ -121,7 +121,7 @@ export default function AccountDeletionClient({ initialState }: { initialState: 
             type="button"
             onClick={requestDeletionNow}
             disabled={!confirmDelete || loading}
-            className="mt-4 rounded-full bg-[#CF4500] px-5 py-2 text-sm font-semibold text-[#F3F0EE] disabled:opacity-50"
+            className="mt-4 shell-cta-accent disabled:opacity-50"
           >
             {loading ? 'Invio richiesta...' : 'Cancella il mio account'}
           </button>

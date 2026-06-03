@@ -135,7 +135,7 @@ export default function SideNav({
         <button
           type="button"
           onClick={onToggleMenu}
-          className="fixed left-4 top-[4.75rem] z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary text-on-primary shadow-ambient-lg transition-colors hover:bg-primary-container"
+          className="fixed left-4 top-[4.75rem] z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary text-on-primary shadow-medium transition-colors hover:bg-primary-container"
           aria-label={t('common.openSideMenu')}
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -148,7 +148,7 @@ export default function SideNav({
         <button
           type="button"
           aria-label={t('common.close')}
-          className="fixed inset-0 z-40 bg-ink/35 backdrop-blur-[1px]"
+          className="bg-scrim fixed inset-0 z-40 backdrop-blur-[1px]"
           onClick={onCloseMenu}
         />
       )}
@@ -157,8 +157,8 @@ export default function SideNav({
         className={cn(
           'fixed bottom-0 top-16 z-50 flex w-64 flex-col bg-surface-container-low transition-transform duration-200',
           isPinned && isDesktop ? 'left-0 translate-x-0 border-r border-surface-container-high' : '',
-          !isPinned && isDesktop ? 'left-0 shadow-ambient-lg' : '',
-          !isDesktop ? 'left-0 shadow-ambient-lg' : '',
+          !isPinned && isDesktop ? 'left-0 shadow-medium' : '',
+          !isDesktop ? 'left-0 shadow-medium' : '',
           showOverlay ? 'translate-x-0' : !isPinned ? '-translate-x-full' : ''
         )}
       >
@@ -236,4 +236,3 @@ export default function SideNav({
     </>
   )
 }
-

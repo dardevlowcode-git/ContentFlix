@@ -1,0 +1,13 @@
+Backup checkpoint
+- Branch: preprod
+- SHA: 419255c
+- Tag: backup/frontend-premium-pre-20260604-0051
+- Source zip: C:\Users\dario\OneDrive - SEDOC DIGITAL GROUP SRL\ProgettiGIT\ContentFlixRoot\ContentFlix\_backups\contentflix-src-20260604-0051-419255c.zip
+
+Revert standard
+1) git restore --source backup/frontend-premium-pre-20260604-0051 --staged --worktree .
+2) git status --short
+
+Revert from zip fallback
+1) unzip source archive in a temp folder
+2) compare/restore files from temp folder into workspace

@@ -1,17 +1,17 @@
 /* Commento didattico:
- * Scopo del file: definisce una pagina o layout pubblico, visibile prima dell'accesso o senza permessi riservati.
- * Moduli richiamati: `next`, `next/link`, `next-intl/server`
- * Flusso: Questa pagina/layout richiama componenti e servizi: i dati arrivano da API o funzioni server, poi vengono passati alla UI per il rendering.
+ * Scopo del file: landing pubblica marketing con layout editoriale a blocchi riusabili.
+ * Moduli richiamati: `next`, `next/link`, `next-intl/server`, componenti hero e template sezioni.
+ * Flusso: compone contenuti localizzati in tre template visivi (split hero, editorial grid, statement band).
  */
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import HeroOrbital from '@/components/marketing/HeroOrbital'
+import { EditorialGridSection, SplitHeroSection, StatementBand } from '@/components/marketing/SectionTemplates'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations()
-
   return {
     title: t('marketing.landing.metaTitle'),
     description: t('marketing.landing.metaDescription'),
@@ -22,22 +22,10 @@ export default async function LandingPage() {
   const t = await getTranslations()
 
   const howItWorksSteps = [
-    {
-      title: t('marketing.landing.howItWorks.step1.title'),
-      description: t('marketing.landing.howItWorks.step1.description'),
-    },
-    {
-      title: t('marketing.landing.howItWorks.step2.title'),
-      description: t('marketing.landing.howItWorks.step2.description'),
-    },
-    {
-      title: t('marketing.landing.howItWorks.step3.title'),
-      description: t('marketing.landing.howItWorks.step3.description'),
-    },
-    {
-      title: t('marketing.landing.howItWorks.step4.title'),
-      description: t('marketing.landing.howItWorks.step4.description'),
-    },
+    { title: t('marketing.landing.howItWorks.step1.title'), description: t('marketing.landing.howItWorks.step1.description') },
+    { title: t('marketing.landing.howItWorks.step2.title'), description: t('marketing.landing.howItWorks.step2.description') },
+    { title: t('marketing.landing.howItWorks.step3.title'), description: t('marketing.landing.howItWorks.step3.description') },
+    { title: t('marketing.landing.howItWorks.step4.title'), description: t('marketing.landing.howItWorks.step4.description') },
   ]
 
   const problemTags = [
@@ -92,137 +80,116 @@ export default async function LandingPage() {
   ]
 
   return (
-    <div className="overflow-hidden bg-surface">
-      <section className="px-6 pb-24 pt-16">
-        <div className="mx-auto grid w-full max-w-7xl items-center gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-7">
-            <h1 className="text-5xl font-extrabold leading-[1.02] tracking-tight text-on-surface md:text-7xl">
-              {t('marketing.landing.hero.headline1')}
-              <br />
-              {t('marketing.landing.hero.headline2')}
-              <br />
-              <span className="text-gradient-ai">{t('marketing.landing.hero.headline3')}</span>
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-on-surface-variant">
-              {t('marketing.landing.hero.subtitle')}
-            </p>
-
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center rounded-full bg-primary px-8 py-4 text-base font-semibold text-on-primary transition-colors hover:bg-primary-container"
-              >
-                {t('marketing.cta.createWatchlist')}
-              </Link>
-              <Link
-                href="/funzionalita"
-                className="inline-flex items-center justify-center rounded-full bg-surface-container-low px-8 py-4 text-base font-semibold text-on-surface transition-colors hover:bg-surface-container"
-              >
-                {t('marketing.cta.exploreFeatures')}
-              </Link>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5">
+    <div className="overflow-hidden bg-surface-base">
+      <SplitHeroSection
+        tone="base"
+        title={
+          <>
+            {t('marketing.landing.hero.headline1')}
+            <br />
+            {t('marketing.landing.hero.headline2')}
+            <br />
+            <span className="text-gradient-ai">{t('marketing.landing.hero.headline3')}</span>
+          </>
+        }
+        subtitle={<p>{t('marketing.landing.hero.subtitle')}</p>}
+        actions={
+          <>
+            <Link href="/login" className="shell-cta-default px-8 py-4 text-base">
+              {t('marketing.cta.createWatchlist')}
+            </Link>
+            <Link href="/funzionalita" className="inline-flex items-center justify-center rounded-full border border-stroke-subtle bg-surface-statement px-8 py-4 text-base font-semibold text-on-surface transition-colors hover:bg-surface-elevated">
+              {t('marketing.cta.exploreFeatures')}
+            </Link>
+          </>
+        }
+        aside={
+          <>
             <HeroOrbital ariaLabel={t('marketing.hero.ariaLabel')} centerLabel={t('marketing.hero.center')} nodes={orbitalNodes} />
-            <div className="mx-auto max-w-sm rounded-3xl bg-surface-container-low p-6 text-center lg:hidden">
-              <p className="text-sm font-semibold uppercase tracking-wide text-on-surface-variant">{t('marketing.hero.mobileFallbackTitle')}</p>
+            <div className="mx-auto max-w-sm rounded-3xl border border-stroke-subtle bg-surface-statement p-6 text-center lg:hidden">
+              <p className="text-label-caps text-on-surface-variant">{t('marketing.hero.mobileFallbackTitle')}</p>
               <p className="mt-3 text-sm text-on-surface-variant">{t('marketing.hero.mobileFallbackDescription')}</p>
             </div>
-          </div>
-        </div>
-      </section>
+          </>
+        }
+      />
 
-      <section className="bg-surface-container-low px-6 py-20">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-4xl font-bold text-on-surface">{t('marketing.landing.howItWorks.title')}</h2>
-          <p className="mt-3 max-w-3xl text-on-surface-variant">{t('marketing.landing.howItWorks.subtitle')}</p>
-          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {howItWorksSteps.map((step) => (
-              <article key={step.title} className="rounded-3xl bg-surface-container-lowest p-6">
-                <h3 className="text-lg font-bold text-on-surface">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{step.description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+      <EditorialGridSection
+        tone="elevated"
+        title={t('marketing.landing.howItWorks.title')}
+        subtitle={t('marketing.landing.howItWorks.subtitle')}
+        columns="2"
+      >
+        {howItWorksSteps.map((step) => (
+          <article key={step.title} className="rounded-3xl p-6">
+            <h3 className="text-card-title text-on-surface">{step.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{step.description}</p>
+          </article>
+        ))}
+      </EditorialGridSection>
 
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-4xl font-bold text-on-surface">{t('marketing.landing.problem.title')}</h2>
-          <p className="mt-4 max-w-3xl text-lg text-on-surface-variant">{t('marketing.landing.problem.description')}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
+      <StatementBand
+        title={t('marketing.landing.problem.title')}
+        description={t('marketing.landing.problem.description')}
+        actions={
+          <div className="flex flex-wrap justify-center gap-3">
             {problemTags.map((tag) => (
-              <span key={tag} className="rounded-full bg-surface-container-low px-4 py-2 text-sm text-on-surface-variant">
+              <span key={tag} className="rounded-full border border-stroke-subtle bg-surface-statement px-4 py-2 text-sm text-on-surface-variant">
                 {tag}
               </span>
             ))}
           </div>
-        </div>
-      </section>
+        }
+      />
 
-      <section className="bg-surface-container-low px-6 py-20">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-4xl font-bold text-on-surface">{t('marketing.landing.features.title')}</h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature) => (
-              <article key={feature.title} className="rounded-3xl bg-surface-container-lowest p-6">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-lg font-semibold text-on-surface">{feature.title}</h3>
-                  {feature.incoming && (
-                    <span className="rounded-full bg-secondary-fixed px-3 py-1 text-xs font-semibold uppercase tracking-wide text-on-secondary-fixed">
-                      {t('marketing.badgeComingSoon')}
-                    </span>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-          <p className="mt-6 text-sm text-on-surface-variant">{t('marketing.landing.features.note')}</p>
-        </div>
-      </section>
-
-      <section className="px-6 py-20">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2">
-          <article className="rounded-[40px] bg-surface-container-low p-8">
-            <h2 className="text-3xl font-bold text-on-surface">{t('marketing.landing.reuse.title')}</h2>
-            <p className="mt-4 text-on-surface-variant">{t('marketing.landing.reuse.description')}</p>
-            <p className="mt-4 text-sm text-on-surface-variant">{t('marketing.landing.reuse.privacyNote')}</p>
+      <EditorialGridSection tone="base" title={t('marketing.landing.features.title')} columns="3">
+        {features.map((feature) => (
+          <article key={feature.title} className="rounded-3xl p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-card-title text-on-surface">{feature.title}</h3>
+              {feature.incoming && (
+                <span className="rounded-full bg-secondary-fixed px-3 py-1 text-xs font-semibold uppercase tracking-wide text-on-secondary-fixed">
+                  {t('marketing.badgeComingSoon')}
+                </span>
+              )}
+            </div>
           </article>
-          <article className="rounded-[40px] bg-surface-container-low p-8">
-            <h2 className="text-3xl font-bold text-on-surface">{t('marketing.landing.pricing.title')}</h2>
-            <p className="mt-4 text-on-surface-variant">{t('marketing.landing.pricing.description')}</p>
-            <ul className="mt-4 space-y-2">
-              {pricingBullets.map((bullet) => (
-                <li key={bullet} className="text-sm text-on-surface-variant">
-                  • {bullet}
-                </li>
-              ))}
-            </ul>
-          </article>
-        </div>
-      </section>
+        ))}
+      </EditorialGridSection>
 
-      <section className="bg-surface-container-low px-6 py-20">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-4xl font-bold text-on-surface">{t('marketing.landing.useCases.title')}</h2>
-          <ul className="mt-8 grid gap-4 md:grid-cols-2">
-            {useCases.map((item) => (
-              <li key={item} className="rounded-3xl bg-surface-container-lowest p-5 text-on-surface-variant">
-                {item}
+      <EditorialGridSection tone="elevated" title={t('marketing.landing.reuse.title')} subtitle={t('marketing.landing.reuse.description')} columns="2">
+        <article className="rounded-[32px] p-8">
+          <h3 className="text-card-title text-on-surface">{t('marketing.landing.reuse.title')}</h3>
+          <p className="mt-3 text-on-surface-variant">{t('marketing.landing.reuse.description')}</p>
+          <p className="mt-4 text-legal-note">{t('marketing.landing.reuse.privacyNote')}</p>
+        </article>
+        <article className="rounded-[32px] p-8">
+          <h3 className="text-card-title text-on-surface">{t('marketing.landing.pricing.title')}</h3>
+          <p className="mt-3 text-on-surface-variant">{t('marketing.landing.pricing.description')}</p>
+          <ul className="mt-4 space-y-2">
+            {pricingBullets.map((bullet) => (
+              <li key={bullet} className="text-sm text-on-surface-variant">
+                • {bullet}
               </li>
             ))}
           </ul>
-        </div>
-      </section>
+        </article>
+      </EditorialGridSection>
 
-      <section className="px-6 py-20">
+      <EditorialGridSection tone="base" title={t('marketing.landing.useCases.title')} columns="2">
+        {useCases.map((item) => (
+          <article key={item} className="rounded-3xl p-5 text-on-surface-variant">
+            {item}
+          </article>
+        ))}
+      </EditorialGridSection>
+
+      <section className="px-6 py-16 md:py-20">
         <div className="mx-auto max-w-5xl">
-          <h2 className="text-4xl font-bold text-on-surface">{t('marketing.landing.faq.title')}</h2>
+          <h2 className="text-section-title text-on-surface">{t('marketing.landing.faq.title')}</h2>
           <div className="mt-8 space-y-4">
             {faqItems.map((item) => (
-              <details key={item.q} className="rounded-3xl bg-surface-container-low p-6">
+              <details key={item.q} className="rounded-3xl border border-stroke-subtle bg-surface-statement p-6 shadow-soft">
                 <summary className="cursor-pointer list-none text-lg font-semibold text-on-surface">{item.q}</summary>
                 <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">{item.a}</p>
               </details>
@@ -231,17 +198,15 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section className="px-6 pb-24">
-        <div className="mx-auto max-w-5xl rounded-[40px] bg-primary px-8 py-14 text-center text-on-primary">
-          <h2 className="text-4xl font-bold">{t('marketing.landing.finalCta.title')}</h2>
-          <Link
-            href="/login"
-            className="mt-8 inline-flex items-center justify-center rounded-full bg-lifted-cream px-8 py-4 text-base font-semibold text-ink-black transition-colors hover:bg-white"
-          >
+      <StatementBand
+        inverse
+        title={t('marketing.landing.finalCta.title')}
+        actions={
+          <Link href="/login" className="inline-flex items-center justify-center rounded-full bg-lifted-cream px-8 py-4 text-base font-semibold text-ink-black transition-colors hover:bg-white">
             {t('marketing.cta.createWatchlist')}
           </Link>
-        </div>
-      </section>
+        }
+      />
     </div>
   )
 }
