@@ -29,10 +29,10 @@ Sono i cookie senza i quali Utraya **non funziona**. Non richiedono consenso ai 
 
 | Nome cookie | Fornitore | Finalità | Durata |
 |---|---|---|---|
-| `sb-access-token` | Supabase (per conto di Utraya S.r.l.) | Mantenere la sessione di login dell'utente | Sessione (fino a logout o scadenza JWT) |
-| `sb-refresh-token` | Supabase (per conto di Utraya S.r.l.) | Rinnovo automatico del token di accesso senza nuovo login | 7 giorni |
-| `cf_consent` | Utraya S.r.l. | Memorizzare le tue scelte sul cookie banner (così non te lo mostriamo a ogni visita) | 6 mesi |
-| `NEXT_LOCALE` | Utraya S.r.l. / next-intl | Ricordare la lingua scelta (italiano o inglese) | 1 anno |
+| `sb-access-token` | Supabase (per conto del responsabile del trattamento) | Mantenere la sessione di login dell'utente | Sessione (fino a logout o scadenza JWT) |
+| `sb-refresh-token` | Supabase (per conto del responsabile del trattamento) | Rinnovo automatico del token di accesso senza nuovo login | 7 giorni |
+| `cf_consent` | Responsabile del trattamento | Memorizzare le tue scelte sul cookie banner (così non te lo mostriamo a ogni visita) | 6 mesi |
+| `NEXT_LOCALE` | Responsabile del trattamento / next-intl | Ricordare la lingua scelta (italiano o inglese) | 1 anno |
 
 **Nessuno di questi cookie** è usato per profilarti o tracciare il tuo comportamento al di fuori del sito.
 
@@ -96,8 +96,8 @@ Versione corrente: vedi intestazione del documento.
 
 Per esercitare i tuoi diritti GDPR (accesso, rettifica, cancellazione, portabilità) o per qualsiasi domanda sulla gestione dei cookie:
 
-- Email: info@utraya.com
-- Titolare del trattamento: Utraya S.r.l. — riferimenti completi in <https://utraya.com/legal/privacy>.
+- Email: privacy@utraya.com
+- Responsabile del trattamento: Dario Bonini
 
 Per reclami all'autorità di controllo:
 
@@ -133,10 +133,10 @@ In line with the Italian Data Protection Authority's guidelines (10 June 2021), 
 
 | Cookie | Provider | Purpose | Duration |
 |---|---|---|---|
-| `sb-access-token` | Supabase (on behalf of Utraya S.r.l.) | Maintain user login session | Session |
-| `sb-refresh-token` | Supabase (on behalf of Utraya S.r.l.) | Auto-renew access token | 7 days |
-| `cf_consent` | Utraya S.r.l. | Remember your cookie banner choices | 6 months |
-| `NEXT_LOCALE` | Utraya S.r.l. / next-intl | Remember your language preference | 1 year |
+| `sb-access-token` | Supabase (on behalf of the data processing responsible person) | Maintain user login session | Session |
+| `sb-refresh-token` | Supabase (on behalf of the data processing responsible person) | Auto-renew access token | 7 days |
+| `cf_consent` | Data processing responsible person | Remember your cookie banner choices | 6 months |
+| `NEXT_LOCALE` | Data processing responsible person / next-intl | Remember your language preference | 1 year |
 
 ## 4. Analytics cookies
 
@@ -162,4 +162,4 @@ You can change your choices anytime via the "Cookie preferences" link in the foo
 
 | Versione | Data | Modifiche principali |
 |---|---|---|
-| `2026-05-16-1` | 2026-05-16 | Prima versione pubblicata. Titolare: Utraya S.r.l. Stato cookie: solo tecnici. No analytics, no profilazione. |
+| `2026-05-16-1` | 2026-05-16 | Prima versione pubblicata. Titolare: Dario Bonini Stato cookie: solo tecnici. No analytics, no profilazione. |
