@@ -8,6 +8,7 @@ docker-compose.yml
 .venv/
 .vscode/
 .vercel/
+_backups/
 
 
 # default
