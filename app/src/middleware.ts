@@ -119,6 +119,7 @@ export async function middleware(request: NextRequest) {
     pathname === '/login' ||
     pathname === '/admin/login' ||
     pathname.startsWith('/api/auth/') ||
+    pathname.startsWith('/api/cron/') ||
     pathname.startsWith('/api/admin/auth/') ||
     pathname.startsWith('/api/account/cancel-deletion') ||
     pathname.startsWith('/_next/') ||

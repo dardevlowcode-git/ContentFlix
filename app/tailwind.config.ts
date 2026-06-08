@@ -57,6 +57,9 @@ const config: Config = {
         'on-tertiary-fixed-variant': '#8F2E00',
 
         'surface': withOpacity('--color-surface'),
+        'surface-base': withOpacity('--color-surface'),
+        'surface-elevated': withOpacity('--color-surface-container-low'),
+        'surface-statement': withOpacity('--color-surface-container-lowest'),
         'surface-dim': withOpacity('--color-surface-dim'),
         'surface-bright': withOpacity('--color-surface-bright'),
         'surface-container-lowest': withOpacity('--color-surface-container-lowest'),
@@ -77,6 +80,8 @@ const config: Config = {
 
         'outline': withOpacity('--color-outline'),
         'outline-variant': withOpacity('--color-outline-variant'),
+        'stroke-subtle': withOpacity('--color-outline-variant'),
+        'stroke-strong': withOpacity('--color-outline'),
 
         // Error
         'error': '#ba1a1a',
@@ -104,7 +109,11 @@ const config: Config = {
 
       boxShadow: {
         'ambient': '0 8px 24px rgba(20, 20, 19, 0.06)',
+        'ambient-lg': '0 14px 34px rgba(20, 20, 19, 0.12)',
         'ambient-md': '0 4px 16px rgba(20, 20, 19, 0.08)',
+        'soft': '0 6px 18px rgba(20, 20, 19, 0.08)',
+        'medium': '0 14px 34px rgba(20, 20, 19, 0.12)',
+        'hero': '0 24px 60px rgba(20, 20, 19, 0.16)',
         'primary-glow': '0 6px 20px rgba(20, 20, 19, 0.18)',
         'tertiary-glow': '0 6px 20px rgba(243, 115, 56, 0.22)',
       },

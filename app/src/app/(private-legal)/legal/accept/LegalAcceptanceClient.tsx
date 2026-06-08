@@ -95,7 +95,7 @@ export default function LegalAcceptanceClient({ status }: { status: LegalAccepta
             type="button"
             onClick={submitAcceptance}
             disabled={!canSubmit}
-            className="rounded-full bg-[#141413] px-6 py-3 text-sm font-semibold text-[#F3F0EE] disabled:opacity-50"
+            className="shell-cta-default px-6 py-3 disabled:opacity-50"
           >
             {loading ? 'Conferma in corso...' : 'Continua su Utraya'}
           </button>

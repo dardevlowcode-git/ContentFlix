@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/daily-sync",
-      "schedule": "0 3 * * *"
+      "schedule": "30 17 * * *"
     },
     {
       "path": "/api/cron/daily-deletion-executor",

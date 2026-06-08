@@ -90,10 +90,10 @@ export default function AdminSideNav() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed left-0 top-16 bottom-0 w-64 bg-surface-container-low flex flex-col z-40">
+    <aside className="fixed bottom-0 left-0 top-16 z-40 flex w-64 flex-col border-r border-stroke-subtle bg-surface-elevated">
       <div className="px-4 pt-6 pb-4">
         <div className="flex items-center gap-2 px-3">
-          <div className="w-7 h-7 gradient-ai rounded-lg flex items-center justify-center">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg gradient-ai shadow-soft">
             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
@@ -119,11 +119,11 @@ export default function AdminSideNav() {
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200',
                 isActive
-                  ? 'bg-tertiary text-on-tertiary shadow-tertiary-glow'
+                  ? 'bg-secondary-fixed text-on-secondary-fixed shadow-soft'
                   : 'text-on-surface-variant hover:bg-surface-container hover:translate-x-1'
               )}
             >
-              <span className={cn(isActive ? 'text-on-tertiary' : 'text-on-surface-variant')}>
+              <span className={cn(isActive ? 'text-on-secondary-fixed' : 'text-on-surface-variant')}>
                 {item.icon}
               </span>
               {t(item.labelKey)}

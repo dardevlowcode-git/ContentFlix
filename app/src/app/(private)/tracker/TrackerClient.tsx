@@ -12,9 +12,11 @@ import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import SeenStatusButton from './SeenStatusButton'
 import type { VideoWithContext } from '@/lib/types/domain'
+import { formatVideoDuration, getVideoDurationBucket } from '@/lib/utils/video-duration'
+import { matchesTrackerFilters, type DurationFilterState, type SeenFilterState, type SeenStatus } from './tracker-filters'
 
 type TrackerViewMode = 'ribbon' | 'list' | 'latest'
-type SeenStatus = 'seen' | 'unseen' | 'hidden'
+type DurationFilterKey = keyof DurationFilterState
 
 interface TrackerClientProps {
   items: VideoWithContext[]
@@ -43,9 +45,16 @@ interface TrackerClientProps {
       watchlist: string
     }
     filters: {
+      menu: string
+      state: string
       seen: string
       unseen: string
       hidden: string
+      duration: string
+      durationUnder2m: string
+      durationUnder5m: string
+      durationBetween2m30m: string
+      durationOver30m: string
     }
     views: {
       ribbon: string
@@ -65,6 +74,12 @@ interface TrackerClientProps {
         shortSummary: string
       }
       noData: string
+    }
+    duration: {
+      unknown: string
+      under2m: string
+      between2m30m: string
+      over30m: string
     }
     statusInfo: {
       seenWithDate: string
@@ -101,11 +116,18 @@ export default function TrackerClient({
 }: TrackerClientProps) {
   const [videos, setVideos] = useState(items)
   const [view, setView] = useState<TrackerViewMode>(initialView)
-  const [filters, setFilters] = useState({
+  const [seenFilters, setSeenFilters] = useState<SeenFilterState>({
     seen: false,
     unseen: true,
     hidden: false,
   })
+  const [durationFilters, setDurationFilters] = useState<DurationFilterState>({
+    under2m: true,
+    under5m: true,
+    between2m30m: true,
+    over30m: true,
+  })
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -119,8 +141,13 @@ export default function TrackerClient({
   }, [videos])
 
   const filteredItems = useMemo(() => {
-    return videos.filter((item) => filters[item.userState.seenStatus])
-  }, [videos, filters])
+    return videos.filter((item) => matchesTrackerFilters({
+      seenStatus: item.userState.seenStatus,
+      durationSeconds: item.video.duration_seconds,
+      seenFilters,
+      durationFilters,
+    }))
+  }, [durationFilters, seenFilters, videos])
 
   const channelScopeLabel = selectedChannelId
     ? `${labels.scope.selectedChannelPrefix}: ${labels.scope.selectedChannelFallback}`
@@ -128,8 +155,20 @@ export default function TrackerClient({
 
   const latestRows = useMemo(() => {
     if (view !== 'latest') return []
-    return buildLatestRows(videos, channels, selectedChannelId, locale)
-  }, [channels, locale, selectedChannelId, videos, view])
+    return buildLatestRows(filteredItems, channels, selectedChannelId, locale)
+  }, [channels, filteredItems, locale, selectedChannelId, view])
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0
+    if (seenFilters.unseen) count += 1
+    if (seenFilters.seen) count += 1
+    if (seenFilters.hidden) count += 1
+    if (durationFilters.under2m) count += 1
+    if (durationFilters.under5m) count += 1
+    if (durationFilters.between2m30m) count += 1
+    if (durationFilters.over30m) count += 1
+    return count
+  }, [durationFilters, seenFilters])
 
   function updateView(nextView: TrackerViewMode) {
     setView(nextView)
@@ -147,8 +186,12 @@ export default function TrackerClient({
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
   }
 
-  function toggleFilter(filterKey: SeenStatus) {
-    setFilters((current) => ({ ...current, [filterKey]: !current[filterKey] }))
+  function toggleSeenFilter(filterKey: SeenStatus) {
+    setSeenFilters((current) => ({ ...current, [filterKey]: !current[filterKey] }))
+  }
+
+  function toggleDurationFilter(filterKey: DurationFilterKey) {
+    setDurationFilters((current) => ({ ...current, [filterKey]: !current[filterKey] }))
   }
 
   function updateVideoStatus(videoId: string, nextState: { seenStatus: SeenStatus; seenAt: string | null; hiddenAt: string | null }) {
@@ -188,23 +231,16 @@ export default function TrackerClient({
         </section>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <FilterPill
-              label={labels.filters.unseen}
-              checked={filters.unseen}
-              onToggle={() => toggleFilter('unseen')}
-            />
-            <FilterPill
-              label={labels.filters.seen}
-              checked={filters.seen}
-              onToggle={() => toggleFilter('seen')}
-            />
-            <FilterPill
-              label={labels.filters.hidden}
-              checked={filters.hidden}
-              onToggle={() => toggleFilter('hidden')}
-            />
-          </div>
+          <FilterMenu
+            isOpen={isFilterMenuOpen}
+            activeFiltersCount={activeFiltersCount}
+            labels={labels.filters}
+            seenFilters={seenFilters}
+            durationFilters={durationFilters}
+            onToggleMenu={() => setIsFilterMenuOpen((current) => !current)}
+            onToggleSeenFilter={toggleSeenFilter}
+            onToggleDurationFilter={toggleDurationFilter}
+          />
           <ViewSelector view={view} labels={labels.views} onChange={updateView} />
         </div>
       </header>
@@ -305,19 +341,109 @@ function ViewButton({
   )
 }
 
-function FilterPill({ label, checked, onToggle }: { label: string; checked: boolean; onToggle: () => void }) {
+function FilterMenu({
+  isOpen,
+  activeFiltersCount,
+  labels,
+  seenFilters,
+  durationFilters,
+  onToggleMenu,
+  onToggleSeenFilter,
+  onToggleDurationFilter,
+}: {
+  isOpen: boolean
+  activeFiltersCount: number
+  labels: TrackerClientProps['labels']['filters']
+  seenFilters: SeenFilterState
+  durationFilters: DurationFilterState
+  onToggleMenu: () => void
+  onToggleSeenFilter: (filterKey: SeenStatus) => void
+  onToggleDurationFilter: (filterKey: DurationFilterKey) => void
+}) {
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onToggleMenu}
+        aria-expanded={isOpen}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-high text-on-surface text-xs font-bold uppercase tracking-[0.04em] hover:bg-surface-container-highest transition-colors"
+      >
+        <span>{labels.menu}</span>
+        <span className="min-w-6 h-6 px-1 rounded-full bg-primary-fixed text-on-primary-fixed text-[11px] font-extrabold inline-flex items-center justify-center">
+          {activeFiltersCount}
+        </span>
+      </button>
+
+      {isOpen ? (
+        <div className="absolute z-20 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl bg-surface-container-lowest border border-surface-container-high p-4 shadow-ambient">
+          <p className="text-[11px] font-bold uppercase tracking-[0.05em] text-on-surface-variant mb-2">
+            {labels.state}
+          </p>
+          <div className="space-y-2 mb-4">
+            <FilterCheckbox
+              label={labels.unseen}
+              checked={seenFilters.unseen}
+              onToggle={() => onToggleSeenFilter('unseen')}
+            />
+            <FilterCheckbox
+              label={labels.seen}
+              checked={seenFilters.seen}
+              onToggle={() => onToggleSeenFilter('seen')}
+            />
+            <FilterCheckbox
+              label={labels.hidden}
+              checked={seenFilters.hidden}
+              onToggle={() => onToggleSeenFilter('hidden')}
+            />
+          </div>
+
+          <p className="text-[11px] font-bold uppercase tracking-[0.05em] text-on-surface-variant mb-2">
+            {labels.duration}
+          </p>
+          <div className="space-y-2">
+            <FilterCheckbox
+              label={labels.durationUnder2m}
+              checked={durationFilters.under2m}
+              onToggle={() => onToggleDurationFilter('under2m')}
+            />
+            <FilterCheckbox
+              label={labels.durationUnder5m}
+              checked={durationFilters.under5m}
+              onToggle={() => onToggleDurationFilter('under5m')}
+            />
+            <FilterCheckbox
+              label={labels.durationBetween2m30m}
+              checked={durationFilters.between2m30m}
+              onToggle={() => onToggleDurationFilter('between2m30m')}
+            />
+            <FilterCheckbox
+              label={labels.durationOver30m}
+              checked={durationFilters.over30m}
+              onToggle={() => onToggleDurationFilter('over30m')}
+            />
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function FilterCheckbox({ label, checked, onToggle }: { label: string; checked: boolean; onToggle: () => void }) {
   return (
     <button
       type="button"
-      aria-pressed={checked}
       onClick={onToggle}
-      className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-[0.04em] transition-colors ${
-        checked
-          ? 'bg-primary-fixed text-on-primary-fixed'
-          : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
-      }`}
+      aria-pressed={checked}
+      className="w-full inline-flex items-center gap-3 text-left rounded-xl px-2 py-2 hover:bg-surface-container-low transition-colors"
     >
-      {label}
+      <span className={`w-5 h-5 rounded border inline-flex items-center justify-center ${
+        checked ? 'border-emerald-600 bg-emerald-50 text-emerald-600' : 'border-surface-container-high text-transparent'
+      }`}>
+        <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.414l-7.07 7.07a1 1 0 01-1.414 0l-3.535-3.535a1 1 0 111.414-1.414l2.828 2.828 6.363-6.363a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+      </span>
+      <span className="text-sm font-semibold text-on-surface">{label}</span>
     </button>
   )
 }
@@ -359,7 +485,8 @@ function TrackerCard({
   const isSeen = item.userState.seenStatus === 'seen'
   const isHidden = item.userState.seenStatus === 'hidden'
   const publishedLabel = formatPublishedDate(item.video.published_at, locale)
-  const durationLabel = formatDuration(item.video.duration_seconds)
+  const durationLabel = formatVideoDuration(item.video.duration_seconds)
+  const durationBucketLabel = getDurationBucketLabel(item.video.duration_seconds, labels)
   const hasCompletedAnalysis = item.analysis?.analysis_status === 'completed'
   const statusTimestamp = getStatusTimestampLabel(item, locale, labels)
 
@@ -425,6 +552,9 @@ function TrackerCard({
               </span>
             ) : null}
             <span className="text-xs text-on-surface-variant">{publishedLabel}</span>
+            {durationBucketLabel ? (
+              <span className="text-xs text-on-surface-variant">{durationBucketLabel}</span>
+            ) : null}
           </div>
 
           <h3 className="font-headline text-xl font-bold text-on-surface leading-tight line-clamp-2">
@@ -432,6 +562,7 @@ function TrackerCard({
           </h3>
           <p className="text-sm text-secondary font-semibold mt-1">
             {item.channel.title}
+            {durationLabel ? ` · ${durationLabel}` : ''}
           </p>
           {statusTimestamp ? (
             <p className="text-xs text-on-surface-variant mt-1">{statusTimestamp}</p>
@@ -500,6 +631,7 @@ function DenseListView({
                   <div className="min-w-0">
                     <p className="font-semibold text-on-surface line-clamp-2">{item.video.title}</p>
                     <p className="text-xs text-on-surface-variant mt-1">{formatPublishedDate(item.video.published_at, locale)}</p>
+                    <p className="text-xs text-on-surface-variant mt-1">{getDurationMetaLabel(item.video.duration_seconds, labels)}</p>
                     {(() => {
                       const statusInfo = getStatusTimestampLabel(item, locale, labels)
                       if (!statusInfo) return null
@@ -579,6 +711,7 @@ function LatestView({
                     <div className="min-w-0">
                       <p className="font-semibold text-on-surface line-clamp-2">{row.item.video.title}</p>
                       <p className="text-xs text-on-surface-variant mt-1">{formatPublishedDate(row.item.video.published_at, locale)}</p>
+                      <p className="text-xs text-on-surface-variant mt-1">{getDurationMetaLabel(row.item.video.duration_seconds, labels)}</p>
                     </div>
                   </Link>
                 ) : (
@@ -632,7 +765,7 @@ function buildLatestRows(
   const sortedChannels = [...scopedChannels].sort((a, b) => a.title.localeCompare(b.title, locale))
 
   return sortedChannels.map((channel) => {
-    const latestVideo = videos.find((item) => item.channel.id === channel.id && item.userState.seenStatus === 'unseen')
+    const latestVideo = videos.find((item) => item.channel.id === channel.id)
     return {
       channelId: channel.id,
       channelTitle: channel.title,
@@ -655,6 +788,28 @@ function getStatusTimestampLabel(
   return null
 }
 
+function getDurationBucketLabel(
+  durationSeconds: number | null,
+  labels: TrackerClientProps['labels']
+): string {
+  const bucket = getVideoDurationBucket(durationSeconds)
+  if (bucket === 'under_2m') return labels.duration.under2m
+  if (bucket === 'between_2m_30m') return labels.duration.between2m30m
+  if (bucket === 'over_30m') return labels.duration.over30m
+  return ''
+}
+
+function getDurationMetaLabel(
+  durationSeconds: number | null,
+  labels: TrackerClientProps['labels']
+): string {
+  const durationLabel = formatVideoDuration(durationSeconds)
+  const bucketLabel = getDurationBucketLabel(durationSeconds, labels)
+  if (!durationLabel) return labels.duration.unknown
+  if (!bucketLabel) return durationLabel
+  return `${durationLabel} · ${bucketLabel}`
+}
+
 function formatDateWithRelative(date: string, locale: string): string {
   const now = new Date()
   const then = new Date(date)
@@ -673,13 +828,6 @@ function formatDateWithRelative(date: string, locale: string): string {
   }
 
   return `${relativeLabel} (${then.toLocaleString(locale)})`
-}
-
-function formatDuration(seconds: number | null): string {
-  if (!seconds || seconds <= 0) return ''
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 function formatPublishedDate(date: string, locale: string): string {

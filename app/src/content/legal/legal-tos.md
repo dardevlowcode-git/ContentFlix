@@ -12,13 +12,13 @@
 
 - Quando questo documento cambia, si genera un **nuovo hash SHA-256** sull'intero file e si bumpa il campo versione (formato `YYYY-MM-DD-N`).
 - Le sezioni marcate **[VESSATORIA]** richiedono accettazione specifica separata ex art. 1341 c.c. comma 2 (vedi §22 "Approvazione specifica delle clausole vessatorie").
-- Placeholder ancora da completare prima del go-live pubblico: `[SEDE LEGALE]`, `[P.IVA / C.F.]`, `[CITTÀ FORO]` al §17 e §21. Sostituire con i valori reali prima della prima pubblicazione effettiva.
+- Documento privo di riferimenti societari e dati identificativi aggiuntivi: il responsabile indicato è Dario Bonini con contatto privacy@utraya.com.
 
 ---
 
 ## 1. Preambolo e natura del servizio
 
-Utraya è un servizio web **gratuito**, attualmente in fase **beta sperimentale ad accesso limitato (allowlist)**, offerto in **buona fede** e **senza finalità di lucro** da Utraya S.r.l., titolare indicato all'art. 21.
+Utraya è un servizio web **gratuito**, attualmente in fase **beta sperimentale ad accesso limitato (allowlist)**, offerto in **buona fede** e **senza finalità di lucro** da Dario Bonini, titolare indicato all'art. 21.
 
 Lo scopo di Utraya è aiutare l'utente a tenere traccia di canali YouTube e leggere riassunti testuali generati con intelligenza artificiale dei video pubblicati. Il servizio **non sostituisce in alcun modo la consulenza professionale** di alcun tipo (legale, medica, finanziaria, tecnica) e i riassunti AI **possono contenere errori, omissioni o interpretazioni non corrette** del contenuto originale.
 
@@ -79,7 +79,7 @@ La violazione di queste regole comporta la **sospensione o chiusura immediata de
 
 - I **contenuti dei video YouTube** appartengono ai rispettivi titolari (creatori dei canali). Utraya non rivendica alcun diritto su di essi e non li ridistribuisce.
 - I **riassunti generati dall'AI** sono prodotti derivati a uso personale dell'utente che ne ha richiesto la generazione. L'utente può usarli per i propri scopi personali e non commerciali; non può rivenderli, ridistribuirli pubblicamente o usarli per scopi commerciali senza esplicito consenso scritto.
-- Il **software, design, marchio "Utraya" e database della piattaforma** sono di proprietà di Utraya S.r.l.
+- Il **software, design, marchio "Utraya" e database della piattaforma** sono di proprietà di Dario Bonini
 
 ## 8. Servizi e fornitori di terze parti
 
@@ -111,7 +111,7 @@ Il titolare si riserva il diritto, in futuro, di introdurre piani a pagamento pe
 
 L'utente può, in qualsiasi momento:
 
-- **cancellare il proprio account** scrivendo a info@utraya.com o usando la funzione in-app quando disponibile;
+- **cancellare il proprio account** scrivendo a privacy@utraya.com o usando la funzione in-app quando disponibile;
 - **revocare l'accesso di Utraya** dal proprio account Google: <https://myaccount.google.com/permissions>;
 - **richiedere una copia dei propri dati** in formato leggibile (diritto alla portabilità, GDPR art. 20);
 - **richiedere la rettifica o cancellazione di specifici dati** (GDPR artt. 16-17).
@@ -179,7 +179,7 @@ In caso di **violazione di dati personali** che comporti rischio per i diritti d
 - notifica gli **utenti coinvolti** senza ingiustificato ritardo quando il rischio è elevato (GDPR art. 34);
 - documenta l'evento nei propri registri interni.
 
-Per segnalare una vulnerabilità di sicurezza in modo responsabile, contattare info@utraya.com con oggetto `[SECURITY]`. La policy di responsible disclosure è disponibile a <https://utraya.com/.well-known/security.txt>.
+Per segnalare una vulnerabilità di sicurezza in modo responsabile, contattare privacy@utraya.com con oggetto `[SECURITY]`. La policy di responsible disclosure è disponibile a <https://utraya.com/.well-known/security.txt>.
 
 ## 15. [VESSATORIA] Limitazione di responsabilità
 
@@ -213,7 +213,7 @@ Questi Termini sono regolati dalla **legge italiana**.
 Per le controversie:
 
 - se l'utente è **consumatore residente nell'Unione Europea**, è competente il **foro del luogo di residenza o domicilio dell'utente**, ai sensi del Reg. (UE) 1215/2012 (Bruxelles I-bis) artt. 17-19 — norma inderogabile a tutela del consumatore;
-- in tutti gli altri casi (utenti professionali, B2B), è competente **in via esclusiva il Foro di `[CITTÀ FORO]`** (sede legale di Utraya S.r.l.).
+- in tutti gli altri casi (utenti professionali, B2B), è competente **in via esclusiva il Foro di `[CITTÀ FORO]`** (foro contrattuale indicato in questo documento).
 
 L'utente consumatore può, in alternativa al foro giudiziario, attivare procedure di risoluzione alternativa delle controversie (ADR/ODR) tramite la piattaforma europea: <https://ec.europa.eu/consumers/odr>.
 
@@ -225,7 +225,7 @@ Il titolare **non risponde** di ritardi o inadempimenti causati da eventi di for
 
 Tutte le comunicazioni di servizio (avvisi di sicurezza, modifiche TOS, conferme operative) sono inviate all'**indirizzo email Google** con cui l'utente si è registrato. L'utente è tenuto a mantenere quell'indirizzo attivo e a controllarlo periodicamente.
 
-Comunicazioni di natura legale possono essere inviate a info@utraya.com indicando in oggetto `[LEGAL]`.
+Comunicazioni di natura legale possono essere inviate a privacy@utraya.com indicando in oggetto `[LEGAL]`.
 
 ## 20. Cessione del contratto
 
@@ -233,13 +233,10 @@ L'utente non può cedere i propri diritti e obblighi derivanti da questi Termini
 
 Il titolare può cedere il contratto in caso di operazioni straordinarie (cessione del ramo d'azienda, fusione, incorporazione) **previa informativa** all'utente, che potrà comunque richiedere la cancellazione dell'account (§10) se non gradisce il subentro.
 
-## 21. Titolare del servizio
+## 21. Responsabile del servizio
 
-- **Titolare del servizio Utraya**: Utraya S.r.l.
-- **Sede legale**: `[SEDE LEGALE]`
-- **Email di contatto**: info@utraya.com
-- **P. IVA / C.F.**: `[P.IVA / C.F.]`
-- **Titolare del trattamento dei dati personali**: Utraya S.r.l., come sopra. Riferimenti completi in `https://utraya.com/legal/privacy`.
+- **Responsabile del servizio e del trattamento dati**: Dario Bonini
+- **Email di contatto per ogni richiesta di informazioni**: privacy@utraya.com
 
 ## 22. Approvazione specifica delle clausole vessatorie (art. 1341 c.c. comma 2)
 
@@ -277,7 +274,7 @@ In assenza di accettazione specifica di queste clausole, **l'accesso al servizio
 
 ## 1. Preamble and nature of the service
 
-Utraya is a **free** web service, currently in **experimental beta with limited access (allowlist)**, offered in **good faith** and **with no profit motive** by Utraya S.r.l., the controller indicated in section 21.
+Utraya is a **free** web service, currently in **experimental beta with limited access (allowlist)**, offered in **good faith** and **with no profit motive** by Dario Bonini, the controller indicated in section 21.
 
 The purpose of Utraya is to help users track YouTube channels and read AI-generated text summaries of published videos. The service **does not replace professional advice** of any kind (legal, medical, financial, technical) and AI summaries **may contain errors, omissions, or misinterpretations** of original content.
 
@@ -318,4 +315,4 @@ You can **revoke Utraya's access** to your Google account at any time at <https:
 
 | Versione | Data | Modifiche principali |
 |---|---|---|
-| `2026-05-16-1` | 2026-05-16 | Prima versione pubblicata. Titolare: Utraya S.r.l. Vessatorie marcate (§11, §13, §15, §16, §17, §18). §12-bis su dati Google. Tetto risarcimento simbolico 1€ per natura gratuita del servizio. |
+| `2026-05-16-1` | 2026-05-16 | Prima versione pubblicata. Titolare: Dario Bonini Vessatorie marcate (§11, §13, §15, §16, §17, §18). §12-bis su dati Google. Tetto risarcimento simbolico 1€ per natura gratuita del servizio. |

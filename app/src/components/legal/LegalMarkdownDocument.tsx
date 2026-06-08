@@ -20,11 +20,11 @@ export default function LegalMarkdownDocument(props: {
     <div className="bg-surface px-6 pb-24 pt-14">
       <article className="mx-auto max-w-5xl rounded-3xl bg-surface-container-low p-7 md:p-10">
         <header className="border-b border-outline-variant/50 pb-6">
-          <h1 className="text-4xl font-extrabold tracking-tight text-on-surface md:text-5xl">{props.title}</h1>
-          <p className="mt-3 text-sm text-on-surface-variant">
+          <h1 className="text-section-title text-on-surface md:text-5xl">{props.title}</h1>
+          <p className="mt-3 text-legal-note">
             Versione {props.version} · In vigore dal {props.effectiveDate}
           </p>
-          <p className="mt-1 text-xs text-on-surface-variant">Hash documento: {shortHash}… (SHA-256)</p>
+          <p className="mt-1 text-legal-note">Hash documento: {shortHash}… (SHA-256)</p>
         </header>
 
         <div className="mt-8 space-y-6 text-[15px] leading-7 text-on-surface">

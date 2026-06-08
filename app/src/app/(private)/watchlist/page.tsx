@@ -8,6 +8,7 @@ import type { Metadata } from 'next'
 import { getCurrentSession } from '@/lib/auth/provider'
 import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
+import { formatVideoDuration, getVideoDurationBucket } from '@/lib/utils/video-duration'
 
 export const metadata: Metadata = {
   title: 'Watchlist',
@@ -102,7 +103,16 @@ export default async function WatchlistPage() {
                     )}
                   </div>
                   <div className="p-4">
-                    <p className="text-xs text-secondary font-medium mb-1">{channel?.title}</p>
+                    <p className="text-xs text-secondary font-medium mb-1">
+                      {channel?.title}
+                      {' · '}
+                      {formatWatchlistDuration(video?.duration_seconds ?? null, {
+                        unknown: t('watchlist.duration.unknown'),
+                        under2m: t('watchlist.duration.under2m'),
+                        between2m30m: t('watchlist.duration.between2m30m'),
+                        over30m: t('watchlist.duration.over30m'),
+                      })}
+                    </p>
                     <h3 className="font-bold text-on-surface text-sm line-clamp-2">{video?.title}</h3>
                   </div>
                 </a>
@@ -120,4 +130,23 @@ export default async function WatchlistPage() {
       )}
     </div>
   )
+}
+
+function formatWatchlistDuration(
+  durationSeconds: number | null,
+  labels: {
+    unknown: string
+    under2m: string
+    between2m30m: string
+    over30m: string
+  }
+): string {
+  const duration = formatVideoDuration(durationSeconds)
+  if (!duration) return labels.unknown
+
+  const bucket = getVideoDurationBucket(durationSeconds)
+  if (bucket === 'under_2m') return `${duration} · ${labels.under2m}`
+  if (bucket === 'between_2m_30m') return `${duration} · ${labels.between2m30m}`
+  if (bucket === 'over_30m') return `${duration} · ${labels.over30m}`
+  return duration
 }

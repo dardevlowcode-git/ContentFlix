@@ -392,7 +392,13 @@
     "addFirstChannel": "Aggiungi il tuo primo canale",
     "emptyFeed": "Aggiungi canali YouTube tramite URL e Utraya analizzerà automaticamente i nuovi video.",
     "unknownChannel": "Canale sconosciuto",
-    "noVideosYet": "I video dei tuoi canali appariranno qui non appena saranno importati."
+    "noVideosYet": "I video dei tuoi canali appariranno qui non appena saranno importati.",
+    "duration": {
+      "unknown": "Durata non disponibile",
+      "under2m": "< 2 min",
+      "between2m30m": "2-30 min",
+      "over30m": "> 30 min"
+    }
   },
   "channels": {
     "title": "Canali",
@@ -517,7 +523,13 @@
     "emptyDetail": "Aggiungi video dalla dashboard o dalla pagina di analisi.",
     "removeFromList": "Rimuovi dalla lista",
     "count": "{count} video salvati per la tua revisione.",
-    "backToDashboard": "Torna alla dashboard"
+    "backToDashboard": "Torna alla dashboard",
+    "duration": {
+      "unknown": "Durata non disponibile",
+      "under2m": "< 2 min",
+      "between2m30m": "2-30 min",
+      "over30m": "> 30 min"
+    }
   },
   "tracker": {
     "title": "Tracker video",
@@ -534,9 +546,16 @@
       "watchlist": "LISTA"
     },
     "filters": {
+      "menu": "Filtri",
+      "state": "Stato",
       "seen": "Visto",
       "unseen": "Da vedere",
-      "hidden": "Nascosto"
+      "hidden": "Nascosto",
+      "duration": "Durata",
+      "durationUnder2m": "< 2 min",
+      "durationUnder5m": "< 5 min",
+      "durationBetween2m30m": "2-30 min",
+      "durationOver30m": "> 30 min"
     },
     "views": {
       "ribbon": "Ribbon",
@@ -552,7 +571,7 @@
       "hiddenWithDate": "Nascosto · {date}"
     },
     "latest": {
-      "emptyChannel": "Nessun video non visto disponibile per questo canale."
+      "emptyChannel": "Nessun video disponibile per questo canale con i filtri attivi."
     },
     "list": {
       "headers": {
@@ -564,6 +583,12 @@
         "shortSummary": "Short summary"
       },
       "noData": "-"
+    },
+    "duration": {
+      "unknown": "Durata non disponibile",
+      "under2m": "< 2 min",
+      "between2m30m": "2-30 min",
+      "over30m": "> 30 min"
     },
     "actions": {
       "hide": "Nascondi",
@@ -744,6 +769,9 @@
     "settings": "Impostazioni",
     "notifications": "Notifiche",
     "profile": "Profilo",
+    "openSideMenu": "Apri menu laterale",
+    "pinSideMenu": "Fissa menu laterale",
+    "unpinSideMenu": "Sblocca menu laterale",
     "theme": {
       "label": "Selettore tema sito",
       "normal": "Normale",

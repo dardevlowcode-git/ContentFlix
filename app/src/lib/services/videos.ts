@@ -10,6 +10,7 @@ import { AppError } from '@/lib/utils/errors'
 import type { VideoWithContext } from '@/lib/types/domain'
 import type { Database, Json } from '@/lib/types/database'
 import { getProviderApiKeyForUser, getProviderApiKeyForUserAsAdmin } from '@/lib/services/integrations'
+import { parseYouTubeDurationToSeconds } from '@/lib/utils/video-duration'
 
 type AnalysisStatus = Database['public']['Tables']['video_analysis']['Row']['analysis_status']
 
@@ -344,6 +345,13 @@ interface YouTubePlaylistItem {
   }
 }
 
+interface YouTubeVideoDetailItem {
+  id?: string
+  contentDetails?: {
+    duration?: string
+  }
+}
+
 /**
  * Seleziona la thumbnail migliore disponibile seguendo priorita` decrescente.
  */
@@ -469,6 +477,45 @@ async function listRecentPlaylistItems(youtubeApiKey: string, playlistId: string
 
   const json = await fetchJson<PlaylistItemsResponse>(url)
   return json.items ?? []
+}
+
+/**
+ * Recupera la durata dei video tramite endpoint videos.list (chunk max 50 id).
+ */
+async function listVideoDurations(
+  youtubeApiKey: string,
+  videoIds: string[]
+): Promise<Map<string, number | null>> {
+  const normalizedIds = Array.from(new Set(videoIds.filter(Boolean)))
+  const durationByVideoId = new Map<string, number | null>()
+
+  for (const videoId of normalizedIds) {
+    durationByVideoId.set(videoId, null)
+  }
+
+  for (let index = 0; index < normalizedIds.length; index += 50) {
+    const chunk = normalizedIds.slice(index, index + 50)
+    if (chunk.length === 0) continue
+
+    const url = new URL('https://www.googleapis.com/youtube/v3/videos')
+    url.searchParams.set('part', 'contentDetails')
+    url.searchParams.set('id', chunk.join(','))
+    url.searchParams.set('maxResults', String(chunk.length))
+    url.searchParams.set('key', youtubeApiKey)
+
+    type VideosListResponse = {
+      items?: YouTubeVideoDetailItem[]
+    }
+
+    const json = await fetchJson<VideosListResponse>(url)
+    for (const item of json.items ?? []) {
+      const videoId = item.id?.trim()
+      if (!videoId) continue
+      durationByVideoId.set(videoId, parseYouTubeDurationToSeconds(item.contentDetails?.duration))
+    }
+  }
+
+  return durationByVideoId
 }
 
 /**
@@ -652,6 +699,17 @@ export async function importChannelVideos(params: {
     .eq('id', channel.id)
 
   const items = await listRecentPlaylistItems(youtubeApiKey, uploadsPlaylistId, maxResults)
+  const videoIds = items
+    .map((item) => item.contentDetails?.videoId)
+    .filter((videoId): videoId is string => Boolean(videoId))
+
+  let durationsByVideoId = new Map<string, number | null>()
+  try {
+    durationsByVideoId = await listVideoDurations(youtubeApiKey, videoIds)
+  } catch {
+    // Fail-open: se il fetch delle durate fallisce manteniamo sync attiva con duration null.
+    durationsByVideoId = new Map<string, number | null>()
+  }
 
   const upsertRows = items
     .map((item) => {
@@ -672,7 +730,7 @@ export async function importChannelVideos(params: {
         description,
         thumbnail_url: thumbnail,
         published_at: publishedAt,
-        duration_seconds: null,
+        duration_seconds: durationsByVideoId.get(videoId) ?? null,
         video_url: `https://www.youtube.com/watch?v=${videoId}`,
         video_type: 'standard' as const,
         availability_status: 'available' as const,

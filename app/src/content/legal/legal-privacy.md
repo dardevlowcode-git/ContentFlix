@@ -9,17 +9,14 @@
 
 ---
 
-## 1. Chi è il Titolare del trattamento
+## 1. Chi è il responsabile del trattamento
 
-Il Titolare del trattamento dei dati personali raccolti tramite il servizio Utraya è:
+Il responsabile del trattamento dei dati personali raccolti tramite il servizio Utraya è:
 
-- **Ragione sociale**: Utraya S.r.l.
-- **Sede legale**: `[SEDE LEGALE]`
-- **P. IVA / C.F.**: `[P.IVA / C.F.]`
-- **Email di contatto**: info@utraya.com
-- **Indirizzo per richieste GDPR**: info@utraya.com (oggetto `[GDPR – natura della richiesta]`)
+- **Responsabile del trattamento**: Dario Bonini
+- **Email di contatto per qualsiasi richiesta**: privacy@utraya.com
 
-Utraya S.r.l. non ha designato un Data Protection Officer (DPO) in quanto il trattamento, per natura e scala, non rientra nei casi obbligatori previsti dall'art. 37 GDPR. Il Titolare è direttamente raggiungibile per qualsiasi richiesta all'indirizzo sopra indicato.
+Per ogni richiesta di informazioni o per l'esercizio dei diritti privacy, gli interessati possono scrivere esclusivamente all'indirizzo indicato sopra.
 
 ## 2. A chi si rivolge questa informativa
 
@@ -28,7 +25,7 @@ Questa informativa è rivolta a **tutti gli utenti finali** del servizio Utraya,
 - accedono al sito <https://utraya.com> e/o si registrano al servizio;
 - utilizzano le funzionalità di watchlist canali YouTube e riassunti AI di video.
 
-Se in futuro Utraya aprirà la propria API a **utenti business** (clienti B2B), i loro utenti finali saranno coperti da un'informativa fornita dall'utente business stesso, che in quel rapporto sarà Titolare del trattamento, mentre Utraya S.r.l. assumerà il ruolo di Responsabile esterno ex art. 28 GDPR (vedi <https://utraya.com/legal/sub-processors> §6).
+Se in futuro Utraya aprirà la propria API a **utenti business** (clienti B2B), i loro utenti finali saranno coperti da un'informativa fornita dall'utente business stesso, che in quel rapporto sarà Titolare del trattamento, mentre Dario Bonini assumerà il ruolo di Responsabile esterno ex art. 28 GDPR (vedi <https://utraya.com/legal/sub-processors> §6).
 
 ## 3. Dati personali trattati
 
@@ -38,9 +35,9 @@ Per accedere a Utraya è richiesta l'autenticazione tramite account Google. Tram
 
 | Dato | Esempio | Finalità |
 |---|---|---|
-| Indirizzo email Google | `mario@example.com` | Identificativo univoco account, comunicazioni di servizio |
+| Indirizzo email Google | `utente@example.com` | Identificativo univoco account, comunicazioni di servizio |
 | Identificativo Google `sub` | `1093847562837465` | Collegamento persistente identità senza password Utraya |
-| Nome visualizzato (opzionale) | `Mario Rossi` | Visualizzazione interfaccia (saluto, avatar) |
+| Nome visualizzato (opzionale) | `Utente` | Visualizzazione interfaccia (saluto, avatar) |
 | Immagine profilo (opzionale) | URL CDN Google | Visualizzazione avatar |
 | Locale | `it`, `en` | Lingua interfaccia |
 | Token di refresh OAuth | (opaco) | Mantenimento sessione, conservato cifrato |
@@ -74,7 +71,7 @@ Utraya **non raccoglie volontariamente** categorie particolari di dati (origine 
 
 ### 3.5 Dati di minori
 
-Utraya è destinato a persone di età non inferiore a **14 anni** (D.Lgs. 196/2003 art. 2-quinquies, in deroga al limite di 16 anni di GDPR art. 8 par. 1). Non raccogliamo consapevolmente dati di minori sotto i 14 anni. Se un genitore o tutore venisse a conoscenza che un minore di 14 anni si è registrato, può richiederne la cancellazione immediata scrivendo a info@utraya.com.
+Utraya è destinato a persone di età non inferiore a **14 anni** (D.Lgs. 196/2003 art. 2-quinquies, in deroga al limite di 16 anni di GDPR art. 8 par. 1). Non raccogliamo consapevolmente dati di minori sotto i 14 anni. Se un genitore o tutore venisse a conoscenza che un minore di 14 anni si è registrato, può richiederne la cancellazione immediata scrivendo a privacy@utraya.com.
 
 ## 4. Finalità del trattamento e basi giuridiche
 
@@ -116,7 +113,7 @@ I dati personali possono essere trattati dai seguenti Responsabili esterni (sub-
 | Vercel, Inc. | Hosting applicazione web + CDN + serverless functions | CDN globale; serverless region default `fra1` (Frankfurt) |
 | Google LLC | OAuth (login Google); eventualmente Gemini API per riassunti (vedi §7) | USA, con garanzie DPF + SCC |
 
-Tutti i sub-processor hanno sottoscritto con Utraya S.r.l. un Data Processing Agreement (DPA) conforme all'art. 28 GDPR.
+Tutti i sub-processor hanno sottoscritto con Dario Bonini un Data Processing Agreement (DPA) conforme all'art. 28 GDPR.
 
 Comunichiamo dati personali a destinatari diversi dai sub-processor **solo nei seguenti casi**:
 
@@ -136,13 +133,13 @@ L'utente fornisce la propria chiave API Google Gemini, che Utraya custodisce cif
 
 - La richiesta a Gemini viene effettuata **con la chiave dell'utente**, non con quella di Utraya.
 - Il **rapporto contrattuale** sui dati inviati a Gemini è **direttamente tra utente e Google**, regolato dai termini Gemini accettati dall'utente al momento della generazione della propria chiave.
-- Utraya S.r.l. è **responsabile solo della custodia cifrata della chiave**, non del contenuto trasmesso a Gemini in quel flusso.
+- Dario Bonini è **responsabile solo della custodia cifrata della chiave**, non del contenuto trasmesso a Gemini in quel flusso.
 
 ### 7.2 Modalità B — chiave applicativa di Utraya (allowlist beta gratuita, fallback)
 
-Per la beta gratuita, Utraya S.r.l. usa una propria chiave Gemini per servire un numero limitato di utenti senza richiedere BYOK. In questa modalità:
+Per la beta gratuita, Dario Bonini usa una propria chiave Gemini per servire un numero limitato di utenti senza richiedere BYOK. In questa modalità:
 
-- Il rapporto è **tra Utraya S.r.l. e Google** ex art. 28 GDPR (DPA Google Cloud: <https://cloud.google.com/terms/data-processing-addendum>).
+- Il rapporto è **tra Dario Bonini e Google** ex art. 28 GDPR (DPA Google Cloud: <https://cloud.google.com/terms/data-processing-addendum>).
 - I dati trasmessi a Gemini sono: **URL del video YouTube + trascrizione/sottotitoli pubblici del video**. **Nessun dato identificativo dell'utente Utraya** (email, sub, IP, watchlist) viene mai incluso nei prompt.
 - Le richieste sono configurate con `prompt_logging: false` per evitare che Google usi i prompt per addestrare i propri modelli (politica di non-training).
 
@@ -160,7 +157,7 @@ Dettaglio completo per ciascun fornitore: <https://utraya.com/legal/sub-processo
 
 ## 9. Diritti dell'interessato
 
-Ai sensi degli artt. 15-22 GDPR, ogni utente può esercitare i seguenti diritti scrivendo a **info@utraya.com** con oggetto `[GDPR – natura della richiesta]`:
+Ai sensi degli artt. 15-22 GDPR, ogni utente può esercitare i seguenti diritti scrivendo a **privacy@utraya.com** con oggetto `[GDPR – natura della richiesta]`:
 
 | Diritto | Riferimento | Cosa significa |
 |---|---|---|
@@ -196,7 +193,7 @@ Puoi anche rivolgerti all'autorità di controllo dello Stato UE in cui risiedi a
 
 Puoi richiedere la cancellazione completa del tuo account in qualsiasi momento:
 
-- via email a info@utraya.com con oggetto `[GDPR – Cancellazione account]`;
+- via email a privacy@utraya.com con oggetto `[GDPR – Cancellazione account]`;
 - usando la funzione in-app di "Cancella account" quando disponibile;
 - revocando l'accesso di Utraya dal tuo account Google: <https://myaccount.google.com/permissions> (in questo caso ti contatteremo per confermare la cancellazione lato Utraya).
 
@@ -211,7 +208,7 @@ La cancellazione è **irreversibile**.
 
 ### 10.2 Portabilità
 
-Puoi richiedere un export completo dei tuoi dati in formato JSON strutturato (account, watchlist, riassunti generati, preferenze) scrivendo a info@utraya.com con oggetto `[GDPR – Portabilità]`. Il file ti sarà fornito entro 30 giorni.
+Puoi richiedere un export completo dei tuoi dati in formato JSON strutturato (account, watchlist, riassunti generati, preferenze) scrivendo a privacy@utraya.com con oggetto `[GDPR – Portabilità]`. Il file ti sarà fornito entro 30 giorni.
 
 ## 11. Sicurezza
 
@@ -232,7 +229,7 @@ Nessun sistema informatico è invulnerabile. In caso di **violazione di dati per
 - notifichiamo gli **utenti coinvolti** senza ingiustificato ritardo quando il rischio è elevato (art. 34 GDPR);
 - documentiamo internamente l'evento, le valutazioni di impatto e le azioni di rimedio.
 
-Per segnalare responsabilmente una vulnerabilità: info@utraya.com con oggetto `[SECURITY]`. La policy di responsible disclosure è disponibile a <https://utraya.com/.well-known/security.txt>.
+Per segnalare responsabilmente una vulnerabilità: privacy@utraya.com con oggetto `[SECURITY]`. La policy di responsible disclosure è disponibile a <https://utraya.com/.well-known/security.txt>.
 
 ## 12. Cookie e tracciamento
 
@@ -266,8 +263,7 @@ La versione corrente è sempre disponibile online ed è identificata da numero d
 
 Per qualsiasi questione relativa al trattamento dei tuoi dati personali o per l'esercizio dei diritti GDPR:
 
-- **Email**: info@utraya.com (oggetto `[GDPR]` per richieste di esercizio diritti)
-- **Posta**: Utraya S.r.l., `[SEDE LEGALE]`
+- **Email**: privacy@utraya.com (oggetto `[GDPR]` per richieste di esercizio diritti)
 - **Reclami autorità**: Garante per la protezione dei dati personali, Piazza Venezia 11, 00187 Roma, <https://www.garanteprivacy.it>
 
 ---
@@ -278,14 +274,12 @@ Per qualsiasi questione relativa al trattamento dei tuoi dati personali o per l'
 
 ## 1. Data Controller
 
-The data controller for personal data collected through the Utraya service is:
+The data processing responsible person for personal data collected through the Utraya service is:
 
-- **Legal entity**: Utraya S.r.l.
-- **Registered office**: `[REGISTERED OFFICE]`
-- **VAT / Tax ID**: `[VAT / Tax ID]`
-- **Contact email**: info@utraya.com
+- **Data processing responsible person**: Dario Bonini
+- **Contact email for all requests**: privacy@utraya.com
 
-Utraya S.r.l. has not appointed a Data Protection Officer (DPO) as the processing does not fall within the mandatory cases under GDPR art. 37.
+For any information request or privacy-rights exercise, data subjects can contact only the address above.
 
 ## 2. Personal data we process
 
@@ -338,7 +332,7 @@ Some sub-processors are based in the United States. Transfers are safeguarded by
 
 You have the right to: access, rectification, erasure, restriction, portability, objection, withdrawal of consent (where applicable), not to be subject to automated decision-making.
 
-Exercise your rights at **info@utraya.com** (subject `[GDPR – nature of request]`). Response within 30 days (extendable to 90 in complex cases), free of charge unless manifestly unfounded or excessive.
+Exercise your rights at **privacy@utraya.com** (subject `[GDPR – nature of request]`). Response within 30 days (extendable to 90 in complex cases), free of charge unless manifestly unfounded or excessive.
 
 You may also lodge a complaint with the Italian Data Protection Authority (Garante) at <https://www.garanteprivacy.it> or with the supervisory authority of the EU Member State where you reside.
 
@@ -356,7 +350,7 @@ We may update this Privacy Notice. For substantial changes, registered users are
 
 ## 11. Contact
 
-Email: info@utraya.com. Postal: Utraya S.r.l., `[REGISTERED OFFICE]`.
+Email: privacy@utraya.com.
 
 ---
 
@@ -364,4 +358,4 @@ Email: info@utraya.com. Postal: Utraya S.r.l., `[REGISTERED OFFICE]`.
 
 | Versione | Data | Modifiche principali |
 |---|---|---|
-| `2026-05-16-1` | 2026-05-16 | Prima versione pubblicata. Titolare: Utraya S.r.l. Scope OAuth `openid email profile`. Solo cookie tecnici. No marketing, no profilazione. Conservazione 10 anni per registri TOS. Trasferimenti extra-UE coperti da DPF + SCC. |
+| `2026-05-16-1` | 2026-05-16 | Prima versione pubblicata. Titolare: Dario Bonini Scope OAuth `openid email profile`. Solo cookie tecnici. No marketing, no profilazione. Conservazione 10 anni per registri TOS. Trasferimenti extra-UE coperti da DPF + SCC. |

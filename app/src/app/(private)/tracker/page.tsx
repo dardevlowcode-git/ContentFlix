@@ -122,9 +122,16 @@ export default async function TrackerPage({ searchParams }: TrackerPageProps) {
           watchlist: t('tracker.badges.watchlist'),
         },
         filters: {
+          menu: t('tracker.filters.menu'),
+          state: t('tracker.filters.state'),
           seen: t('tracker.filters.seen'),
           unseen: t('tracker.filters.unseen'),
           hidden: t('tracker.filters.hidden'),
+          duration: t('tracker.filters.duration'),
+          durationUnder2m: t('tracker.filters.durationUnder2m'),
+          durationUnder5m: t('tracker.filters.durationUnder5m'),
+          durationBetween2m30m: t('tracker.filters.durationBetween2m30m'),
+          durationOver30m: t('tracker.filters.durationOver30m'),
         },
         views: {
           ribbon: t('tracker.views.ribbon'),
@@ -144,6 +151,12 @@ export default async function TrackerPage({ searchParams }: TrackerPageProps) {
             shortSummary: t('tracker.list.headers.shortSummary'),
           },
           noData: t('tracker.list.noData'),
+        },
+        duration: {
+          unknown: t('tracker.duration.unknown'),
+          under2m: t('tracker.duration.under2m'),
+          between2m30m: t('tracker.duration.between2m30m'),
+          over30m: t('tracker.duration.over30m'),
         },
         statusInfo: {
           seenWithDate: t('tracker.statusInfo.seenWithDate'),

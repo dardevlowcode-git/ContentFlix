@@ -19,21 +19,21 @@ export default async function MarketingHeader() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 topnav-surface">
+    <header className="shell-header sticky top-0 z-50">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6">
-        <Link href="/" className="text-2xl font-extrabold tracking-tight text-on-surface">
-          Utraya
+        <Link href="/" className="shell-logo">
+          UTRAYA
         </Link>
 
         <nav
           aria-label={t('marketing.nav.label')}
-          className="hidden items-center gap-2 rounded-full bg-surface-container-low px-3 py-2 md:flex"
+          className="shell-nav-pill hidden items-center gap-2 md:flex"
         >
           {navLinks.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-full px-4 py-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface"
+              className="shell-nav-link"
             >
               {item.label}
             </Link>
@@ -47,7 +47,7 @@ export default async function MarketingHeader() {
           </div>
           <Link
             href="/login"
-            className="hidden rounded-full bg-primary px-5 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-container sm:inline-flex"
+            className="shell-cta-default hidden sm:inline-flex"
           >
             {t('marketing.cta.createWatchlist')}
           </Link>

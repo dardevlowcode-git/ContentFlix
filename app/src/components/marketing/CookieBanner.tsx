@@ -47,37 +47,37 @@ export default function CookieBanner() {
   }
 
   return (
-    <aside role="dialog" aria-modal="true" aria-labelledby="cookie-banner-title" className="fixed bottom-0 left-0 right-0 z-[70] border-t border-[#E8E5E2] bg-lifted-cream p-4 md:p-5">
+    <aside role="dialog" aria-modal="true" aria-labelledby="cookie-banner-title" className="fixed bottom-0 left-0 right-0 z-[70] border-t border-stroke-subtle bg-surface-statement p-4 md:p-5 shadow-hero">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-3">
-        <h2 id="cookie-banner-title" className="text-sm font-semibold text-[#141413]">{t('marketing.cookies.title')}</h2>
-        <p className="text-sm text-[#141413]">{t('marketing.cookies.description')}</p>
+        <h2 id="cookie-banner-title" className="text-sm font-semibold text-on-surface">{t('marketing.cookies.title')}</h2>
+        <p className="text-sm text-on-surface">{t('marketing.cookies.description')}</p>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => saveConsent({ analytics: true, marketing: true })}
-            className="rounded-full bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F3F0EE]"
+            className="shell-cta-default px-4 py-2 text-xs"
           >
             {t('marketing.cookies.acceptAll')}
           </button>
           <button
             type="button"
             onClick={() => saveConsent({ analytics: false, marketing: false })}
-            className="rounded-full border border-[#141413] bg-transparent px-4 py-2 text-xs font-semibold text-[#141413]"
+            className="rounded-full border border-stroke-strong bg-transparent px-4 py-2 text-xs font-semibold text-on-surface transition-colors hover:bg-surface-elevated"
           >
             {t('marketing.cookies.rejectNonEssential')}
           </button>
           <button
             type="button"
             onClick={() => setShowCustomize((previous) => !previous)}
-            className="text-xs font-semibold text-[#141413] underline underline-offset-4"
+            className="text-xs font-semibold text-on-surface underline underline-offset-4"
           >
             {t('marketing.cookies.customize')}
           </button>
-          <Link href="/legal/cookie" className="text-xs text-[#141413] underline underline-offset-4 hover:text-light-signal-orange">{t('marketing.cookies.policyLink')}</Link>
+          <Link href="/legal/cookie" className="text-xs text-on-surface underline underline-offset-4 hover:text-light-signal-orange">{t('marketing.cookies.policyLink')}</Link>
         </div>
 
         {showCustomize && (
-          <div role="dialog" aria-modal="true" aria-labelledby="cookie-customize-title" className="mt-2 rounded-2xl border border-outline-variant/50 bg-surface-container-low p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="cookie-customize-title" className="mt-2 rounded-2xl border border-stroke-subtle bg-surface-elevated p-4">
             <h3 id="cookie-customize-title" className="text-sm font-semibold text-on-surface">{t('marketing.cookies.customizeTitle')}</h3>
             <div className="mt-3 space-y-3 text-sm text-on-surface">
               <label className="flex items-center justify-between gap-3">
@@ -97,7 +97,7 @@ export default function CookieBanner() {
               <button
                 type="button"
                 onClick={() => saveConsent({ analytics, marketing })}
-                className="rounded-full bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F3F0EE]"
+                className="shell-cta-default px-4 py-2 text-xs"
               >
                 {t('marketing.cookies.savePreferences')}
               </button>
@@ -107,7 +107,7 @@ export default function CookieBanner() {
                   setShowCustomize(false)
                   closeBanner()
                 }}
-                className="rounded-full border border-outline-variant px-4 py-2 text-xs font-semibold text-on-surface-variant"
+                className="rounded-full border border-stroke-subtle px-4 py-2 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-surface-container-low"
               >
                 {t('common.close')}
               </button>
