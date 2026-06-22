@@ -56,7 +56,7 @@ jobs:
         working-directory: app   # progetto Next.js nella sottocartella app/
     steps:
       - name: Checkout codice
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
@@ -95,7 +95,7 @@ jobs:
       image: returntocorp/semgrep
     steps:
       - name: Checkout codice
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Esegui Semgrep con ruleset Next.js + TypeScript + OWASP
         # Scansiona solo la sottocartella app/ (il progetto Next.js)
@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout completo (history necessaria)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # fetch-depth: 0 OBBLIGATORIO per scansionare tutta la history
           fetch-depth: 0
@@ -155,7 +155,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout codice
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Scansione configurazione (Dockerfile, YAML, ecc.)
         uses: aquasecurity/trivy-action@master
@@ -182,7 +182,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout codice
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Scansione filesystem (vulnerabilita package-lock)
         uses: aquasecurity/trivy-action@master
