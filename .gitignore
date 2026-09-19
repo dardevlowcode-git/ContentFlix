@@ -52,6 +52,10 @@ next-env.d.ts
 
 
 ## Codex suggestions
+# Local backups / checkpoints (mai in produzione, solo root repo)
+_backups/
+/2026-*.md
+
 # Secrets/local env
 .env
 .env.*

@@ -12,9 +12,13 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1
+# Attiva l'output standalone di Next.js (vedi next.config.mjs): serve solo qui,
+# perche il runtime copia .next/standalone. Su Vercel resta output standard.
+ENV DOCKER_OUTPUT=1
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN mkdir -p public
 RUN npm run build
 
 FROM node:20-alpine AS runner

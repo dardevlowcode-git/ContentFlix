@@ -46,7 +46,11 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
-  output: 'standalone',
+  // Output standalone SOLO per la build Docker (Dockerfile imposta DOCKER_OUTPUT=1).
+  // Su Vercel deve restare l'output standard: con Next 16.3+ lo standalone sposta
+  // i file di tracing (.nft.json) sotto .next/standalone e il builder Vercel non
+  // li trova piu (deploy fallito dal 12/09/2026 con Next 16.3.4).
+  output: process.env.DOCKER_OUTPUT === '1' ? 'standalone' : undefined,
   async headers() {
     return [
       {
