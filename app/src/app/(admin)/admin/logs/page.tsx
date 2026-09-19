@@ -9,6 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { buildJobLabel, collectJobChannelIds, collectJobUserIds } from '@/lib/utils/job-label'
 import FailedJobsTableClient from './FailedJobsTableClient'
+import LogCleanupButton from './LogCleanupButton'
 
 export const metadata: Metadata = { title: 'Admin' }
 
@@ -133,14 +134,30 @@ export default async function AdminLogsPage() {
       </header>
 
       <div className="mb-8">
-        <h2 className="font-headline text-lg font-bold text-on-surface mb-4">{t('admin.logs.failedJobLogs')}</h2>
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <h2 className="font-headline text-lg font-bold text-on-surface">{t('admin.logs.failedJobLogs')}</h2>
+          <LogCleanupButton
+            type="failed_jobs"
+            label={t('admin.logs.cleanupFailedJobs')}
+            confirmMessage={t('admin.logs.cleanupConfirmFailedJobs')}
+            disabled={failedRows.length === 0}
+          />
+        </div>
         <FailedJobsTableClient rows={failedRows} emptyLabel={t('admin.logs.emptyFailedJobs')} locale={locale} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* App logs */}
         <div>
-          <h2 className="font-headline text-lg font-bold text-on-surface mb-4">{t('admin.logs.appLogs')}</h2>
+          <div className="flex items-center justify-between mb-4 gap-3">
+            <h2 className="font-headline text-lg font-bold text-on-surface">{t('admin.logs.appLogs')}</h2>
+            <LogCleanupButton
+              type="app_logs"
+              label={t('admin.logs.cleanupAppLogs')}
+              confirmMessage={t('admin.logs.cleanupConfirmAppLogs')}
+              disabled={appLogRows.length === 0}
+            />
+          </div>
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-ambient font-mono text-xs space-y-1 max-h-[600px] overflow-y-auto">
             {appLogRows.length === 0 ? (
               <p className="text-on-surface-variant text-center py-8">{t('admin.logs.empty')}</p>
@@ -164,7 +181,15 @@ export default async function AdminLogsPage() {
 
         {/* Audit trail */}
         <div>
-          <h2 className="font-headline text-lg font-bold text-on-surface mb-4">{t('admin.logs.auditTrail')}</h2>
+          <div className="flex items-center justify-between mb-4 gap-3">
+            <h2 className="font-headline text-lg font-bold text-on-surface">{t('admin.logs.auditTrail')}</h2>
+            <LogCleanupButton
+              type="audit_logs"
+              label={t('admin.logs.cleanupAuditLogs')}
+              confirmMessage={t('admin.logs.cleanupConfirmAuditLogs')}
+              disabled={auditLogRows.length === 0}
+            />
+          </div>
           <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-ambient max-h-[600px] overflow-y-auto">
             {auditLogRows.length === 0 ? (
               <p className="text-on-surface-variant text-center py-8 px-4">{t('admin.logs.emptyAudit')}</p>
