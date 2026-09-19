@@ -1,216 +1,38 @@
-# =============================================================================
-# Workflow di scansione sicurezza per ContentFlix (Next.js + TypeScript + Supabase)
-# -----------------------------------------------------------------------------
-# Struttura repo:
-#   repo-root/
-#   ├── app/              <- progetto Next.js
-#   │   ├── package.json
-#   │   ├── Dockerfile
-#   │   └── ...
-#   └── .github/
-#       └── workflows/
-#
-# Esegue 4 controlli in parallelo:
-#   1. npm audit          -> CVE delle dipendenze (npm registry)
-#   2. Semgrep            -> analisi statica del codice (SAST)
-#   3. Gitleaks           -> ricerca segreti nella history Git
-#   4. Trivy              -> scansione configurazione (Dockerfile, IaC) + filesystem
-#
-# Tutti i risultati vengono caricati nella tab "Security" del repository su GitHub
-# (Code Scanning alerts) tramite formato SARIF. Compaiono anche come annotation
-# nei Pull Request.
-# =============================================================================
+# Security Policy — ContentFlix (utraya.com)
 
-name: Security Scan
+## Lingua / Language
+Segnalazioni accettate in italiano e inglese.
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: '0 6 * * 1'  # ogni lunedi alle 06:00 UTC (08:00 ora italiana)
-  workflow_dispatch:
+## Versioni supportate
+| Branch / Versione | Supportata |
+| --- | --- |
+| `main` (produzione, utraya.com) | Sì |
+| `preprod` (preview.utraya.com) | Sì |
+| Altri branch / vecchi tag | No — aggiornare a `main` prima di segnalare |
 
-permissions:
-  contents: read
-  security-events: write
-  actions: read
+## Come segnalare una vulnerabilità (preferito)
+Usa il **Private vulnerability reporting** di GitHub (gratis e già attivo):
+1. Vai su `Security > Report a vulnerability` nel repo `dardevlowcode-git/ContentFlix`.
+2. Descrivi: URL coinvolto, passi per riprodurre, impatto, eventuale PoC.
+3. Non aprire issue pubbliche, PR pubbliche o discussioni con dettagli della falla.
 
-jobs:
-  # ---------------------------------------------------------------------------
-  # JOB 1: npm audit - vulnerabilita note nelle dipendenze
-  # ---------------------------------------------------------------------------
-  npm-audit:
-    name: npm audit (dipendenze)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: app   # progetto Next.js nella sottocartella app/
-    steps:
-      - name: Checkout codice
-        uses: actions/checkout@v4
+Alternative se GitHub non è raggiungibile: contatta il maintainer via i contatti pubblicati sul profilo GitHub dell'owner. Non inviare segreti reali nei report (usa valori redatti).
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: app/package-lock.json
+## Cosa includere
+- Tipo di problema (XSS, open redirect, auth bypass, leak secret, ecc.)
+- Dove (endpoint, file/riga se noto)
+- Come riprodurlo in modo sicuro
+- Impatto stimato (lettura dati, takeover account, ecc.)
 
-      - name: Install dipendenze (senza eseguire scripts)
-        # --ignore-scripts protegge da supply-chain attack durante install
-        run: npm ci --ignore-scripts
+## Cosa promettiamo
+- Conferma di ricezione entro 3 giorni lavorativi.
+- Valutazione iniziale entro 7 giorni lavorativi.
+- Fix e disclosure coordinata: ti teniamo aggiornato, ti chiediamo di non divulgare prima del fix su `main`.
+- Nessun bounty monetario in questa fase — credito pubblico nel release note se lo desideri.
 
-      - name: Esegui npm audit (livello high)
-        # Fallisce il job se ci sono vulnerabilita HIGH o CRITICAL
-        run: npm audit --audit-level=high
+## Scope
+In scope: codice in questo repo, `https://utraya.com`, `https://preview.utraya.com`, flusso `Google OAuth -> callback -> allowlist -> provisioning -> redirect sicuro`, cookie `cf_admin_session`.
+Fuori scope: Vercel / Supabase / Cloudflare stessi (segnalali al vendor), social engineering, DDoS volumetrico, report automatici senza impatto dimostrabile.
 
-      - name: npm audit (report JSON per artifact)
-        if: always()
-        run: npm audit --json > npm-audit-report.json || true
-
-      - name: Upload report npm audit
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: npm-audit-report
-          path: app/npm-audit-report.json
-          retention-days: 30
-
-  # ---------------------------------------------------------------------------
-  # JOB 2: Semgrep - analisi statica codice (SAST)
-  # ---------------------------------------------------------------------------
-  semgrep:
-    name: Semgrep SAST
-    runs-on: ubuntu-latest
-    container:
-      image: returntocorp/semgrep
-    steps:
-      - name: Checkout codice
-        uses: actions/checkout@v4
-
-      - name: Esegui Semgrep con ruleset Next.js + TypeScript + OWASP
-        # Scansiona solo la sottocartella app/ (il progetto Next.js)
-        run: |
-          cd app
-          semgrep scan \
-            --config=p/typescript \
-            --config=p/nextjs \
-            --config=p/owasp-top-ten \
-            --config=p/javascript \
-            --config=p/react \
-            --config=p/secrets \
-            --sarif --output=../semgrep-results.sarif \
-            --error || true
-        continue-on-error: true
-
-      - name: Upload SARIF su GitHub Code Scanning
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: semgrep-results.sarif
-          category: semgrep
-
-      - name: Upload report Semgrep
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: semgrep-results
-          path: semgrep-results.sarif
-          retention-days: 30
-
-  # ---------------------------------------------------------------------------
-  # JOB 3: Gitleaks - segreti committati nella history Git
-  # ---------------------------------------------------------------------------
-  gitleaks:
-    name: Gitleaks (segreti)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout completo (history necessaria)
-        uses: actions/checkout@v4
-        with:
-          # fetch-depth: 0 OBBLIGATORIO per scansionare tutta la history
-          fetch-depth: 0
-
-      - name: Esegui Gitleaks
-        # Gitleaks scansiona TUTTO il repo (incluso .git/), non serve working-directory
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}  # solo per organizzazioni
-
-  # ---------------------------------------------------------------------------
-  # JOB 4: Trivy - scansione Dockerfile (configurazione)
-  # ---------------------------------------------------------------------------
-  trivy-config:
-    name: Trivy (config Dockerfile)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout codice
-        uses: actions/checkout@v4
-
-      - name: Scansione configurazione (Dockerfile, YAML, ecc.)
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'config'
-          scan-ref: 'app'        # Dockerfile e' dentro app/
-          format: 'sarif'
-          output: 'trivy-config.sarif'
-          severity: 'CRITICAL,HIGH,MEDIUM'
-          exit-code: '0'
-
-      - name: Upload SARIF Trivy config
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-config.sarif
-          category: trivy-config
-
-  # ---------------------------------------------------------------------------
-  # JOB 5: Trivy - scansione filesystem (vulnerabilita librerie)
-  # ---------------------------------------------------------------------------
-  trivy-fs:
-    name: Trivy (filesystem - librerie)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout codice
-        uses: actions/checkout@v4
-
-      - name: Scansione filesystem (vulnerabilita package-lock)
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: 'app'        # package-lock.json e' dentro app/
-          format: 'sarif'
-          output: 'trivy-fs.sarif'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '0'
-
-      - name: Upload SARIF Trivy fs
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-fs.sarif
-          category: trivy-fs
-
-  # ---------------------------------------------------------------------------
-  # JOB 6: Riepilogo finale
-  # ---------------------------------------------------------------------------
-  summary:
-    name: Riepilogo scansione
-    needs: [npm-audit, semgrep, gitleaks, trivy-config, trivy-fs]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Stampa esito
-        run: |
-          echo "## Riepilogo Security Scan" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- npm audit: ${{ needs.npm-audit.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Semgrep: ${{ needs.semgrep.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Gitleaks: ${{ needs.gitleaks.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Trivy config: ${{ needs.trivy-config.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Trivy fs: ${{ needs.trivy-fs.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Per i dettagli vedi la tab **Security** del repository." >> $GITHUB_STEP_SUMMARY
+## Controlli automatici già attivi
+Dependabot alerts + security updates, secret scanning + push protection, CodeQL default setup (JS/TS + Actions), Semgrep + Trivy + Gitleaks via Actions, CI con lint/type-check/test. Le PR Dependabot non mergiano da sole: richiedono review umana.
