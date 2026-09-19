@@ -60,27 +60,36 @@ describe('account-deletion service', () => {
   })
 
   it('createCancelDeletionToken e cancelDeletion aggiornano request/users con token valido', async () => {
-    const requestUpdateEq3Mock = vi.fn().mockResolvedValue({ error: null })
-    const requestUpdateEq2Mock = vi.fn(() => ({ eq: requestUpdateEq3Mock }))
-    const requestUpdateEq1Mock = vi.fn(() => ({ eq: requestUpdateEq2Mock }))
-    const requestUpdateMock = vi.fn(() => ({ eq: requestUpdateEq1Mock }))
+    // Orologio finto: il token scade il 2026-06-20, quindi la verifica deve
+    // avvenire "prima" di quella data, altrimenti Date.now() reale lo dichiara
+    // scaduto e il test fallisce sempre. Non tocca il codice vero.
+    vi.useFakeTimers()
+    try {
+      vi.setSystemTime(new Date('2026-06-10T00:00:00.000Z'))
+      const requestUpdateEq3Mock = vi.fn().mockResolvedValue({ error: null })
+      const requestUpdateEq2Mock = vi.fn(() => ({ eq: requestUpdateEq3Mock }))
+      const requestUpdateEq1Mock = vi.fn(() => ({ eq: requestUpdateEq2Mock }))
+      const requestUpdateMock = vi.fn(() => ({ eq: requestUpdateEq1Mock }))
 
-    const usersUpdateEqMock = vi.fn().mockResolvedValue({ error: null })
-    const usersUpdateMock = vi.fn(() => ({ eq: usersUpdateEqMock }))
+      const usersUpdateEqMock = vi.fn().mockResolvedValue({ error: null })
+      const usersUpdateMock = vi.fn(() => ({ eq: usersUpdateEqMock }))
 
-    const fromMock = vi.fn((table: string) => {
-      if (table === 'user_deletion_requests') return { update: requestUpdateMock }
-      if (table === 'users') return { update: usersUpdateMock }
-      return { update: vi.fn() }
-    })
+      const fromMock = vi.fn((table: string) => {
+        if (table === 'user_deletion_requests') return { update: requestUpdateMock }
+        if (table === 'users') return { update: usersUpdateMock }
+        return { update: vi.fn() }
+      })
 
-    createAdminClientMock.mockReturnValue({ from: fromMock })
+      createAdminClientMock.mockReturnValue({ from: fromMock })
 
-    const token = createCancelDeletionToken('user-2', 'req-2', '2026-06-20T00:00:00.000Z')
-    await cancelDeletion(token)
+      const token = createCancelDeletionToken('user-2', 'req-2', '2026-06-20T00:00:00.000Z')
+      await cancelDeletion(token)
 
-    expect(requestUpdateMock).toHaveBeenCalledWith(expect.objectContaining({ status: 'cancelled' }))
-    expect(usersUpdateMock).toHaveBeenCalledWith({ status: 'active' })
+      expect(requestUpdateMock).toHaveBeenCalledWith(expect.objectContaining({ status: 'cancelled' }))
+      expect(usersUpdateMock).toHaveBeenCalledWith({ status: 'active' })
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('executeDeletion invoca rpc di purge e marca richiesta completed', async () => {
